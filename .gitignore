@@ -1,0 +1,28 @@
+# For both client and server
+node_modules/
+.env
+.env.*
+
+# Dependencies
+node_modules/
+dist/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# Cache
+.cache/
+.temp/
+
+# Editor/IDE
+.vscode/
+.idea/
+
+# System files
+.DS_Store
+Thumbs.db
