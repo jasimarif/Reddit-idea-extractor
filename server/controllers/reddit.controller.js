@@ -1,4 +1,5 @@
 const { fetchTopPosts, fetchComments } = require("../services/reddit.service");
+const { delay } = require("../utils/throttle");
 
 async function getRedditData(req, res) {
   const { subreddit = "startups", limit = 3 } = req.body;
@@ -8,6 +9,8 @@ async function getRedditData(req, res) {
 
     const result = [];
     for (const post of posts) {
+      await delay(1200)
+
       const comments = await fetchComments(post.id);
       result.push({
         postTitle: post.title,
