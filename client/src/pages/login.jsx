@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { Brain, Mail, Lock, AlertCircle } from 'lucide-react';
 
 const LoginPage = () => {
@@ -7,20 +8,22 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const { login, isLoading } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleSubmit = (e) => {
+  const from = location.state?.from?.pathname || '/dashboard';
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
-    // Placeholder validation
-    if (!email || !password) {
-      setError('Email and password are required');
-      return;
+    
+    try {
+      await login(email, password, rememberMe);
+      navigate(from, { replace: true });
+    } catch (err) {
+      setError('Invalid email or password');
     }
-
-    // No actual login logic — just console output for testing
-    console.log('Login attempted with:', { email, password, rememberMe });
   };
 
   return (
@@ -63,6 +66,7 @@ const LoginPage = () => {
                   id="email"
                   name="email"
                   type="email"
+                  autoComplete="email"
                   required
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                   placeholder="Enter your email"
@@ -84,6 +88,7 @@ const LoginPage = () => {
                   id="password"
                   name="password"
                   type="password"
+                  autoComplete="current-password"
                   required
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                   placeholder="Enter your password"

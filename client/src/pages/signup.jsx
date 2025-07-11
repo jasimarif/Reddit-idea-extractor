@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { Brain, Mail, Lock, User, AlertCircle } from 'lucide-react';
 
 const SignupPage = () => {
@@ -8,9 +9,10 @@ const SignupPage = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const { signup, isLoading } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -24,8 +26,12 @@ const SignupPage = () => {
       return;
     }
 
-    // No actual signup logic — this is just a static UI.
-    console.log('Signup attempted with:', { name, email, password });
+    try {
+      await signup(email, password, name);
+      navigate('/dashboard');
+    } catch (err) {
+      setError('Failed to create account');
+    }
   };
 
   return (
@@ -68,6 +74,7 @@ const SignupPage = () => {
                   id="name"
                   name="name"
                   type="text"
+                  autoComplete="name"
                   required
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                   placeholder="Enter your full name"
@@ -89,6 +96,7 @@ const SignupPage = () => {
                   id="email"
                   name="email"
                   type="email"
+                  autoComplete="email"
                   required
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                   placeholder="Enter your email"
@@ -110,6 +118,7 @@ const SignupPage = () => {
                   id="password"
                   name="password"
                   type="password"
+                  autoComplete="new-password"
                   required
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                   placeholder="Create a password"
@@ -131,6 +140,7 @@ const SignupPage = () => {
                   id="confirmPassword"
                   name="confirmPassword"
                   type="password"
+                  autoComplete="new-password"
                   required
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                   placeholder="Confirm your password"
