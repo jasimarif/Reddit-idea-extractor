@@ -1,0 +1,55 @@
+const reddtService = require("./reddit.service");
+const openaiService = require("./summarize.service");
+const Post = require("../models/Post");
+const { delay } = require("../utils/throttle");
+
+async function fetchAndSaveRedditIdeas(subreddit, limit = 5, userId = null) {
+  try {
+    console.log(`fetching ideas from r/${subreddit}`);
+
+    //fetch post from reddit
+    const posts = await reddtService.fetchTopPosts(subreddit, limit);
+
+    let savedCount = 0;
+
+    for (const post of posts) {
+      const exist = await reddtService.checkIfPostExists(post.id);
+      if (exist) {
+        console.log(`Post ${post.id} already exist, skipping..`);
+        continue;
+      }
+
+      const comments = await reddtService.fetchComments(post.id, 3);
+
+      const analysis = await openaiService.summarizeWithOpenAI(
+        post.title,
+        post.selftext,
+        comments
+      );
+
+      const postData = {
+        ...post,
+        analysis,
+        isManuallyAdded: false,
+        userId: userId,
+        status: "processed",
+      };
+
+      await Post.create(postData);
+      savedCount++;
+
+      console.log(`Saved idea: ${postData.title}`);
+
+      await delay(1200);
+    }
+    console.log(
+      `Successfully saved ${savedCount} new ideas from r/${subreddit}`
+    );
+    return { success: true, savedCount };
+  } catch (error) {
+    console.error("Error fetching Reddit ideas:", error);
+    throw error;
+  }
+}
+
+module.exports = { fetchAndSaveRedditIdeas };

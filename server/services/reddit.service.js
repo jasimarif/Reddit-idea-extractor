@@ -23,4 +23,14 @@ async function fetchComments(postId, limit = 5) {
   return comments;
 }
 
-module.exports = { fetchTopPosts, fetchComments };
+async function checkIfPostExists(redditPostId) {
+  try {
+    const existingPost = await Post.findOne({ redditPostId });
+    return !!existingPost;
+  } catch (error) {
+    console.error("Error checking if post exists:", error);
+    return false;
+  }
+}
+
+module.exports = { fetchTopPosts, fetchComments, checkIfPostExists };
