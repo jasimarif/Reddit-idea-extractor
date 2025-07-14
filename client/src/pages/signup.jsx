@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { Brain, Mail, Lock, User, AlertCircle } from "lucide-react";
+import { Brain, Mail, Lock, User, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 const SignupPage = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const { signup, isLoading } = useAuth();
   const navigate = useNavigate();
@@ -30,7 +32,8 @@ const SignupPage = () => {
       await signup(email, password, name);
       navigate("/dashboard");
     } catch (err) {
-      setError("Failed to create account");
+      console.error('Signup error:', err);
+      setError(err.message || "Failed to create account");
     }
   };
 
@@ -126,14 +129,27 @@ const SignupPage = () => {
                 <input
                   id="password"
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   autoComplete="new-password"
                   required
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                  placeholder="Create a password"
+                  className="block w-full pl-10 pr-14 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  placeholder="Password (min 8 chars, incl. uppercase, lowercase, number, symbol)"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (error) setError("");
+                  }}
                 />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  className="absolute inset-y-0 right-4 flex items-center text-gray-400 hover:text-purple-600 transition outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 shadow-none border-none active:outline-none active:ring-0 border-none"
+                  onClick={() => setShowPassword((show) => !show)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  style={{ background: 'none', border: 'none', padding: 0 }}
+                >
+                  {showPassword ? <EyeOff className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
+                </button>
               </div>
             </div>
 
@@ -151,14 +167,28 @@ const SignupPage = () => {
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   autoComplete="new-password"
                   required
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="block w-full pl-10 pr-14 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                   placeholder="Confirm your password"
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    if (error) setError("");
+                  }}
                 />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  className="absolute inset-y-0 right-4 flex items-center text-gray-400 hover:text-purple-600 transition outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 shadow-none border-none active:outline-none active:ring-0 border-none"
+                  onClick={() => setShowConfirmPassword((show) => !show)}
+                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                  style={{ background: 'none', border: 'none', padding: 0 }}
+                >
+                  {showConfirmPassword ? <EyeOff className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
+                </button>
+
               </div>
             </div>
 

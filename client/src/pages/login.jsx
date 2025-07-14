@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Brain, Mail, Lock, AlertCircle } from 'lucide-react';
+import { Brain, Mail, Lock, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const { login, isLoading } = useAuth();
@@ -22,7 +23,8 @@ const LoginPage = () => {
       await login(email, password, rememberMe);
       navigate(from, { replace: true });
     } catch (err) {
-      setError('Invalid email or password');
+      console.error('Login error:', err);
+      setError(err.message || 'Invalid email or password');
     }
   };
 
@@ -87,14 +89,27 @@ const LoginPage = () => {
                 <input
                   id="password"
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   required
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="block w-full pl-10 pr-14 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                   placeholder="Enter your password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (error) setError("");
+                  }}
                 />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  className="absolute inset-y-0 right-4 flex items-center text-gray-400 hover:text-purple-600 transition outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 shadow-none border-none active:outline-none active:ring-0 border-none"
+                  onClick={() => setShowPassword((show) => !show)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  style={{ background: 'none', border: 'none', padding: 0 }}
+                >
+                  {showPassword ? <EyeOff className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
+                </button>
               </div>
             </div>
 
