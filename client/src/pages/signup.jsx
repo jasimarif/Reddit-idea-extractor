@@ -1,36 +1,36 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { Brain, Mail, Lock, User, AlertCircle } from 'lucide-react';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import { Brain, Mail, Lock, User, AlertCircle } from "lucide-react";
 
 const SignupPage = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
   const { signup, isLoading } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError("Passwords do not match");
       return;
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError("Password must be at least 6 characters");
       return;
     }
 
     try {
       await signup(email, password, name);
-      navigate('/dashboard');
+      navigate("/dashboard");
     } catch (err) {
-      setError('Failed to create account');
+      setError("Failed to create account");
     }
   };
 
@@ -43,7 +43,7 @@ const SignupPage = () => {
             Create your account
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Already have an account?{' '}
+            Already have an account?{" "}
             <Link
               to="/login"
               className="font-medium text-purple-600 hover:text-purple-500 transition-colors"
@@ -63,7 +63,10 @@ const SignupPage = () => {
             )}
 
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Full name
               </label>
               <div className="relative">
@@ -85,7 +88,10 @@ const SignupPage = () => {
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Email address
               </label>
               <div className="relative">
@@ -107,7 +113,10 @@ const SignupPage = () => {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Password
               </label>
               <div className="relative">
@@ -129,7 +138,10 @@ const SignupPage = () => {
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Confirm password
               </label>
               <div className="relative">
@@ -159,8 +171,31 @@ const SignupPage = () => {
                 {isLoading ? (
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                 ) : (
-                  'Create account'
+                  "Create account"
                 )}
+              </button>
+            </div>
+            <div className="mt-6">
+              <p className="text-center text-sm text-gray-500 mb-4">
+                or continue with
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  window.location.href = `${
+                    import.meta.env.VITE_API_URL
+                  }/api/auth/google`;
+                }}
+                className="w-full flex justify-center items-center space-x-3 py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white hover:bg-gray-50 transition-all"
+              >
+                <img
+                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS70VFOE_89OCH_ztJMmAt-3NPx-nwKCVGvkg&s"
+                  alt="Google"
+                  className="w-5 h-5"
+                />
+                <span className="text-sm font-medium text-gray-700">
+                  Continue with Google
+                </span>
               </button>
             </div>
           </form>

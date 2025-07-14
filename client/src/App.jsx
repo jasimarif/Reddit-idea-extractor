@@ -14,6 +14,7 @@ import FavoritesPage from "./pages/FavoratesPage.jsx";
 import FetchPage from "./pages/FetchPage.jsx";
 import IdeaDetailPage from "./pages/IdeaDetailPage.jsx";
 import NotFound from "./pages/NotFound.jsx"
+import GoogleCallback from "./pages/googleCallback.jsx";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ function App() {
               <Navbar />
               <Routes>
                 <Route path="/" element={<HomePage />} />
+                <Route path="/google/callback" element={<GoogleCallback />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignupPage />} />
                 <Route

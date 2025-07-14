@@ -18,28 +18,37 @@ const categoryEmojis = {
 
 const IdeaDetailPage = () => {
   const { id } = useParams();
-  const [idea, setIdea] = useState([]);
+  const [idea, setIdea] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-useEffect(() => {
-  const fetchIdea = async () => {
-    setIsLoading(true);
+  useEffect(() => {
+    const fetchIdea = async () => {
+      setIsLoading(true);
+      try {
+        const response = await apiRequest.get(`/ideas/${id}`);
+        setIdea(response.data.data);
+      } catch (error) {
+        console.error('Failed to fetch idea:', error);
+        setIdea(null);
+      }
+      setIsLoading(false);
+    };
+
+    fetchIdea();
+  }, [id]);
+
+  const handleToggleFavorite = async () => {
+    if (!idea) return;
+    const newFavoriteStatus = !idea.isFavorited;
+    setIdea({ ...idea, isFavorited: newFavoriteStatus });
     try {
-      const response = await apiRequest.get(`/ideas/${id}`);
-      setIdea(response.data.data);
-    } catch (error) {
-      console.error('Failed to fetch idea:', error);
-      setIdea(null);
-    }
-    setIsLoading(false);
-  };
-
-  fetchIdea();
-}, [id]);
-
-  const handleToggleFavorite = () => {
-    if (idea) {
-      setIdea({ ...idea, isFavorited: !idea.isFavorited });
+      if (newFavoriteStatus) {
+        await apiRequest.post(`/favorites/${idea._id || idea.id}`);
+      } else {
+        await apiRequest.delete(`/favorites/${idea._id || idea.id}`);
+      }
+    } catch (err) {
+      setIdea({ ...idea, isFavorited: !newFavoriteStatus });
     }
   };
 
@@ -82,10 +91,17 @@ useEffect(() => {
           <div className="p-8 border-b border-gray-200">
             <div className="flex items-start justify-between mb-6">
               <div className="flex items-center space-x-3">
-                <span className="text-2xl">{categoryEmojis[idea.category]}</span>
-                <span className={`px-3 py-1 rounded-full text-sm font-medium border ${categoryColors[idea.category]}`}>
-                  {idea.category}
-                </span>
+                {(() => {
+  const category = idea.category || idea.topic || "Health";
+  return (
+    <>
+      <span className="text-2xl">{categoryEmojis[category] || "💡"}</span>
+      <span className={`px-3 py-1 rounded-full text-sm font-medium border ${categoryColors[category] || "bg-gray-100 text-gray-700 border-gray-200"}`}>
+        {category}
+      </span>
+    </>
+  );
+})()}
               </div>
               <button
                 onClick={handleToggleFavorite}

@@ -4,6 +4,8 @@ import apiRequest from "../lib/apiRequest";
 
 const AuthContext = createContext(undefined);
 
+
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
