@@ -1,5 +1,5 @@
 const cron = require('node-cron');
-const ideaService = require('./services/ideaService');
+const ideaService = require('./services/idea.service');
 
 const startCronJobs = () => {
   console.log('Starting cron jobs...');
