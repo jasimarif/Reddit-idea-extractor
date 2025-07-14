@@ -1,15 +1,23 @@
 const axios = require("axios");
+const Post = require("../models/Post");
 
 async function fetchTopPosts(subreddit, limit = 3) {
   const url = `https://www.reddit.com/r/${subreddit}/top.json?limit=${limit}&t=day`;
   const res = await axios.get(url);
 
-  return res.data.data.children.map((post) => ({
-    id: post.data.id,
-    title: post.data.title,
-    selftext: post.data.selftext,
-    permalink: `https://www.reddit.com${post.data.permalink}`,
-  }));
+  return res.data.data.children.map((post) => {
+    const data = post.data;
+
+    return {
+      id: data.id,
+      title: data.title,
+      selftext: data.selftext,
+      author: data.author,
+      upvotes: data.ups,
+      commentCount: data.num_comments,
+      permalink: `https://www.reddit.com${data.permalink}`,
+    };
+  });
 }
 
 async function fetchComments(postId, limit = 5) {

@@ -1,65 +1,67 @@
-import React, { useState, useEffect } from 'react';
-import IdeaCard from '../components/IdeaCard';
-import { Heart, Search } from 'lucide-react';
-
-const mockFavorites = [
-  {
-    id: '2',
-    title: 'How I built a $5k/month side business in 6 months with zero experience',
-    summary: 'Detailed breakdown of starting a digital marketing consultancy from scratch. The poster shares their exact steps, tools used, first client acquisition strategies, and monthly revenue progression.',
-    category: 'Wealth',
-    tags: ['side-business', 'digital-marketing', 'entrepreneurship', 'consulting'],
-    upvotes: 2156,
-    subreddit: 'Entrepreneur',
-    originalUrl: 'https://reddit.com/r/Entrepreneur/sample-post-2',
-    isFavorited: true,
-    createdAt: '2024-01-14'
-  },
-  {
-    id: '5',
-    title: 'Emergency fund strategy that helped me save $10k in one year',
-    summary: 'Step-by-step guide to building an emergency fund on a tight budget, including specific apps, automatic savings strategies, and mindset shifts that made the difference.',
-    category: 'Wealth',
-    tags: ['emergency-fund', 'savings', 'personal-finance', 'budgeting'],
-    upvotes: 1834,
-    subreddit: 'personalfinance',
-    originalUrl: 'https://reddit.com/r/personalfinance/sample-post-5',
-    isFavorited: true,
-    createdAt: '2024-01-11'
-  }
-];
+import React, { useState, useEffect } from "react";
+import IdeaCard from "../components/IdeaCard";
+import { Heart, Search } from "lucide-react";
+import apiRequest from "../lib/apiRequest";
 
 const FavoritesPage = () => {
-  const [favorites, setFavorites] = useState(mockFavorites);
-  const [filteredFavorites, setFilteredFavorites] = useState(mockFavorites);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [favorites, setFavorites] = useState([]);
+  const [filteredFavorites, setFilteredFavorites] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      try {
+        const response = await apiRequest.get("/favorites", {
+          params: { page: 1, limit: 100 },
+        });
+        setFavorites(response.data.data || []);
+        setFilteredFavorites(response.data.data || []);
+      } catch (error) {
+        console.error("Failed to fetch favorites:", error);
+      }
+    };
+    fetchFavorites();
+  }, []);
 
   useEffect(() => {
     let filtered = favorites;
 
-    if (selectedCategory !== 'All') {
-      filtered = filtered.filter(idea => idea.category === selectedCategory);
+    if (selectedCategory !== "All") {
+      filtered = filtered.filter((idea) => idea.category === selectedCategory);
     }
 
     if (searchTerm) {
-      filtered = filtered.filter(idea =>
-        idea.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        idea.summary.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        idea.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+      filtered = filtered.filter(
+        (idea) =>
+          idea.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          idea.summary.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          idea.tags?.some((tag) =>
+            tag.toLowerCase().includes(searchTerm.toLowerCase())
+          )
       );
     }
 
     setFilteredFavorites(filtered);
   }, [favorites, selectedCategory, searchTerm]);
 
-  const handleToggleFavorite = (ideaId) => {
-    setFavorites(prev => prev.filter(idea => idea.id !== ideaId));
+  const handleToggleFavorite = async (ideaId) => {
+    try {
+      await apiRequest.delete(`/favorites/${ideaId}`);
+      // Refetch favorites from backend to ensure sync
+      const response = await apiRequest.get("/favorites", {
+        params: { page: 1, limit: 100 },
+      });
+      setFavorites(response.data.data || []);
+      setFilteredFavorites(response.data.data || []);
+    } catch (err) {
+      console.error("Error removing favorite:", err);
+    }
   };
 
-  const categories = ['All', 'Health', 'Wealth', 'Relationships'];
-  const availableCategories = categories.filter(cat =>
-    cat === 'All' || favorites.some(idea => idea.category === cat)
+  const categories = ["All", "Health", "Wealth", "Relationships"];
+  const availableCategories = categories.filter(
+    (cat) => cat === "All" || favorites.some((idea) => idea.category === cat)
   );
 
   return (
@@ -80,7 +82,9 @@ const FavoritesPage = () => {
         {favorites.length === 0 ? (
           <div className="text-center py-16">
             <Heart className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">No favorites yet</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+              No favorites yet
+            </h2>
             <p className="text-gray-600 mb-6">
               Start exploring ideas and save the ones you find interesting
             </p>
@@ -104,13 +108,13 @@ const FavoritesPage = () => {
                       onClick={() => setSelectedCategory(category)}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                         selectedCategory === category
-                          ? 'bg-purple-100 text-purple-700 border border-purple-200'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-transparent'
+                          ? "bg-purple-100 text-purple-700 border border-purple-200"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-transparent"
                       }`}
                     >
-                      {category === 'Health' && '💊 '}
-                      {category === 'Wealth' && '💸 '}
-                      {category === 'Relationships' && '❤️ '}
+                      {category === "Health" && "💊 "}
+                      {category === "Wealth" && "💸 "}
+                      {category === "Relationships" && "❤️ "}
                       {category}
                     </button>
                   ))}
@@ -135,23 +139,28 @@ const FavoritesPage = () => {
             {/* Results Count */}
             <div className="mb-6">
               <p className="text-sm text-gray-600">
-                {filteredFavorites.length} favorite{filteredFavorites.length !== 1 ? 's' : ''}
-                {selectedCategory !== 'All' && ` in ${selectedCategory}`}
+                {filteredFavorites.length} favorite
+                {filteredFavorites.length !== 1 ? "s" : ""}
+                {selectedCategory !== "All" && ` in ${selectedCategory}`}
               </p>
             </div>
 
             {/* Favorites Grid */}
             {filteredFavorites.length === 0 ? (
               <div className="text-center py-12">
-                <div className="text-gray-400 text-lg mb-2">No favorites found</div>
-                <p className="text-gray-500">Try adjusting your filters or search terms</p>
+                <div className="text-gray-400 text-lg mb-2">
+                  No favorites found
+                </div>
+                <p className="text-gray-500">
+                  Try adjusting your filters or search terms
+                </p>
               </div>
             ) : (
               <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredFavorites.map((idea) => (
                   <IdeaCard
-                    key={idea.id}
-                    idea={idea}
+                    key={idea._id}
+                    idea={{ ...idea, id: idea._id, isFavorited: true }}
                     onToggleFavorite={handleToggleFavorite}
                   />
                 ))}

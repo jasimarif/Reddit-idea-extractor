@@ -13,13 +13,17 @@ async function getRedditData(req, res) {
 
       const comments = await fetchComments(post.id);
       result.push({
+        id: post.id,
         postTitle: post.title,
         selftext: post.selftext,
         permalink: post.permalink,
+        author: post.author,
+        upvotes: post.upvotes,
+        commentCount: post.commentCount,
         comments,
       });
     }
-    res.json({ post: result });
+    res.json({ posts: result });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Failed to fetch Reddit data" });

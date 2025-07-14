@@ -1,20 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Heart, ArrowUp, ExternalLink, Calendar, Tag } from 'lucide-react';
+import apiRequest from '../lib/apiRequest';
 
-// Mock data (in real app, fetch from API)
-const mockIdea = {
-  id: '1',
-  title: 'Simple 5-minute meditation technique that changed my anxiety levels',
-  summary: `A user shares their personal experience with a breathing technique that involves counting breaths from 1 to 5 repeatedly. They noticed significant improvements in their anxiety within just two weeks of consistent practice. The technique is based on focusing entirely on the breath count, which helps interrupt anxious thought patterns and brings immediate calm. What makes this approach different from other meditation techniques is its simplicity and the fact that it can be done anywhere, anytime. The user started doing this during work breaks, before bed, and whenever they felt anxiety rising. They emphasize that consistency was key - even when they didn't feel like it, doing the 5-minute practice daily made all the difference. The post includes detailed instructions on posture, breathing rhythm, and what to do when your mind wanders. Many commenters shared their own success stories with similar techniques.`,
-  category: 'Health',
-  tags: ['meditation', 'anxiety', 'breathing', 'mental-health', 'mindfulness', 'stress-relief'],
-  upvotes: 1247,
-  subreddit: 'Anxiety',
-  originalUrl: 'https://reddit.com/r/Anxiety/sample-post-1',
-  isFavorited: false,
-  createdAt: '2024-01-15'
-};
 
 const categoryColors = {
   Health: 'bg-green-100 text-green-800 border-green-200',
@@ -30,19 +18,24 @@ const categoryEmojis = {
 
 const IdeaDetailPage = () => {
   const { id } = useParams();
-  const [idea, setIdea] = useState(null);
+  const [idea, setIdea] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchIdea = async () => {
-      setIsLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setIdea(mockIdea); // You can replace with actual fetch logic
-      setIsLoading(false);
-    };
+useEffect(() => {
+  const fetchIdea = async () => {
+    setIsLoading(true);
+    try {
+      const response = await apiRequest.get(`/ideas/${id}`);
+      setIdea(response.data.data);
+    } catch (error) {
+      console.error('Failed to fetch idea:', error);
+      setIdea(null);
+    }
+    setIsLoading(false);
+  };
 
-    fetchIdea();
-  }, [id]);
+  fetchIdea();
+}, [id]);
 
   const handleToggleFavorite = () => {
     if (idea) {
@@ -155,7 +148,7 @@ const IdeaDetailPage = () => {
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-4">
               <a
-                href={idea.originalUrl}
+                href={idea.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 !text-white font-medium rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 transform hover:scale-105"

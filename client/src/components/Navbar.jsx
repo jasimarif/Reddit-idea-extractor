@@ -24,14 +24,15 @@ const Navbar = () => {
 
   const isActive = (path) => location.pathname === path;
 
-  const getUserInitials = (name) => {
-    return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
+const getUserInitials = (name) => {
+  if (!name || typeof name !== 'string') return '??';
+  return name
+    .split(' ')
+    .map(word => word[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+};
 
   return (
     <nav className="bg-white shadow-lg border-b border-gray-200">

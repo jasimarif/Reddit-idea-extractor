@@ -1,11 +1,13 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { jwtDecode } from "jwt-decode"; 
+import apiRequest from "../lib/apiRequest";
 
 const AuthContext = createContext(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -15,12 +17,16 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
-    if (token) {
+    const storedToken =
+      localStorage.getItem("auth_token") ||
+      sessionStorage.getItem("auth_token");
+    if (storedToken) {
+      const decoded = jwtDecode(storedToken);
       setUser({
-        id: '1',
-        email: 'user@example.com',
-        name: 'Demo User',
+        id: decoded.id,
+        email: decoded.email,
+        name: decoded.name,
+        memberSince: decoded.memberSince,
       });
     }
     setIsLoading(false);
@@ -31,23 +37,26 @@ export const AuthProvider = ({ children }) => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      const mockUser = {
-        id: '1',
+      const response = await apiRequest.post("/auth/login", {
         email,
-        name: email.split('@')[0],
-      };
-
-      const token = 'mock_jwt_token';
+        password,
+      });
+      const token = response.data.token;
 
       if (rememberMe) {
-        localStorage.setItem('auth_token', token);
+        localStorage.setItem("auth_token", token);
       } else {
-        sessionStorage.setItem('auth_token', token);
+        sessionStorage.setItem("auth_token", token);
       }
 
-      setUser(mockUser);
+      setUser({
+        id: response.data.user.id,
+        email: response.data.user.email,
+        name: response.data.user.name,
+        memberSince: response.data.user.createdAt,
+      });
     } catch (error) {
-      throw new Error('Login failed');
+      throw new Error("Login failed");
     } finally {
       setIsLoading(false);
     }
@@ -58,26 +67,32 @@ export const AuthProvider = ({ children }) => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      const mockUser = {
-        id: '1',
+      const response = await apiRequest.post("/auth/signup", {
         email,
+        password,
         name,
-      };
+      });
 
-      const token = 'mock_jwt_token';
-      localStorage.setItem('auth_token', token);
+      const token = response.data.token;
+      localStorage.setItem("auth_token", token);
 
-      setUser(mockUser);
+      setUser({
+        id: response.data.user.id,
+        email: response.data.user.email,
+        name: response.data.user.name,
+        memberSince: response.data.user.createdAt,
+      });
     } catch (error) {
-      throw new Error('Signup failed');
+      throw new Error("Signup failed");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('auth_token');
-    sessionStorage.removeItem('auth_token');
+  const logout = async () => {
+    await apiRequest.post("/auth/logout");
+    localStorage.removeItem("auth_token");
+    sessionStorage.removeItem("auth_token");
     setUser(null);
   };
 

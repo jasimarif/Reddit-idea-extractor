@@ -88,13 +88,14 @@ const IdeaCard = ({ idea, onToggleFavorite }) => {
             {/* Favorite Button */}
             <button
               onClick={() => onToggleFavorite(idea.id)}
+              title={idea.isFavorited ? 'Unfavorite' : 'Favorite'}
               className={`p-2 rounded-full transition-colors ${
                 idea.isFavorited
                   ? 'text-red-500 hover:text-red-600 bg-red-50'
                   : 'text-gray-400 hover:text-red-500 hover:bg-red-50'
               }`}
             >
-              <Heart className={`h-5 w-5 ${idea.isFavorited ? 'fill-current' : ''}`} />
+              <Heart className={`h-5 w-5${idea.isFavorited ? ' fill-current' : ''}`} fill={idea.isFavorited ? 'currentColor' : 'none'} />
             </button>
           </div>
         </div>

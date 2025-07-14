@@ -1,5 +1,6 @@
 const Post = require("../models/Post");
 const Favorite = require("../models/Favorite");
+const ideaService = require("../services/idea.service");
 
 const getIdeas = async (req, res, next) => {
   try {

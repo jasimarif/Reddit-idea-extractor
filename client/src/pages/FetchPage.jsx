@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { RefreshCw, CheckCircle, AlertCircle, Download } from 'lucide-react';
+import apiRequest from '../lib/apiRequest';
 
 const FetchPage = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -12,13 +13,12 @@ const FetchPage = () => {
     setStatus('idle');
 
     try {
-      // Simulate API call to backend
-      await new Promise(resolve => setTimeout(resolve, 3000));
-
-      // Mock successful response
+      // Call the backend fetch-now endpoint
+      const response = await apiRequest.post('/ideas/fetch-now');
+      const count = response.data?.data?.savedCount || 0;
       setStatus('success');
       setLastFetch(new Date().toLocaleString());
-      setFetchCount(prev => prev + Math.floor(Math.random() * 10) + 5);
+      setFetchCount(count);
     } catch (error) {
       setStatus('error');
     } finally {

@@ -133,30 +133,21 @@ const UserProfilePage = () => {
                     <Calendar className="h-4 w-4 inline mr-1" />
                     Member Since
                   </label>
-                  <p className="text-lg text-gray-900">January 2024</p>
+                  <p className="text-lg text-gray-900">
+                    {user.memberSince
+                      ? new Date(user.memberSince).toLocaleDateString(undefined, {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                        })
+                      : 'N/A'}
+                  </p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Stats Section */}
-          <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Activity Stats</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <div className="text-2xl font-bold text-purple-600">24</div>
-                <div className="text-sm text-gray-600">Ideas Favorited</div>
-              </div>
-              <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <div className="text-2xl font-bold text-blue-600">156</div>
-                <div className="text-sm text-gray-600">Ideas Viewed</div>
-              </div>
-              <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <div className="text-2xl font-bold text-green-600">8</div>
-                <div className="text-sm text-gray-600">Shared Ideas</div>
-              </div>
-            </div>
-          </div>
+
         </div>
       </div>
     </div>

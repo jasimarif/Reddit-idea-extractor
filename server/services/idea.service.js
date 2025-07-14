@@ -1,4 +1,4 @@
-const reddtService = require("./reddit.service");
+const redditService = require("./reddit.service");
 const openaiService = require("./summarize.service");
 const Post = require("../models/Post");
 const { delay } = require("../utils/throttle");
@@ -8,24 +8,26 @@ async function fetchAndSaveRedditIdeas(subreddit, limit = 5, userId = null) {
     console.log(`fetching ideas from r/${subreddit}`);
 
     //fetch post from reddit
-    const posts = await reddtService.fetchTopPosts(subreddit, limit);
+    const posts = await redditService.fetchTopPosts(subreddit, limit);
 
     let savedCount = 0;
 
     for (const post of posts) {
-      const exist = await reddtService.checkIfPostExists(post.id);
+      const exist = await redditService.checkIfPostExists(post.id);
       if (exist) {
         console.log(`Post ${post.id} already exist, skipping..`);
         continue;
       }
 
-      const comments = await reddtService.fetchComments(post.id, 3);
+      const comments = await redditService.fetchComments(post.id, 3);
 
-      const analysis = await openaiService.summarizeWithOpenAI(
-        post.title,
-        post.selftext,
-        comments
-      );
+      const analysis = await openaiService.summarizeWithOpenAI({
+        title: post.title,
+        selftext: post.selftext,
+        comments,
+        subreddit,
+        createdAt: post.created_utc,
+      });
 
       const postData = {
         ...post,
@@ -33,6 +35,12 @@ async function fetchAndSaveRedditIdeas(subreddit, limit = 5, userId = null) {
         isManuallyAdded: false,
         userId: userId,
         status: "processed",
+        url: post.permalink,
+        postDate: post.created_utc || Date.now(),
+        topic: analysis.topic || "General",
+        subreddit: subreddit,
+        summary: analysis.summary,
+        tags: analysis.tags || [],
       };
 
       await Post.create(postData);
