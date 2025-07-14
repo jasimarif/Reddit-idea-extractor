@@ -143,7 +143,7 @@ const SignupPage = () => {
                 <button
                   type="button"
                   tabIndex={-1}
-                  className="absolute inset-y-0 right-4 flex items-center text-gray-400 hover:text-purple-600 transition outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 shadow-none border-none active:outline-none active:ring-0 border-none"
+                  className="absolute inset-y-0 right-4 flex items-center text-gray-400 hover:text-purple-600 transition outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 shadow-none border-none active:outline-none active:ring-0"
                   onClick={() => setShowPassword((show) => !show)}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                   style={{ background: 'none', border: 'none', padding: 0 }}
@@ -181,7 +181,7 @@ const SignupPage = () => {
                 <button
                   type="button"
                   tabIndex={-1}
-                  className="absolute inset-y-0 right-4 flex items-center text-gray-400 hover:text-purple-600 transition outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 shadow-none border-none active:outline-none active:ring-0 border-none"
+                  className="absolute inset-y-0 right-4 flex items-center text-gray-400 hover:text-purple-600 transition outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 shadow-none border-none active:outline-none active:ring-0"
                   onClick={() => setShowConfirmPassword((show) => !show)}
                   aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
                   style={{ background: 'none', border: 'none', padding: 0 }}
