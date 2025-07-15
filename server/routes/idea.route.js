@@ -5,7 +5,9 @@ const {
     createIdea,
     getTags,
     getCategories,
-    fetchIdeasNow
+    fetchIdeasNow, 
+    getComments,
+    addComment
 } = require('../controllers/idea.controller');
 const {protect} = require('../middlewares/auth.middleware')
 
@@ -15,6 +17,8 @@ router.get('/tags', getTags);
 router.get('/categories', getCategories);
 router.post('/fetch-now', fetchIdeasNow);
 router.get('/:id', getIdea);
+router.get('/:id/comments', getComments);
+router.post('/:id/comments', protect, addComment);
 router.post('/create', protect, createIdea);
 router.get('/', getIdeas);
 

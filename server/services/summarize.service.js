@@ -2,35 +2,41 @@ const { OpenAI } = require("openai");
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 async function summarizeWithOpenAI({ title, selftext, comments }) {
-  const prompt = `You're an AI that extracts business/startup ideas from Reddit threads.
+  const prompt = `You're a startup idea generator AI analyzing Reddit threads to find pain points or unmet needs worth solving.
 
-Thread Title: ${title}
-Post Body: ${selftext}
-Top Comments: ${comments.join("\n\n")}
+Your goal is to extract **real startup-worthy ideas** from the discussion below.
 
-Please analyze the post and comments to extract a business idea or problem worth solving.
+---
+Reddit Thread Title: ${title}
 
-Return a JSON object in the following format:
+Reddit Post Body:
+${selftext}
+
+Top User Comments:
+${comments.join("\n\n")}
+---
+
+Output a single valid JSON object using the following format:
 
 {
-  "idea": "A clear, concise business idea or pain point extracted from the post.",
-  "topic": "The main topic or theme of the idea, e.g., 'Health', 'Wealth', 'Relationships'.",
-  "summary": "A 4-5 sentence summary of the problem or opportunity.",
-  "category": "Health, Wealth, or Relationships — choose the best fit.",
+  "idea": "Describe a clear and novel startup idea or unmet need in 1-2 sentences.",
+  "problem": "Summarize the core pain point expressed in the thread.",
+  "solutionInsight": "What kind of solution (product/service) might solve this problem?",
+  "topic": "The broader topic, e.g. 'Education', 'Mental Health', 'Remote Work'",
+  "category": "Health, Wealth, or Relationships — pick one best fit",
+  "summary": "A 3-5 sentence summary of the pain point, context, and possible opportunity.",
   "tags": ["keywords", "from", "post", "and", "comments"],
-  "feasibility": "Low" | "Medium" | "High", // Based on technical difficulty and access to resources.
-  "marketPotential": 1-10, // 1 = niche or low demand, 10 = mass market or highly scalable.
-  "subreddit": "subreddit name", // optional if passed externally
+  "feasibility": "Low" | "Medium" | "High",
+  "marketPotential": 1-10,
+  "subreddit": "the subreddit name, if known",
   "createdAt": "YYYY-MM-DD"
 }
 
-Focus on identifying:
-- Pain points or unmet needs
-- Suggestions for services/products
-- Startup ideas or innovation gaps
-- Potentially monetizable opportunities
-
-Ensure the output is valid JSON.
+Guidelines:
+- Focus on problems, frustrations, or gaps users highlight.
+- Be specific. Avoid generic statements like 'make something better'.
+- If no clear idea exists, return an object with "idea": "No viable idea found", and explain why in the summary.
+- Don't invent ideas unrelated to the post — stay grounded in the content.
 `;
 
   const response = await openai.chat.completions.create({

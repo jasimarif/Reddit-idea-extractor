@@ -1,6 +1,13 @@
 const mongoose = require("mongoose");
 
+const CommentSchema = new mongoose.Schema({
+  author: String,
+  text: String,
+  createdAt: Date,
+});
+
 const postSchema = new mongoose.Schema({
+  redditPostId: { type: String, required: true, unique: true },
   subreddit: { type: String, required: true },
   topic: { type: String, required: true },
   title: { type: String, required: true },
@@ -15,6 +22,7 @@ const postSchema = new mongoose.Schema({
   isManuallyAdded: { type: Boolean, default: false },
   status: { type: String, default: "processed" },
   createdAt: { type: Date, default: Date.now },
+  comments: [CommentSchema],
 });
 
 module.exports = mongoose.model("Post", postSchema);

@@ -5,7 +5,8 @@ import apiRequest from '../lib/apiRequest';
 const FetchPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [lastFetch, setLastFetch] = useState(null);
-  const [status, setStatus] = useState('idle'); // 'idle' | 'success' | 'error'
+  const [status, setStatus] = useState('idle'); 
+  const [errorMsg, setErrorMsg] = useState('');
   const [fetchCount, setFetchCount] = useState(0);
 
   const handleFetchIdeas = async () => {
@@ -13,18 +14,30 @@ const FetchPage = () => {
     setStatus('idle');
 
     try {
-      // Call the backend fetch-now endpoint
       const response = await apiRequest.post('/ideas/fetch-now');
+      console.log('Fetch Ideas Response:', response);
       const count = response.data?.data?.savedCount || 0;
       setStatus('success');
       setLastFetch(new Date().toLocaleString());
       setFetchCount(count);
+      setErrorMsg('');
     } catch (error) {
+      console.error('Fetch Ideas Error:', error, error?.response?.data, error?.response?.status);
       setStatus('error');
+      // Detect timeout error (axios and fetch both use 'timeout' in message)
+      let msg = error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        'Unknown error occurred.';
+      if (msg.toLowerCase().includes('timeout')) {
+        msg = 'The request took too long and timed out. The Reddit API or backend may be slow. Please wait a bit and try again.';
+      }
+      setErrorMsg(msg);
     } finally {
       setIsLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -73,7 +86,8 @@ const FetchPage = () => {
               <div>
                 <div className="text-red-800 font-medium">Fetch failed</div>
                 <div className="text-red-600 text-sm">
-                  There was an error connecting to the Reddit API. Please try again.
+                  There was an error connecting to the Reddit API. Please try again.<br/>
+                  <span style={{fontWeight:'bold'}}>Error:</span> {errorMsg}
                 </div>
               </div>
             </div>

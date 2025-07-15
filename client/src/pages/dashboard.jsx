@@ -50,8 +50,10 @@ const DashboardPage = () => {
   useEffect(() => {
     const fetchFavorites = async () => {
       try {
-        const response = await apiRequest.get("/favorites", { params: { page: 1, limit: 1000 } });
-        const ids = (response.data.data || []).map(fav => fav._id || fav.id);
+        const response = await apiRequest.get("/favorites", {
+          params: { page: 1, limit: 1000 },
+        });
+        const ids = (response.data.data || []).map((fav) => fav._id || fav.id);
         setFavoriteIds(ids);
       } catch (error) {
         setFavoriteIds([]);
@@ -63,35 +65,43 @@ const DashboardPage = () => {
   const fetchIdeas = async () => {
     setIsLoading(true);
     try {
-      const favResponse = await apiRequest.get("/favorites", { params: { page: 1, limit: 1000 } });
-      const ids = (favResponse.data.data || []).map(fav => fav._id || fav.id);
+      const favResponse = await apiRequest.get("/favorites", {
+        params: { page: 1, limit: 1000 },
+      });
+      const ids = (favResponse.data.data || []).map((fav) => fav._id || fav.id);
       setFavoriteIds(ids);
-  
+
       const params = {};
       if (selectedCategory !== "All") params.category = selectedCategory;
       if (searchTerm) params.search = searchTerm;
       if (selectedTags.length > 0) params.tags = selectedTags.join(",");
       params.page = currentPage;
       params.limit = itemsPerPage;
-  
+
       const response = await apiRequest.get("/ideas", { params });
       let fetchedIdeas = response.data.data || [];
-  
-      fetchedIdeas = fetchedIdeas.map(idea => ({
+
+      fetchedIdeas = fetchedIdeas.map((idea) => ({
         ...idea,
         isFavorited: ids.includes(idea._id),
       }));
-  
+
       if (sortBy === "upvotes") {
         fetchedIdeas = [...fetchedIdeas].sort((a, b) => b.upvotes - a.upvotes);
       } else if (sortBy === "newest") {
-        fetchedIdeas = [...fetchedIdeas].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        fetchedIdeas = [...fetchedIdeas].sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
       } else if (sortBy === "oldest") {
-        fetchedIdeas = [...fetchedIdeas].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        fetchedIdeas = [...fetchedIdeas].sort(
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+        );
       }
-  
+
       setIdeas(fetchedIdeas);
-      setTotalIdeas(response.data.pagination?.totalItems || fetchedIdeas.length);
+      setTotalIdeas(
+        response.data.pagination?.totalItems || fetchedIdeas.length
+      );
     } catch (error) {
       console.error("Failed to fetch ideas:", error);
       setIdeas([]);
@@ -100,7 +110,6 @@ const DashboardPage = () => {
       setIsLoading(false);
     }
   };
-  
 
   useEffect(() => {
     fetchIdeas();
@@ -128,8 +137,10 @@ const DashboardPage = () => {
         await apiRequest.delete(`/favorites/${ideaId}`);
       }
       // Refetch favorites and ideas to ensure sync
-      const response = await apiRequest.get("/favorites", { params: { page: 1, limit: 1000 } });
-      const ids = (response.data.data || []).map(fav => fav._id || fav.id);
+      const response = await apiRequest.get("/favorites", {
+        params: { page: 1, limit: 1000 },
+      });
+      const ids = (response.data.data || []).map((fav) => fav._id || fav.id);
       setFavoriteIds(ids);
       await fetchIdeas();
     } catch (error) {
@@ -188,44 +199,6 @@ const DashboardPage = () => {
               <span>Refresh Ideas</span>
             </button>
           </div>
-        </div>
-
-        {/* About Categories Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
-          <button
-            onClick={() => setShowCategoryInfo(!showCategoryInfo)}
-            className="flex items-center justify-between w-full text-left"
-          >
-            <div className="flex items-center space-x-2">
-              <Info className="h-5 w-5 text-gray-500" />
-              <span className="font-medium text-gray-900">
-                About Categories
-              </span>
-            </div>
-            {showCategoryInfo ? (
-              <ChevronUp className="h-4 w-4 text-gray-500" />
-            ) : (
-              <ChevronDown className="h-4 w-4 text-gray-500" />
-            )}
-          </button>
-
-          {showCategoryInfo && (
-            <div className="mt-4 space-y-3">
-              {Object.entries(categoryInfo).map(([category, description]) => (
-                <div key={category} className="flex items-start space-x-3">
-                  <span className="text-lg">
-                    {category === "Health" && "💊"}
-                    {category === "Wealth" && "💸"}
-                    {category === "Relationships" && "❤️"}
-                  </span>
-                  <div>
-                    <h4 className="font-medium text-gray-900">{category}</h4>
-                    <p className="text-sm text-gray-600">{description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* Search and Sort */}

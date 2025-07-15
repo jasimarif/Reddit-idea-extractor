@@ -1,25 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Heart, ArrowUp, ExternalLink, Calendar, Tag } from 'lucide-react';
-import apiRequest from '../lib/apiRequest';
-
+import React, { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import {
+  ArrowLeft,
+  Heart,
+  ArrowUp,
+  ExternalLink,
+  Calendar,
+  Tag,
+} from "lucide-react";
+import apiRequest from "../lib/apiRequest";
 
 const categoryColors = {
-  Health: 'bg-green-100 text-green-800 border-green-200',
-  Wealth: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  Relationships: 'bg-pink-100 text-pink-800 border-pink-200'
+  Health: "bg-green-100 text-green-800 border-green-200",
+  Wealth: "bg-yellow-100 text-yellow-800 border-yellow-200",
+  Relationships: "bg-pink-100 text-pink-800 border-pink-200",
 };
 
 const categoryEmojis = {
-  Health: '💊',
-  Wealth: '💸',
-  Relationships: '❤️'
+  Health: "💊",
+  Wealth: "💸",
+  Relationships: "❤️",
 };
 
 const IdeaDetailPage = () => {
   const { id } = useParams();
   const [idea, setIdea] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [comments, setComments] = useState([]);
+  const [commentsLoading, setCommentsLoading] = useState(true);
+  const [commentsError, setCommentsError] = useState("");
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
 
   useEffect(() => {
     const fetchIdea = async () => {
@@ -28,7 +38,7 @@ const IdeaDetailPage = () => {
         const response = await apiRequest.get(`/ideas/${id}`);
         setIdea(response.data.data);
       } catch (error) {
-        console.error('Failed to fetch idea:', error);
+        console.error("Failed to fetch idea:", error);
         setIdea(null);
       }
       setIsLoading(false);
@@ -37,18 +47,47 @@ const IdeaDetailPage = () => {
     fetchIdea();
   }, [id]);
 
+  // Fetch comments for the idea
+  useEffect(() => {
+    if (!id) return;
+    const fetchComments = async () => {
+      setCommentsLoading(true);
+      setCommentsError("");
+      try {
+        const response = await apiRequest.get(`/ideas/${id}/comments`);
+        setComments(response.data.data || []);
+      } catch (error) {
+        console.error(
+          "Failed to fetch comments:",
+          error,
+          error?.response?.data
+        );
+        setCommentsError(
+          "Failed to fetch comments: " +
+            (error?.response?.data?.message || error.message || "Unknown error")
+        );
+        setComments([]);
+      }
+      setCommentsLoading(false);
+    };
+    fetchComments();
+  }, [id]);
+
   const handleToggleFavorite = async () => {
-    if (!idea) return;
+    if (!idea || favoriteLoading) return;
+    setFavoriteLoading(true);
     const newFavoriteStatus = !idea.isFavorited;
     setIdea({ ...idea, isFavorited: newFavoriteStatus });
     try {
       if (newFavoriteStatus) {
-        await apiRequest.post(`/favorites/${idea._id || idea.id}`);
+        await apiRequest.post(`/favorites/${idea._id}`);
       } else {
-        await apiRequest.delete(`/favorites/${idea._id || idea.id}`);
+        await apiRequest.delete(`/favorites/${idea._id}`);
       }
     } catch (err) {
       setIdea({ ...idea, isFavorited: !newFavoriteStatus });
+    } finally {
+      setFavoriteLoading(false);
     }
   };
 
@@ -64,9 +103,16 @@ const IdeaDetailPage = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Idea not found</h2>
-          <p className="text-gray-600 mb-4">The idea you're looking for doesn't exist.</p>
-          <Link to="/dashboard" className="text-purple-600 hover:text-purple-700 font-medium">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Idea not found
+          </h2>
+          <p className="text-gray-600 mb-4">
+            The idea you're looking for doesn't exist.
+          </p>
+          <Link
+            to="/dashboard"
+            className="text-purple-600 hover:text-purple-700 font-medium"
+          >
             Back to Dashboard
           </Link>
         </div>
@@ -79,7 +125,10 @@ const IdeaDetailPage = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <div className="mb-6">
-          <Link to="/dashboard" className="inline-flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
+          <Link
+            to="/dashboard"
+            className="inline-flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
+          >
             <ArrowLeft className="h-4 w-4" />
             <span>Back to Dashboard</span>
           </Link>
@@ -92,26 +141,59 @@ const IdeaDetailPage = () => {
             <div className="flex items-start justify-between mb-6">
               <div className="flex items-center space-x-3">
                 {(() => {
-  const category = idea.category || idea.topic || "Health";
-  return (
-    <>
-      <span className="text-2xl">{categoryEmojis[category] || "💡"}</span>
-      <span className={`px-3 py-1 rounded-full text-sm font-medium border ${categoryColors[category] || "bg-gray-100 text-gray-700 border-gray-200"}`}>
-        {category}
-      </span>
-    </>
-  );
-})()}
+                  const category = idea.category || idea.topic || "Health";
+                  return (
+                    <>
+                      <span className="text-2xl">
+                        {categoryEmojis[category] || "💡"}
+                      </span>
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm font-medium border ${
+                          categoryColors[category] ||
+                          "bg-gray-100 text-gray-700 border-gray-200"
+                        }`}
+                      >
+                        {category}
+                      </span>
+                    </>
+                  );
+                })()}
               </div>
               <button
                 onClick={handleToggleFavorite}
                 className={`p-3 rounded-full transition-colors ${
                   idea.isFavorited
-                    ? 'text-red-500 hover:text-red-600 bg-red-50'
-                    : 'text-gray-400 hover:text-red-500 hover:bg-red-50'
+                    ? "text-red-500 fill-red-500 hover:text-red-600 hover:fill-red-600 bg-red-50"
+                    : "text-gray-400 fill-none hover:text-red-500 hover:fill-red-500 hover:bg-red-50"
                 }`}
+                aria-label={
+                  idea.isFavorited ? "Unfavorite" : "Add to Favorites"
+                }
+                disabled={favoriteLoading}
               >
-                <Heart className={`h-6 w-6 ${idea.isFavorited ? 'fill-current' : ''}`} />
+                {favoriteLoading ? (
+                  <svg
+                    className="animate-spin h-6 w-6 text-red-500"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      fill="none"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v8z"
+                    />
+                  </svg>
+                ) : (
+                  <Heart className={`h-6 w-6`} />
+                )}
               </button>
             </div>
 
@@ -137,7 +219,9 @@ const IdeaDetailPage = () => {
           {/* Content */}
           <div className="p-8">
             <div className="prose max-w-none">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Summary</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                Summary
+              </h2>
               <p className="text-gray-700 leading-relaxed mb-8">
                 {idea.summary}
               </p>
@@ -177,15 +261,94 @@ const IdeaDetailPage = () => {
                 onClick={handleToggleFavorite}
                 className={`flex items-center justify-center space-x-2 px-6 py-3 font-medium rounded-lg border transition-colors ${
                   idea.isFavorited
-                    ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                    ? "bg-red-50 text-red-600 border-red-200 hover:bg-red-100 fill-red-500"
+                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 fill-none"
                 }`}
+                aria-label={
+                  idea.isFavorited ? "Unfavorite" : "Add to Favorites"
+                }
+                disabled={favoriteLoading}
               >
-                <Heart className={`h-4 w-4 ${idea.isFavorited ? 'fill-current' : ''}`} />
-                <span>{idea.isFavorited ? 'Unfavorite' : 'Add to Favorites'}</span>
+                {favoriteLoading ? (
+                  <svg
+                    className="animate-spin h-4 w-4 text-red-500"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      fill="none"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v8z"
+                    />
+                  </svg>
+                ) : (
+                  <Heart className={`h-4 w-4`} />
+                )}
+                <span>
+                  {idea.isFavorited ? "Unfavorite" : "Add to Favorites"}
+                </span>
               </button>
             </div>
           </div>
+        </div>
+        {/* Comments Section */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 mt-8 p-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Comments</h2>
+          {commentsLoading ? (
+            <div className="text-gray-600">Loading comments...</div>
+          ) : commentsError ? (
+            <div className="text-red-500">{commentsError}</div>
+          ) : comments.length === 0 ? (
+            <div className="text-gray-600">
+              No comments found for this post.
+            </div>
+          ) : (
+            <ul className="space-y-4">
+              {comments.map((comment, idx) => (
+                <li
+                  key={comment.id || comment._id || idx}
+                  className="transition-shadow hover:shadow-md bg-gray-50 rounded-xl p-5 flex gap-4 items-start"
+                >
+                  <div
+                    className="flex-shrink-0 h-12 w-12 rounded-full flex items-center justify-center font-bold text-lg"
+                    style={{
+                      background: `linear-gradient(135deg, #a5b4fc 0%, #c7d2fe 100%)`,
+                      color: '#4f46e5',
+                    }}
+                    aria-label={comment.author || 'Anonymous'}
+                  >
+                    {comment.author?.charAt(0)?.toUpperCase() || '?'}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-semibold text-gray-900">
+                        {comment.author || 'Anonymous'}
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        {comment.createdAt
+                          ? new Date(comment.createdAt).toLocaleString(undefined, {
+                              dateStyle: 'medium',
+                              timeStyle: 'short',
+                            })
+                          : ''}
+                      </span>
+                    </div>
+                    <div className="text-gray-800 leading-relaxed whitespace-pre-line">
+                      {comment.text || comment.body}
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     </div>

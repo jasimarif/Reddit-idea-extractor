@@ -7,7 +7,6 @@ async function fetchAndSaveRedditIdeas(subreddit, limit = 5, userId = null) {
   try {
     console.log(`fetching ideas from r/${subreddit}`);
 
-    //fetch post from reddit
     const posts = await redditService.fetchTopPosts(subreddit, limit);
 
     let savedCount = 0;
@@ -32,6 +31,7 @@ async function fetchAndSaveRedditIdeas(subreddit, limit = 5, userId = null) {
       const postData = {
         ...post,
         analysis,
+        redditPostId: post.id,
         isManuallyAdded: false,
         userId: userId,
         status: "processed",
@@ -41,13 +41,21 @@ async function fetchAndSaveRedditIdeas(subreddit, limit = 5, userId = null) {
         subreddit: subreddit,
         summary: analysis.summary,
         tags: analysis.tags || [],
+        comments: comments,
       };
 
-      await Post.create(postData);
-      savedCount++;
-
-      console.log(`Saved idea: ${postData.title}`);
-
+      try {
+        await Post.create(postData);
+        savedCount++;
+        console.log(`Saved idea: ${postData.title}`);
+      } catch (err) {
+        if (err.code === 11000) {
+          // Duplicate key error, skip and continue
+          console.log(`Duplicate post: ${postData.redditPostId}, skipping.`);
+        } else {
+          throw err;
+        }
+      }
       await delay(1200);
     }
     console.log(
