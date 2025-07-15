@@ -2,7 +2,7 @@ const { OpenAI } = require("openai");
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 async function summarizeWithOpenAI({ title, selftext, comments }) {
-  const prompt = `You're a startup idea generator AI analyzing Reddit threads to find pain points or unmet needs worth solving.
+  const prompt = `You're a startup idea generator AI analyzing Reddit threads and comments to find pain points or unmet needs worth solving.
 
 Your goal is to extract **real startup-worthy ideas** from the discussion below.
 
