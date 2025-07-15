@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Brain, User, LogOut, Heart, BarChart3, ChevronDown, Home } from 'lucide-react';
+import { Brain, User, LogOut, Heart, BarChart3, ChevronDown, Home, TrendingUp, Globe } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -77,7 +77,7 @@ const getUserInitials = (name) => {
                 <Link
                   to="/fetch"
                   className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    isActive('/favorites')
+                    isActive('/fetch')
                       ? 'bg-purple-100 text-purple-700'
                       : 'text-gray-700 hover:text-purple-600 hover:bg-gray-50'
                   }`}
@@ -85,6 +85,27 @@ const getUserInitials = (name) => {
                   <BarChart3 className="h-4 w-4" />
                   <span>Trigger fetch</span>
                 </Link>
+
+                
+                
+                {/* More Dropdown for secondary links */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50 transition-colors">
+                    <span>More</span>
+                    <ChevronDown className="h-4 w-4" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="bg-white w-48">
+                    <DropdownMenuItem asChild>
+                      <Link to="/pain-points"><Brain className="h-4 w-4 mr-2" /> Pain Points</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/market-gaps"><TrendingUp className="h-4 w-4 mr-2" /> Market Gaps</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/landing-pages"><Globe className="h-4 w-4 mr-2" /> Landing Pages</Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50 rounded-md transition-colors">

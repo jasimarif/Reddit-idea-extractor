@@ -1,14 +1,7 @@
 import apiRequest from "../lib/apiRequest";
 import React, { useState, useEffect } from "react";
 import IdeaCard from "../components/IdeaCard";
-import {
-  Filter,
-  Search,
-  RefreshCw,
-  ChevronDown,
-  Info,
-  ChevronUp,
-} from "lucide-react";
+import { Filter, Search, RefreshCw } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -21,18 +14,18 @@ import { Badge } from "../components/ui/badge";
 const DashboardPage = () => {
   const [ideas, setIdeas] = useState([]);
   const [totalIdeas, setTotalIdeas] = useState(0);
-  const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("upvotes");
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [showCategoryInfo, setShowCategoryInfo] = useState(false);
   const itemsPerPage = 6;
   const [favoriteIds, setFavoriteIds] = useState([]);
+  const [allTags, setAllTags] = useState([]);
+  const [categories, setCategories] = useState([]);
 
   // Tags state and fetch logic
-  const [allTags, setAllTags] = useState([]);
   useEffect(() => {
     const fetchTags = async () => {
       try {
@@ -44,6 +37,23 @@ const DashboardPage = () => {
       }
     };
     fetchTags();
+  }, []);
+
+  // Categories state and fetch logic
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await apiRequest.get("/ideas/categories");
+        // Wrap string categories as objects with a 'name' property for UI compatibility
+        const data = response.data?.data || [];
+        const normalized = data.map(cat => typeof cat === 'string' ? { name: cat } : cat);
+        setCategories(normalized);
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+        setCategories([]);
+      }
+    };
+    fetchCategories();
   }, []);
 
   // Fetch favorite IDs on mount
@@ -68,22 +78,41 @@ const DashboardPage = () => {
       const favResponse = await apiRequest.get("/favorites", {
         params: { page: 1, limit: 1000 },
       });
-      const ids = (favResponse.data.data || []).map((fav) => fav._id || fav.id);
+      const ids = Array.isArray(favResponse.data.data)
+        ? favResponse.data.data.filter(Boolean).map((fav) => fav._id || fav.id)
+        : [];
       setFavoriteIds(ids);
 
       const params = {};
-      if (selectedCategory !== "All") params.category = selectedCategory;
+      if (selectedCategories.length > 0) params.categories = selectedCategories.join(",");
       if (searchTerm) params.search = searchTerm;
       if (selectedTags.length > 0) params.tags = selectedTags.join(",");
       params.page = currentPage;
       params.limit = itemsPerPage;
 
+      console.log('Fetching ideas with params:', params);
       const response = await apiRequest.get("/ideas", { params });
-      let fetchedIdeas = response.data.data || [];
+      console.log('Ideas API response:', response.data);
+      let fetchedIdeas = Array.isArray(response.data.data)
+        ? response.data.data.filter(Boolean)
+        : [];
+
+      if (selectedCategories.length > 0) {
+        fetchedIdeas = fetchedIdeas.filter((idea) => {
+          const cat = idea.category || idea.topic;
+          if (!cat) return false;
+          if (typeof cat === 'string') {
+            return selectedCategories.includes(cat);
+          } else if (typeof cat === 'object' && cat.name) {
+            return selectedCategories.includes(cat.name);
+          }
+          return false;
+        });
+      }
 
       fetchedIdeas = fetchedIdeas.map((idea) => ({
         ...idea,
-        isFavorited: ids.includes(idea._id),
+        isFavorited: idea && idea._id ? ids.includes(idea._id) : false,
       }));
 
       if (sortBy === "upvotes") {
@@ -114,7 +143,7 @@ const DashboardPage = () => {
   useEffect(() => {
     fetchIdeas();
     // eslint-disable-next-line
-  }, [selectedCategory, searchTerm, sortBy, selectedTags, currentPage]);
+  }, [selectedCategories, searchTerm, sortBy, selectedTags, currentPage]);
 
   const handleToggleFavorite = async (ideaId) => {
     const idea = ideas.find((idea) => idea._id === ideaId);
@@ -161,18 +190,17 @@ const DashboardPage = () => {
     setCurrentPage(1);
   };
 
-  const categories = ["All", "Health", "Wealth", "Relationships"];
+  const handleCategoryToggle = (category) => {
+    setSelectedCategories((prev) =>
+      prev.includes(category)
+        ? prev.filter((t) => t !== category)
+        : [...prev, category]
+    );
+    setCurrentPage(1);
+  };
+
   const totalPages = Math.max(1, Math.ceil(totalIdeas / itemsPerPage));
   const currentIdeas = ideas;
-
-  const categoryInfo = {
-    Health:
-      "Mental health, fitness, wellness, medical advice, and lifestyle improvements",
-    Wealth:
-      "Personal finance, entrepreneurship, side businesses, career advice, and financial planning",
-    Relationships:
-      "Dating, marriage, family dynamics, parenting, and social connections",
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -204,20 +232,57 @@ const DashboardPage = () => {
         {/* Search and Sort */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 lg:space-x-4">
-            {/* Search */}
-            <div className="relative flex-1 max-w-md">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search ideas, content, or tags..."
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+            {/* Category Dropdown */}
+            <div className="w-full md:w-56 mb-4 md:mb-0">
+              <Select
+                value={selectedCategories[0] || ""} // fallback for single-select UI, not needed for multi-select buttons
+                onValueChange={(value) => {
+                  if (value === "All") {
+                    setSelectedCategories([]);
+                  } else {
+                    setSelectedCategories([value]);
+                  }
+                  setCurrentPage(1);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent className="bg-white">
+                  <SelectItem value="All">All Categories</SelectItem>
+                  {categories.map((cat) => (
+                    <SelectItem
+                      key={cat._id || cat.id || cat.name}
+                      value={cat.name}
+                    >
+                      {cat.icon && (
+                        <span style={{ marginRight: 8 }}>{cat.icon}</span>
+                      )}
+                      {cat.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-
+            {/* Search */}
+            <div className="flex-1 mb-4 md:mb-0">
+              <div className="relative">
+                <input
+                  type="text"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  placeholder="Search ideas..."
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+                <Search
+                  className="absolute left-3 top-2.5 text-gray-400"
+                  size={18}
+                />
+              </div>
+            </div>
             {/* Sort */}
             <div className="flex items-center space-x-2">
               <span className="text-sm font-medium text-gray-700">
@@ -227,7 +292,7 @@ const DashboardPage = () => {
                 <SelectTrigger className="w-40">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white"> 
                   <SelectItem value="upvotes">Most Upvotes</SelectItem>
                   <SelectItem value="newest">Newest</SelectItem>
                   <SelectItem value="oldest">Oldest</SelectItem>
@@ -240,32 +305,6 @@ const DashboardPage = () => {
         {/* Filters */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
           <div className="space-y-4">
-            {/* Category Filters */}
-            <div className="flex items-center space-x-2">
-              <Filter className="h-5 w-5 text-gray-400" />
-              <span className="text-sm font-medium text-gray-700">
-                Categories:
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {categories.map((category) => (
-                  <button
-                    key={category}
-                    onClick={() => setSelectedCategory(category)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      selectedCategory === category
-                        ? "bg-purple-100 text-purple-700 border border-purple-200"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-transparent"
-                    }`}
-                  >
-                    {category === "Health" && "💊 "}
-                    {category === "Wealth" && "💸 "}
-                    {category === "Relationships" && "❤️ "}
-                    {category}
-                  </button>
-                ))}
-              </div>
-            </div>
-
             {/* Tag Filters */}
             <div className="flex items-start space-x-2">
               <span className="text-sm font-medium text-gray-700 mt-1">
@@ -288,23 +327,46 @@ const DashboardPage = () => {
               </div>
             </div>
 
+            {/* Category Filters */}
+            <div className="flex items-start space-x-2 mt-4">
+              <span className="text-sm font-medium text-gray-700 mt-1">
+                Popular Categories:
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {categories.slice(0, 12).map((cat) => (
+                  <button
+                    key={cat.name}
+                    onClick={() => handleCategoryToggle(cat.name)}
+                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                      selectedCategories.includes(cat.name)
+                        ? "bg-green-100 text-green-700 border border-green-200"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200 border border-transparent"
+                    }`}
+                  >
+                    {cat.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Active Filters */}
             {(selectedTags.length > 0 ||
-              selectedCategory !== "All" ||
+              selectedCategories.length > 0 ||
               searchTerm) && (
               <div className="flex items-center space-x-2 pt-2 border-t">
                 <span className="text-sm font-medium text-gray-700">
                   Active filters:
                 </span>
-                {selectedCategory !== "All" && (
+                {selectedCategories.map((cat) => (
                   <Badge
+                    key={cat}
                     variant="secondary"
                     className="cursor-pointer"
-                    onClick={() => setSelectedCategory("All")}
+                    onClick={() => handleCategoryToggle(cat)}
                   >
-                    {selectedCategory} ×
+                    {cat} ×
                   </Badge>
-                )}
+                ))}
                 {searchTerm && (
                   <Badge
                     variant="secondary"
@@ -333,7 +395,7 @@ const DashboardPage = () => {
         <div className="mb-6">
           <p className="text-sm text-gray-600">
             Showing {currentIdeas.length} of {totalIdeas} ideas
-            {selectedCategory !== "All" && ` in ${selectedCategory}`}
+            {selectedCategories.length > 0 && ` in ${selectedCategories.join(", ")}`}
           </p>
         </div>
 
@@ -353,7 +415,7 @@ const DashboardPage = () => {
             </p>
             {(searchTerm ||
               selectedTags.length > 0 ||
-              selectedCategory !== "All") && (
+              selectedCategories.length > 0) && (
               <button
                 onClick={() => {
                   setSearchTerm("");

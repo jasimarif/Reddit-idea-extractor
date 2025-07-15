@@ -13,8 +13,11 @@ import UserProfilePage from "./pages/UserProfilePage.jsx";
 import FavoritesPage from "./pages/FavoratesPage.jsx";
 import FetchPage from "./pages/FetchPage.jsx";
 import IdeaDetailPage from "./pages/IdeaDetailPage.jsx";
-import NotFound from "./pages/NotFound.jsx"
+import NotFound from "./pages/NotFound.jsx";
 import GoogleCallback from "./pages/googleCallback.jsx";
+import LandingPages from "./pages/LandingPages.jsx";
+import MarketGaps from "./pages/MarketGaps.jsx";
+import PainPoints from "./pages/PainPoints.jsx";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +34,7 @@ function App() {
                 <Route path="/google/callback" element={<GoogleCallback />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignupPage />} />
+
                 <Route
                   path="/dashboard"
                   element={
@@ -68,6 +72,30 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <FetchPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="landing-pages"
+                  element={
+                    <ProtectedRoute>
+                      <LandingPages />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="market-gaps"
+                  element={
+                    <ProtectedRoute>
+                      <MarketGaps />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="pain-points"
+                  element={
+                    <ProtectedRoute>
+                      <PainPoints />
                     </ProtectedRoute>
                   }
                 />

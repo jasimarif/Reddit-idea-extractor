@@ -144,43 +144,17 @@ const getTags = async (req, res, next) => {
 
 const getCategories = async (req, res, next) => {
   try {
-    const Category = require("../models/Category");
-    const categories = await Category.find().sort({ name: 1 });
-
-    // If no categories exist, return default ones
-    if (categories.length === 0) {
-      const defaultCategories = [
-        {
-          name: "Health",
-          description: "Health and wellness opportunities",
-          color: "#10B981",
-        },
-        {
-          name: "Wealth",
-          description: "Business and financial opportunities",
-          color: "#3B82F6",
-        },
-        {
-          name: "Relationships",
-          description: "Social and relationship solutions",
-          color: "#F59E0B",
-        },
-      ];
-
-      return res.status(200).json({
-        success: true,
-        data: defaultCategories,
-      });
-    }
+    const categories = await Post.distinct("category");
 
     res.status(200).json({
       success: true,
-      data: categories,
+      data: categories.filter((category) => category && category.trim() !== "").sort(),
     });
   } catch (error) {
     next(error);
   }
 };
+
 
 const fetchIdeasNow = async (req, res, next) => {
   try {

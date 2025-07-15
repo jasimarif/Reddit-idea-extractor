@@ -15,8 +15,11 @@ const FavoritesPage = () => {
         const response = await apiRequest.get("/favorites", {
           params: { page: 1, limit: 100 },
         });
-        setFavorites(response.data.data || []);
-        setFilteredFavorites(response.data.data || []);
+        const cleanData = Array.isArray(response.data.data)
+  ? response.data.data.filter(Boolean)
+  : [];
+setFavorites(cleanData);
+setFilteredFavorites(cleanData);
       } catch (error) {
         console.error("Failed to fetch favorites:", error);
       }
@@ -157,7 +160,7 @@ const FavoritesPage = () => {
               </div>
             ) : (
               <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filteredFavorites.map((idea) => (
+                {filteredFavorites.filter(Boolean).map((idea) => (
                   <IdeaCard
                     key={idea._id}
                     idea={{ ...idea, id: idea._id, isFavorited: true }}

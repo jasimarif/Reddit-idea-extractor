@@ -41,6 +41,7 @@ async function fetchAndSaveRedditIdeas(subreddit, limit = 5, userId = null) {
         subreddit: subreddit,
         summary: analysis.summary,
         tags: analysis.tags || [],
+        category: analysis.category || "General",
         comments: comments,
       };
 
