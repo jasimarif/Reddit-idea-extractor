@@ -1,7 +1,10 @@
 import apiRequest from "../lib/apiRequest";
 import React, { useState, useEffect } from "react";
-import IdeaCard from "../components/IdeaCard";
-import { Filter, Search, RefreshCw } from "lucide-react";
+import { Search, RefreshCw, Calendar, ExternalLink } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/card";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "../components/ui/table";
+import { Button } from "../components/ui/button";
+import { Link } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -119,11 +122,11 @@ const DashboardPage = () => {
         fetchedIdeas = [...fetchedIdeas].sort((a, b) => b.upvotes - a.upvotes);
       } else if (sortBy === "newest") {
         fetchedIdeas = [...fetchedIdeas].sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          (a, b) => new Date(b.postDate) - new Date(a.postDate)
         );
       } else if (sortBy === "oldest") {
         fetchedIdeas = [...fetchedIdeas].sort(
-          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+          (a, b) => new Date(a.postDate) - new Date(b.postDate)
         );
       }
 
@@ -145,39 +148,39 @@ const DashboardPage = () => {
     // eslint-disable-next-line
   }, [selectedCategories, searchTerm, sortBy, selectedTags, currentPage]);
 
-  const handleToggleFavorite = async (ideaId) => {
-    const idea = ideas.find((idea) => idea._id === ideaId);
-    if (!idea) return;
+  // const handleToggleFavorite = async (ideaId) => {
+  //   const idea = ideas.find((idea) => idea._id === ideaId);
+  //   if (!idea) return;
 
-    const newFavoriteStatus = !idea.isFavorited;
-    const prevIdeas = [...ideas];
+  //   const newFavoriteStatus = !idea.isFavorited;
+  //   const prevIdeas = [...ideas];
 
-    // Optimistically update the UI
-    setIdeas((prev) =>
-      prev.map((idea) =>
-        idea._id === ideaId ? { ...idea, isFavorited: newFavoriteStatus } : idea
-      )
-    );
+  //   // Optimistically update the UI
+  //   setIdeas((prev) =>
+  //     prev.map((idea) =>
+  //       idea._id === ideaId ? { ...idea, isFavorited: newFavoriteStatus } : idea
+  //     )
+  //   );
 
-    try {
-      if (newFavoriteStatus) {
-        await apiRequest.post(`/favorites/${ideaId}`);
-      } else {
-        await apiRequest.delete(`/favorites/${ideaId}`);
-      }
-      // Refetch favorites and ideas to ensure sync
-      const response = await apiRequest.get("/favorites", {
-        params: { page: 1, limit: 1000 },
-      });
-      const ids = (response.data.data || []).map((fav) => fav._id || fav.id);
-      setFavoriteIds(ids);
-      await fetchIdeas();
-    } catch (error) {
-      console.error("Error toggling favorite:", error);
-      // Revert UI if the request fails
-      setIdeas(prevIdeas);
-    }
-  };
+  //   try {
+  //     if (newFavoriteStatus) {
+  //       await apiRequest.post(`/favorites/${ideaId}`);
+  //     } else {
+  //       await apiRequest.delete(`/favorites/${ideaId}`);
+  //     }
+  //     // Refetch favorites and ideas to ensure sync
+  //     const response = await apiRequest.get("/favorites", {
+  //       params: { page: 1, limit: 1000 },
+  //     });
+  //     const ids = (response.data.data || []).map((fav) => fav._id || fav.id);
+  //     setFavoriteIds(ids);
+  //     await fetchIdeas();
+  //   } catch (error) {
+  //     console.error("Error toggling favorite:", error);
+  //     // Revert UI if the request fails
+  //     setIdeas(prevIdeas);
+  //   }
+  // };
 
   const handleRefreshIdeas = async () => {
     await fetchIdeas();
@@ -199,6 +202,12 @@ const DashboardPage = () => {
     setCurrentPage(1);
   };
 
+  const getCategoryColor = (idea) => {
+    if (idea.category === "tech") return "blue";
+    if (idea.category === "business") return "orange";
+    return "gray";
+  };
+
   const totalPages = Math.max(1, Math.ceil(totalIdeas / itemsPerPage));
   const currentIdeas = ideas;
 
@@ -216,16 +225,6 @@ const DashboardPage = () => {
                 Discover and organize the best ideas from Reddit communities
               </p>
             </div>
-            <button
-              onClick={handleRefreshIdeas}
-              disabled={isLoading}
-              className="mt-4 sm:mt-0 flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-            >
-              <RefreshCw
-                className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
-              />
-              <span>Refresh Ideas</span>
-            </button>
           </div>
         </div>
 
@@ -307,9 +306,9 @@ const DashboardPage = () => {
           <div className="space-y-4">
             {/* Tag Filters */}
             <div className="flex items-start space-x-2">
-              <span className="text-sm font-medium text-gray-700 mt-1">
+              {/* <span className="text-sm font-medium text-gray-700 mt-1">
                 Popular Tags:
-              </span>
+              </span> */}
               <div className="flex flex-wrap gap-2">
                 {allTags.slice(0, 12).map((tag) => (
                   <button
@@ -393,65 +392,142 @@ const DashboardPage = () => {
 
         {/* Results Count */}
         <div className="mb-6">
-          <p className="text-sm text-gray-600">
-            Showing {currentIdeas.length} of {totalIdeas} ideas
-            {selectedCategories.length > 0 && ` in ${selectedCategories.join(", ")}`}
-          </p>
+          {isLoading ? (
+            <div className="flex items-center space-x-2">
+              <RefreshCw className="h-4 w-4 animate-spin text-gray-500" />
+              <p className="text-sm text-gray-600">Loading ideas...</p>
+            </div>
+          ) : (
+            <p className="text-sm text-gray-600">
+              {totalIdeas > 0 
+                ? `Showing ${Math.min(currentIdeas.length, itemsPerPage)} of ${totalIdeas} ideas${selectedCategories.length > 0 ? ` in ${selectedCategories.join(", ")}` : ''}`
+                : 'No ideas found matching your criteria'}
+            </p>
+          )}
         </div>
 
-        {/* Ideas Grid */}
-        {currentIdeas.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="text-6xl mb-4">🔍</div>
-            <div className="text-xl font-semibold text-gray-900 mb-2">
-              {searchTerm || selectedTags.length > 0
-                ? "No matching ideas found"
-                : "No ideas available"}
+        {/* Ideas Table */}
+      <Card className="bg-white rounded-xl shadow-sm border border-gray-200">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg font-semibold text-gray-900">Business Ideas ({currentIdeas.length})</CardTitle>
+            <div className="flex items-center space-x-2">
+              <Button variant="outline" size="sm" onClick={handleRefreshIdeas} disabled={isLoading} className="border-gray-300">
+                <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
             </div>
-            <p className="text-gray-500 mb-6">
-              {searchTerm || selectedTags.length > 0
-                ? "Try adjusting your search terms or filters to find more ideas."
-                : "Check back later for new ideas from Reddit communities."}
-            </p>
-            {(searchTerm ||
-              selectedTags.length > 0 ||
-              selectedCategories.length > 0) && (
-              <button
-                onClick={() => {
-                  setSearchTerm("");
-                  setSelectedTags([]);
-                  setSelectedCategory("All");
-                  setCurrentPage(1);
-                }}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-              >
-                Clear All Filters
-              </button>
-            )}
           </div>
-        ) : (
-          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
-            {currentIdeas.map((idea) => (
-              <IdeaCard
-                key={idea._id}
-                idea={{
-                  id: idea._id,
-                  title: idea.title,
-                  summary: idea.summary,
-                  category: idea.category || idea.topic,
-                  tags: idea.tags || [],
-                  upvotes: idea.upvotes,
-                  subreddit: idea.subreddit,
-                  originalUrl: idea.url,
-                  isFavorited: idea.isFavorited,
-                  createdAt: idea.createdAt || idea.postDate,
-                }}
-                onToggleFavorite={handleToggleFavorite}
-              />
-            ))}
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-hidden">
+            <Table>
+              <TableHeader className="bg-gray-50">
+                <TableRow className="border-b border-gray-200">
+                  <TableHead className="px-24 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/5">Business Idea</TableHead>
+                  <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">Source</TableHead>
+                  <TableHead className="px-12 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">Category</TableHead>
+                  <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12">Score</TableHead>
+                  <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">Date</TableHead>
+                  <TableHead className="px-12 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">Status</TableHead>
+                  <TableHead className="px-10 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody className="bg-white">
+                {currentIdeas.map((idea) => (
+                  <TableRow key={idea._id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <TableCell className="px-6 py-4 whitespace-normal text-sm text-gray-900 max-w-md">
+                      <Link 
+                        to={`/idea/${idea._id}`}
+                        className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                      >
+                        {idea.title || idea.summary}
+                      </Link>
+                      {idea.summary && (
+                        <p className="text-gray-600 text-sm mt-1 line-clamp-2">
+                          {idea.summary}
+                        </p>
+                      )}
+                    </TableCell>
+                    
+                    <TableCell className="px-4 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        {idea.url ? (
+                          <a 
+                            href={idea.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+                          >
+                            {idea.platform || 'reddit'}
+                          </a>
+                        ) : (
+                          <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded">
+                            {idea.platform || 'reddit'}
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
+                    
+                    <TableCell className="px-4 py-4 whitespace-nowrap">
+                      <Badge 
+                        variant="outline" 
+                        className={`${getCategoryColor(idea.category)} uppercase tracking-wide text-xs font-semibold`}
+                      >
+                        {idea.category || 'General'}
+                      </Badge>
+                    </TableCell>
+                    
+                    <TableCell className="px-4 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <span className="px-2 py-1 bg-blue-50 text-blue-700 text-sm font-medium rounded">
+                          {idea.rankScore?.toFixed(2) || 'N/A'}
+                        </span>
+                      </div>
+                    </TableCell>
+                    
+                    <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <div className="flex items-center">
+                        <Calendar className="h-4 w-4 mr-1.5 text-gray-400" />
+                        {new Date(idea.postDate).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </div>
+                    </TableCell>
+                    
+                    <TableCell className="px-4 py-4 whitespace-nowrap">
+                      <Badge className="bg-green-50 text-green-700 border border-green-100 text-xs font-medium">
+                        {idea.status}
+                      </Badge>
+                    </TableCell>
+                    
+                    <TableCell className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <Link to={`/idea/${idea._id}`}>
+                        <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800 hover:bg-blue-50">
+                          <ExternalLink className="h-4 w-4 mr-1.5" />
+                          View
+                        </Button>
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
-        )}
+          
+          {currentIdeas.length === 0 && (
+            <div className="text-center py-12">
+              <div className="text-slate-400 mb-2">No ideas found</div>
+              <p className="text-slate-600">Try adjusting your filters to see more results.</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
+
+        
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-center space-x-2">

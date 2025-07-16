@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Post = require("../models/PainPoint");
 const Favorite = require("../models/Favorite");
 const ideaService = require("../services/idea.service");
@@ -64,29 +65,68 @@ const getIdeas = async (req, res, next) => {
 
 const getIdea = async (req, res, next) => {
   try {
-    const idea = await Post.findById(req.params.id).populate("userId", "name");
+    const { id } = req.params;
+    
+    // Validate ID parameter
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid idea ID format',
+        error: 'INVALID_ID_FORMAT'
+      });
+    }
+
+    const idea = await Post.findById(id).populate("userId", "name");
+    
     if (!idea) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Idea not found" });
+      return res.status(404).json({ 
+        success: false, 
+        message: "Idea not found",
+        error: 'IDEA_NOT_FOUND'
+      });
     }
 
     let isFavorite = false;
-    if (req.user) {
-      const favorite = await Favorite.findOne({
-        user: req.user.id,
-        post: idea._id,
+    try {
+      if (req.user) {
+        const favorite = await Favorite.findOne({
+          user: req.user.id,
+          post: idea._id,
+        });
+        isFavorite = !!favorite;
+      }
+      
+      res.status(200).json({
+        success: true,
+        data: {
+          ...idea.toObject(),
+          isFavorite,
+        },
       });
-      isFavorite = !!favorite;
+    } catch (dbError) {
+      console.error('Error checking favorite status:', dbError);
+      // Still return the idea even if favorite check fails
+      res.status(200).json({
+        success: true,
+        data: {
+          ...idea.toObject(),
+          isFavorite: false,
+        },
+      });
     }
-    res.status(200).json({
-      success: true,
-      data: {
-        ...idea.toObject(),
-        isFavorite,
-      },
-    });
   } catch (error) {
+    console.error('Error in getIdea:', error);
+    
+    // Handle specific MongoDB errors
+    if (error.name === 'CastError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid ID format',
+        error: 'INVALID_ID_FORMAT'
+      });
+    }
+    
+    // Pass other errors to the error handler
     next(error);
   }
 };

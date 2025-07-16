@@ -99,7 +99,7 @@ const getUserInitials = (name) => {
                     <DropdownMenuItem asChild>
                       <Link to="/dashboard" className="flex items-center space-x-2 cursor-pointer">
                         <BarChart3 className="h-4 w-4" />
-                        <span>Dashboard</span>
+                        <span>Ideas</span>
                       </Link>
                     </DropdownMenuItem>
 
