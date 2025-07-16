@@ -26,9 +26,6 @@ const IdeaDetailPage = () => {
   const { id } = useParams();
   const [idea, setIdea] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [comments, setComments] = useState([]);
-  const [commentsLoading, setCommentsLoading] = useState(true);
-  const [commentsError, setCommentsError] = useState("");
   const [favoriteLoading, setFavoriteLoading] = useState(false);
 
   useEffect(() => {
@@ -45,32 +42,6 @@ const IdeaDetailPage = () => {
     };
 
     fetchIdea();
-  }, [id]);
-
-  // Fetch comments for the idea
-  useEffect(() => {
-    if (!id) return;
-    const fetchComments = async () => {
-      setCommentsLoading(true);
-      setCommentsError("");
-      try {
-        const response = await apiRequest.get(`/ideas/${id}/comments`);
-        setComments(response.data.data || []);
-      } catch (error) {
-        console.error(
-          "Failed to fetch comments:",
-          error,
-          error?.response?.data
-        );
-        setCommentsError(
-          "Failed to fetch comments: " +
-            (error?.response?.data?.message || error.message || "Unknown error")
-        );
-        setComments([]);
-      }
-      setCommentsLoading(false);
-    };
-    fetchComments();
   }, [id]);
 
   const handleToggleFavorite = async () => {
@@ -298,57 +269,6 @@ const IdeaDetailPage = () => {
               </button>
             </div>
           </div>
-        </div>
-        {/* Comments Section */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 mt-8 p-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Comments</h2>
-          {commentsLoading ? (
-            <div className="text-gray-600">Loading comments...</div>
-          ) : commentsError ? (
-            <div className="text-red-500">{commentsError}</div>
-          ) : comments.length === 0 ? (
-            <div className="text-gray-600">
-              No comments found for this post.
-            </div>
-          ) : (
-            <ul className="space-y-4">
-              {comments.map((comment, idx) => (
-                <li
-                  key={comment.id || comment._id || idx}
-                  className="transition-shadow hover:shadow-md bg-gray-50 rounded-xl p-5 flex gap-4 items-start"
-                >
-                  <div
-                    className="flex-shrink-0 h-12 w-12 rounded-full flex items-center justify-center font-bold text-lg"
-                    style={{
-                      background: `linear-gradient(135deg, #a5b4fc 0%, #c7d2fe 100%)`,
-                      color: '#4f46e5',
-                    }}
-                    aria-label={comment.author || 'Anonymous'}
-                  >
-                    {comment.author?.charAt(0)?.toUpperCase() || '?'}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-semibold text-gray-900">
-                        {comment.author || 'Anonymous'}
-                      </span>
-                      <span className="text-xs text-gray-400">
-                        {comment.createdAt
-                          ? new Date(comment.createdAt).toLocaleString(undefined, {
-                              dateStyle: 'medium',
-                              timeStyle: 'short',
-                            })
-                          : ''}
-                      </span>
-                    </div>
-                    <div className="text-gray-800 leading-relaxed whitespace-pre-line">
-                      {comment.text || comment.body}
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
         </div>
       </div>
     </div>

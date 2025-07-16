@@ -7,6 +7,7 @@ const summarizeRoutes = require("./routes/summarize.route");
 const authRoutes = require("./routes/auth.route");
 const ideaRoutes = require("./routes/idea.route");
 const favoriteRoutes = require("./routes/favorite.route");
+const painpointRoutes = require("./routes/painpoint.route");
 const cookieParser = require("cookie-parser");
 const passport = require("passport");
 require("./config/passport");
@@ -34,5 +35,6 @@ app.use("/api/twitter", twitterRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/ideas", ideaRoutes);
 app.use("/api/favorites", favoriteRoutes);
+app.use("/api/painpoints", painpointRoutes);
 
 module.exports = app;

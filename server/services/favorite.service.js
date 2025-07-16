@@ -1,5 +1,5 @@
 const Favorite = require('../models/Favorite')
-const Post = require('../models/Post');
+const Post = require('../models/PainPoint');
 
 async function addToFavorites(userId, postId) {
   const post = await Post.findById(postId);

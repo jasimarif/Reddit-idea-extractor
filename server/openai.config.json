@@ -1,0 +1,7 @@
+{
+  "painPointAssistantId": null,
+  "marketGapAssistantId": null,
+  "landingPageAssistantId": null,
+  "lastUpdated": null,
+  "note": "This file stores the OpenAI Assistant IDs for each agent type to avoid creating duplicates."
+}

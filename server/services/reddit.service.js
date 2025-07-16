@@ -1,5 +1,6 @@
 const axios = require("axios");
-const Post = require("../models/Post");
+const Post = require("../models/PainPoint");
+const Thread = require("../models/Threads");
 
 function filterPostsByKeywords(posts) {
   const triggerKeywords = [
@@ -120,9 +121,9 @@ async function fetchComments(postId, limit = 5) {
   return comments;
 }
 
-async function checkIfPostExists(redditPostId) {
+async function checkIfPostExists(threadId) {
   try {
-    const existingPost = await Post.findOne({ redditPostId });
+    const existingPost = await Post.findOne({ threadId });
     return !!existingPost;
   } catch (error) {
     console.error("Error checking if post exists:", error);
@@ -130,8 +131,39 @@ async function checkIfPostExists(redditPostId) {
   }
 }
 
+async function storeThread(post, comments) {
+  try {
+    const threadExists = await Thread.findOne({
+      platform: "reddit",
+      sourceId: post.id,
+    });
+
+    if (threadExists) return;
+
+    const newThread = new Thread({
+      platform: "reddit",
+      sourceId: post.id,
+      subreddit: post.subreddit || "", // optional
+      author: post.author,
+      title: post.title,
+      content: post.selftext,
+      comments: comments.map((c) => ({
+        author: c.author,
+        text: c.text,
+        createdAt: c.createdAt,
+      })),
+    });
+
+    await newThread.save();
+  } catch (err) {
+    console.error("Error saving thread to DB:", err);
+  }
+}
+
+
 module.exports = {
   fetchTopPosts,
   fetchComments,
   checkIfPostExists,
+  storeThread,
 };

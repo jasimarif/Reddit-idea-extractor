@@ -59,7 +59,7 @@ const getUserInitials = (name) => {
                   }`}
                 >
                   <Home className="h-4 w-4" />
-                  <span>Dashboard</span>
+                  <span>Ideas</span>
                 </Link>
 
                 <Link
@@ -73,40 +73,6 @@ const getUserInitials = (name) => {
                   <Heart className="h-4 w-4" />
                   <span>Favorites</span>
                 </Link>
-
-                <Link
-                  to="/fetch"
-                  className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    isActive('/fetch')
-                      ? 'bg-purple-100 text-purple-700'
-                      : 'text-gray-700 hover:text-purple-600 hover:bg-gray-50'
-                  }`}
-                >
-                  <BarChart3 className="h-4 w-4" />
-                  <span>Trigger fetch</span>
-                </Link>
-
-                
-                
-                {/* More Dropdown for secondary links */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger className="flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50 transition-colors">
-                    <span>More</span>
-                    <ChevronDown className="h-4 w-4" />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="bg-white w-48">
-                    <DropdownMenuItem asChild>
-                      <Link to="/pain-points"><Brain className="h-4 w-4 mr-2" /> Pain Points</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/market-gaps"><TrendingUp className="h-4 w-4 mr-2" /> Market Gaps</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/landing-pages"><Globe className="h-4 w-4 mr-2" /> Landing Pages</Link>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
                 <DropdownMenu>
                   <DropdownMenuTrigger className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50 rounded-md transition-colors">
                     <Avatar className="h-8 w-8">

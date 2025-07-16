@@ -1,4 +1,4 @@
-const Post = require("../models/Post");
+const Post = require("../models/PainPoint");
 const Favorite = require("../models/Favorite");
 const ideaService = require("../services/idea.service");
 

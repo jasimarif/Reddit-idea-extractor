@@ -27,6 +27,7 @@ Output a single valid JSON object using the following format:
   "summary": "A 3-5 sentence summary of the pain point, context, and possible opportunity.",
   "tags": ["keywords", "from", "post", "and", "comments"],
   "feasibility": "Low" | "Medium" | "High",
+  "quotes": ["Direct quotes from the post or comments that highlight the problem or need"],
   "marketPotential": 1-10,
   "subreddit": "the subreddit name, if known",
   "createdAt": "YYYY-MM-DD"

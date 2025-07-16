@@ -59,6 +59,10 @@ const BusinessIdeaSchema = new mongoose.Schema(
       enum: ["Health", "Wealth", "Relationships", "Other"],
       required: true,
     },
+    marketSize: { type: String },
+    feasibilityScore: { type: Number },
+    technicalComplexity: { type: String },
+    expectedROI: { type: String },
 
     // Scoring & viability
     overallScore: {
@@ -76,6 +80,9 @@ const BusinessIdeaSchema = new mongoose.Schema(
       type: String,
       required: false, // Optional; helps display filtering in UI
     },
+    targetAudience: { type: String },
+
+    categoryBestPotential: { type: Boolean },
 
     // Generation metadata
     generatedBy: {
@@ -106,3 +113,5 @@ const BusinessIdeaSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+module.exports = mongoose.model("BusinessIdea", BusinessIdeaSchema);

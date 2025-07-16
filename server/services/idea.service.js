@@ -1,6 +1,6 @@
 const redditService = require("./reddit.service");
 const openaiService = require("./summarize.service");
-const Post = require("../models/Post");
+const Post = require("../models/PainPoint");
 const { delay } = require("../utils/throttle");
 
 async function fetchAndSaveRedditIdeas(subreddit, limit = 5, userId = null) {
@@ -31,7 +31,12 @@ async function fetchAndSaveRedditIdeas(subreddit, limit = 5, userId = null) {
       const postData = {
         ...post,
         analysis,
-        redditPostId: post.id,
+        solutionInsight: analysis.solutionInsight,
+        feasibility: analysis.feasibility,
+        marketPotential: analysis.marketPotential,
+        threadId: post.id,
+        problem: analysis.problem,
+        idea: analysis.idea,
         isManuallyAdded: false,
         userId: userId,
         status: "processed",
@@ -52,7 +57,7 @@ async function fetchAndSaveRedditIdeas(subreddit, limit = 5, userId = null) {
       } catch (err) {
         if (err.code === 11000) {
           // Duplicate key error, skip and continue
-          console.log(`Duplicate post: ${postData.redditPostId}, skipping.`);
+          console.log(`Duplicate post: ${postData.threadId}, skipping.`);
         } else {
           throw err;
         }

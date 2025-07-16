@@ -3,7 +3,24 @@ const { summarizeWithOpenAI } = require("../services/summarize.service");
 const { delay } = require("../utils/throttle");
 
 async function summarizeReddit(req, res) {
-  const { subreddit = "startups", limit = 2 } = req.body;
+  
+  const subredditList = [
+      "personalfinance",
+      "startups",
+      "Entrepreneur",
+      "smallbusiness",
+      "freelance",
+      "consulting",
+      "overemployed",
+      "jobs",
+      "resumes",
+      "careerguidance",
+    ];
+
+    const subreddit =
+      req.query.subreddit ||
+      subredditList[Math.floor(Math.random() * subredditList.length)];
+    const limit = parseInt(req.query.limit) || 5;
 
   try {
     const posts = await fetchTopPosts(subreddit, limit);

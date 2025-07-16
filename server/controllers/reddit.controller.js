@@ -1,17 +1,37 @@
-const { fetchTopPosts, fetchComments } = require("../services/reddit.service");
+const { fetchTopPosts, fetchComments, storeThread } = require("../services/reddit.service");
 const { delay } = require("../utils/throttle");
 
+
 async function getRedditData(req, res) {
-  const { subreddit = "startups", limit = 3 } = req.body;
+   const subredditList = [
+      "personalfinance",
+      "startups",
+      "Entrepreneur",
+      "smallbusiness",
+      "freelance",
+      "consulting",
+      "overemployed",
+      "jobs",
+      "resumes",
+      "careerguidance",
+    ];
+
+    const subreddit =
+      req.query.subreddit ||
+      subredditList[Math.floor(Math.random() * subredditList.length)];
+    const limit = parseInt(req.query.limit) || 10;
 
   try {
     const posts = await fetchTopPosts(subreddit, limit);
-
     const result = [];
+
     for (const post of posts) {
-      await delay(1200)
+      await delay(1200);
 
       const comments = await fetchComments(post.id);
+
+      await storeThread(post, comments);
+
       result.push({
         id: post.id,
         postTitle: post.title,
@@ -23,6 +43,7 @@ async function getRedditData(req, res) {
         comments,
       });
     }
+
     res.json({ posts: result });
   } catch (error) {
     console.log(error);
