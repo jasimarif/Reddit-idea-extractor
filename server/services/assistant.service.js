@@ -186,10 +186,8 @@ async function getOrCreateAssistant(type) {
     // Try to retrieve existing assistant if ID is available
     if (existingId) {
       try {
-        console.log(`Retrieving existing ${type} assistant with ID: *******`);
         const assistant = await openai.beta.assistants.retrieve(existingId);
         cache[type] = assistant;
-        console.log(`Successfully retrieved ${type} assistant`);
         return assistant;
       } catch (error) {
         console.warn(`Failed to retrieve ${type} assistant (${existingId}), creating new one:`, error.message);
