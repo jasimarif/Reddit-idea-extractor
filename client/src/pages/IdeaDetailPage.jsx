@@ -136,7 +136,7 @@ const IdeaDetailPage = () => {
         <CardHeader className="bg-red-50">
           <CardTitle className="flex items-center space-x-2 text-red-700">
             <Target className="h-5 w-5" />
-            <span> Agent 1: Pain Point Analyzer</span>
+            <span> Pain Point Analyzer</span>
           </CardTitle>
           <p className="text-sm text-red-600">Extract and structure pain points, frustrations, and unmet needs</p>
         </CardHeader>
