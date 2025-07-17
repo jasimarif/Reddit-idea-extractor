@@ -12,7 +12,10 @@ const getIdeas = async (req, res, next) => {
     let query = {};
 
     if (req.query.category) {
-      query.category = req.query.category;
+      const categories = req.query.category.split(",").map(c => c.trim());
+      query.category = categories.length > 1
+        ? { $in: categories }
+        : categories[0];
     }
 
     if (req.query.tags) {
@@ -185,10 +188,15 @@ const getTags = async (req, res, next) => {
 const getCategories = async (req, res, next) => {
   try {
     const categories = await Post.distinct("category");
+    
+    const formattedCategories = categories
+      .filter(category => category && category.trim() !== "")
+      .sort()
+      .map(category => ({ name: category }));
 
     res.status(200).json({
       success: true,
-      data: categories.filter((category) => category && category.trim() !== "").sort(),
+      data: formattedCategories,
     });
   } catch (error) {
     next(error);

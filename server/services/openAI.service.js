@@ -39,17 +39,19 @@ async function getLandingPageAssistant() {
 }
 
 function buildPainPointExtractionPrompt(threadContent) {
-  return `Analyze the following thread content and extract specific pain points. 
+  return `Analyze the following thread content and extract specific pain points that could be converted into business ideas later. 
   Return a JSON object with a 'painPoints' array where each item has:
-  - title: A short title for the pain point
-  - summary: A brief summary
-  - description: Detailed description
-  - category: One of [Health, Wealth, Relationships, Technology, Education, Entertainment, Other]
+  - title: A short, idea-oriented title that clearly reflects the user's struggle and hints at a potential solution (e.g., "Helping Remote Teams Manage Asynchronous Work")
+  - summary: A brief summary which should contain painpoint keywords from the thread
+  - description: Detailed description which should contain painpoint keywords
+  - category: One of [Health, Wealth, Relationships, Technology, Education, Entertainment] or a more specific category
   - subCategory: More specific category
   - intensity: [Low, Medium, High]
   - urgency: [Low, Medium, High]
   - quotes: Array of supporting quotes
-  - keywords: Array of relevant keywords
+  - keywords: Array of relevant thread query keywords
+  - businessPotential: "High" | "Medium" | "Low"
+
 
   Thread content:
   ${JSON.stringify(threadContent, null, 2)}
@@ -67,7 +69,7 @@ async function extractPainPoints(threadContent) {
         {
           role: "system",
           content:
-            "You are an expert at analyzing user feedback and identifying pain points. Always respond with a valid JSON object containing a 'painPoints' array.",
+            "You are an expert at analyzing user feedback and identifying pain points to convert them into business ideas. Always respond with a valid JSON object containing a 'painPoints' array.",
         },
         {
           role: "user",

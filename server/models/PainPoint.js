@@ -11,23 +11,20 @@ const PainPointSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Thread",
     required: true,
-    index: true  // Keep the index for performance but remove unique constraint
+    index: true  
   },
   redditPostId: {
     type: String,
     index: {
       unique: true,
-      sparse: true  // This allows multiple null values
+      sparse: true 
     },
     default: null
   },
-  // Made these fields optional with defaults
   subreddit: { type: String, default: 'general' },
   topic: { type: String, default: 'General' },
   url: { type: String, default: '' },
   postDate: { type: Date, default: Date.now },
-  
-  // Other fields
   quotes: [String], // 3-5 direct user quotes
   frequency: { type: Number, default: 1 }, // Number of mentions
   title: { type: String, required: true, default: 'Untitled' },
@@ -54,11 +51,9 @@ const PainPointSchema = new mongoose.Schema({
   comments: { type: [CommentSchema], default: [] },
 }, { 
   timestamps: true,
-  // Ensure the collection name is explicitly set
   collection: 'painpoints'
 });
 
-// Static method to find similar pain points
 PainPointSchema.statics.findSimilar = async function(keywords, category, limit = 5) {
   if (!keywords || !keywords.length) return [];
   
@@ -75,27 +70,21 @@ PainPointSchema.statics.findSimilar = async function(keywords, category, limit =
     .lean();
 };
 
-// Instance method to calculate rank score
 PainPointSchema.methods.calculateRankScore = function() {
-  // Base score from upvotes
   let score = this.upvotes || 0;
   
-  // Bonus for having more quotes
   const quoteBonus = Math.min((this.quotes?.length || 0) * 2, 10);
   score += quoteBonus;
   
-  // Adjust based on intensity and urgency
   const intensityScores = { Low: 1, Medium: 2, High: 3 };
   score += intensityScores[this.intensity] || 1;
   score += intensityScores[this.urgency] || 1;
   
-  // Bonus for having a summary
   if (this.summary?.length > 0) score += 2;
   
-  // Bonus for having keywords
   if (this.keywords?.length > 0) score += this.keywords.length * 0.5;
   
-  this.rankScore = Math.round(score * 10) / 10; // Keep one decimal place
+  this.rankScore = Math.round(score * 10) / 10; 
   return this.rankScore;
 };
 

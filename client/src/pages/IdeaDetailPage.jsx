@@ -2,65 +2,91 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   ArrowLeft,
-  Heart,
-  ArrowUp,
   ExternalLink,
-  Calendar,
-  Tag,
+  Target,
+  TrendingUp,
+  Clock,
 } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
 import apiRequest from "../lib/apiRequest";
 
-const categoryColors = {
-  Health: "bg-green-100 text-green-800 border-green-200",
-  Wealth: "bg-yellow-100 text-yellow-800 border-yellow-200",
-  Relationships: "bg-pink-100 text-pink-800 border-pink-200",
-};
-
-const categoryEmojis = {
-  Health: "💊",
-  Wealth: "💸",
-  Relationships: "❤️",
-};
+  const getCategoryColor = (category) => {
+    switch (category.toLowerCase()) {
+      case 'health':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'wealth':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'relationships':
+        return 'bg-pink-100 text-pink-800 border-pink-200';
+      case 'other':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
+      default:
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+    }
+  };
 
 const IdeaDetailPage = () => {
   const { id } = useParams();
   const [idea, setIdea] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [favoriteLoading, setFavoriteLoading] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+
 
   useEffect(() => {
     const fetchIdea = async () => {
+      if (!id) {
+        console.log('No ID provided');
+        setIdea(null);
+        setIsLoading(false);
+        return;
+      }
+      
+      console.log('Fetching idea with ID:', id);
       setIsLoading(true);
       try {
+        // First fetch the idea
         const response = await apiRequest.get(`/ideas/${id}`);
-        setIdea(response.data.data);
+        console.log('API Response:', response);
+        
+        if (!response || !response.data) {
+          throw new Error('No response data received');
+        }
+        
+        if (!response.data.data) {
+          throw new Error('No idea data in response');
+        }
+        
+        const ideaData = response.data.data;
+        console.log('Idea data:', ideaData);
+        
+        setIdea(ideaData);
+        
+        // Then check if it's a favorite - handle the 404 gracefully
+        try {
+          console.log('Checking favorite status...');
+          const favoritesResponse = await apiRequest.get(`/favorites/check/${id}`);
+          console.log('Favorite status response:', favoritesResponse);
+          
+          if (favoritesResponse.data && typeof favoritesResponse.data.isFavorite === 'boolean') {
+            setIsFavorite(favoritesResponse.data.isFavorite);
+          }
+        } catch (favoriteError) {
+          console.warn('Could not check favorite status:', favoriteError);
+          // Set default to false if favorites endpoint is not available
+          setIsFavorite(false);
+        }
       } catch (error) {
         console.error("Failed to fetch idea:", error);
         setIdea(null);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     fetchIdea();
   }, [id]);
-
-  const handleToggleFavorite = async () => {
-    if (!idea || favoriteLoading) return;
-    setFavoriteLoading(true);
-    const newFavoriteStatus = !idea.isFavorited;
-    setIdea({ ...idea, isFavorited: newFavoriteStatus });
-    try {
-      if (newFavoriteStatus) {
-        await apiRequest.post(`/favorites/${idea._id}`);
-      } else {
-        await apiRequest.delete(`/favorites/${idea._id}`);
-      }
-    } catch (err) {
-      setIdea({ ...idea, isFavorited: !newFavoriteStatus });
-    } finally {
-      setFavoriteLoading(false);
-    }
-  };
 
   if (isLoading) {
     return (
@@ -84,7 +110,7 @@ const IdeaDetailPage = () => {
             to="/dashboard"
             className="text-purple-600 hover:text-purple-700 font-medium"
           >
-            Back to Dashboard
+            Back to Ideas
           </Link>
         </div>
       </div>
@@ -93,7 +119,7 @@ const IdeaDetailPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <div className="mb-6">
           <Link
@@ -101,175 +127,129 @@ const IdeaDetailPage = () => {
             className="inline-flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
-            <span>Back to Dashboard</span>
+            <span>Back to Ideas</span>
           </Link>
         </div>
 
-        {/* Main Content */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-          {/* Header */}
-          <div className="p-8 border-b border-gray-200">
-            <div className="flex items-start justify-between mb-6">
+        {/* Agent 1: Pain Point Analyzer - Updated with single pain point */}
+      <Card className="border-l-4 border-red-500">
+        <CardHeader className="bg-red-50">
+          <CardTitle className="flex items-center space-x-2 text-red-700">
+            <Target className="h-5 w-5" />
+            <span> Agent 1: Pain Point Analyzer</span>
+          </CardTitle>
+          <p className="text-sm text-red-600">Extract and structure pain points, frustrations, and unmet needs</p>
+        </CardHeader>
+        <CardContent className="space-y-6 pt-6">
+          
+          {/* Pain Point Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div className="p-4 border rounded-lg text-center bg-red-50">
+              <p className="text-xs text-red-600 mb-1">Pain Point</p>
+              <p className="text-lg font-bold text-red-700">{idea.title}</p>
+            </div>
+            <div className="p-4 border rounded-lg text-center">
+              <p className="text-xs text-slate-500 mb-1">Rank Score</p>
+              <p className="text-lg font-bold text-red-600">{idea.rankScore}</p>
+            </div>
+            <div className="p-4 border rounded-lg text-center">
+              <p className="text-xs text-slate-500 mb-1">Intensity</p>
+              <Badge variant={idea.intensity === 'High' ? 'destructive' : 'secondary'}>
+                {idea.intensity}
+              </Badge>
+            </div>
+            <div className="p-4 border rounded-lg text-center">
+              <p className="text-xs text-slate-500 mb-1">Urgency</p>
+              <Badge variant={idea.urgency === 'High' ? 'destructive' : 'secondary'}>
+                {idea.urgency}
+              </Badge>
+            </div>
+          </div>
+
+          {/* Main Pain Point Card */}
+          <div className="bg-gradient-to-br from-red-50 to-pink-50 border border-red-200 rounded-xl p-6 space-y-4">
+            <div className="flex items-start justify-between">
               <div className="flex items-center space-x-3">
-                {(() => {
-                  const category = idea.category || idea.topic || "Health";
-                  return (
-                    <>
-                      <span className="text-2xl">
-                        {categoryEmojis[category] || "💡"}
-                      </span>
-                      <span
-                        className={`px-3 py-1 rounded-full text-sm font-medium border ${
-                          categoryColors[category] ||
-                          "bg-gray-100 text-gray-700 border-gray-200"
-                        }`}
-                      >
-                        {category}
-                      </span>
-                    </>
-                  );
-                })()}
+                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                <h3 className="text-xl font-bold text-slate-900">{idea.title}</h3>
+                <Badge className={getCategoryColor(idea.category)} variant="outline">
+                  {idea.category}
+                </Badge>
               </div>
-              <button
-                onClick={handleToggleFavorite}
-                className={`p-3 rounded-full transition-colors ${
-                  idea.isFavorited
-                    ? "text-red-500 fill-red-500 hover:text-red-600 hover:fill-red-600 bg-red-50"
-                    : "text-gray-400 fill-none hover:text-red-500 hover:fill-red-500 hover:bg-red-50"
-                }`}
-                aria-label={
-                  idea.isFavorited ? "Unfavorite" : "Add to Favorites"
-                }
-                disabled={favoriteLoading}
-              >
-                {favoriteLoading ? (
-                  <svg
-                    className="animate-spin h-6 w-6 text-red-500"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      fill="none"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v8z"
-                    />
-                  </svg>
-                ) : (
-                  <Heart className={`h-6 w-6`} />
-                )}
-              </button>
+              <div className="flex items-center space-x-2 text-sm text-slate-500">
+                <TrendingUp className="h-4 w-4" />
+                <span>Score: {idea.rankScore}</span>
+              </div>
             </div>
 
-            <h1 className="text-3xl font-bold text-gray-900 mb-4 leading-tight">
-              {idea.title}
-            </h1>
+            <div className="space-y-3">
+              <div>
+                <p className="text-sm font-medium text-slate-700 mb-1">Summary</p>
+                <p className="text-slate-800 bg-white/60 p-3 rounded-lg border">{idea.summary}</p>
+              </div>
 
-            <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600">
-              <div className="flex items-center space-x-2">
-                <ArrowUp className="h-4 w-4" />
-                <span>{idea.upvotes} upvotes</span>
+              <div>
+                <p className="text-sm font-medium text-slate-700 mb-1">Topic</p>
+                <p className="text-slate-700 text-sm bg-white/60 p-3 rounded-lg border">{idea.topic}</p>
               </div>
-              <div className="flex items-center space-x-2">
-                <span>r/{idea.subreddit}</span>
+
+              {idea.quotes.length > 0 && (
+                <div>
+                  <p className="text-sm font-medium text-red-700 mb-2">User Quote</p>
+                  <blockquote className="bg-white border-l-4 border-red-400 p-4 rounded-r-lg italic text-slate-700">
+                    "{idea.quotes[0]}"
+                  </blockquote>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
+                <div className="text-center">
+                  <p className="text-xs text-slate-500">Subreddit</p>
+                  <p className="font-medium text-sm">r/{idea.subreddit}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-slate-500">Frequency</p>
+                  <p className="font-medium text-sm">{idea.frequency}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-slate-500">Solvability</p>
+                  <Badge variant={idea.potentialSolvability ? 'default' : 'outline'} className="text-xs">
+                    {idea.potentialSolvability ? 'Yes' : 'No'}
+                  </Badge>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-slate-500">Status</p>
+                  <Badge variant="outline" className="text-xs capitalize">
+                    {idea.status}
+                  </Badge>
+                </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <Calendar className="h-4 w-4" />
-                <span>{new Date(idea.createdAt).toLocaleDateString()}</span>
+
+              <div className="flex items-center justify-between pt-4 border-t border-red-200">
+                <div className="flex items-center space-x-1 text-xs text-slate-500">
+                  <Clock className="h-3 w-3" />
+                  <span>Posted: {new Date(idea.postDate).toLocaleDateString()}</span>
+                </div>
+                {/* <Button asChild variant="outline" size="sm">
+                  <a 
+                    href={idea.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center space-x-1 text-blue-600 hover:text-blue-800"
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                    <span>View Source</span>
+                  </a>
+                </Button> */}
               </div>
             </div>
           </div>
+        </CardContent>
+      </Card>
+      
 
-          {/* Content */}
-          <div className="p-8">
-            <div className="prose max-w-none">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                Summary
-              </h2>
-              <p className="text-gray-700 leading-relaxed mb-8">
-                {idea.summary}
-              </p>
-            </div>
 
-            {/* Tags */}
-            <div className="mb-8">
-              <div className="flex items-center space-x-2 mb-3">
-                <Tag className="h-4 w-4 text-gray-400" />
-                <span className="text-sm font-medium text-gray-700">Tags</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {idea.tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full hover:bg-gray-200 transition-colors"
-                  >
-                    #{tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <a
-                href={idea.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 !text-white font-medium rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 transform hover:scale-105"
-              >
-                <ExternalLink className="h-4 w-4" />
-                <span>View Original Post</span>
-              </a>
-
-              <button
-                onClick={handleToggleFavorite}
-                className={`flex items-center justify-center space-x-2 px-6 py-3 font-medium rounded-lg border transition-colors ${
-                  idea.isFavorited
-                    ? "bg-red-50 text-red-600 border-red-200 hover:bg-red-100 fill-red-500"
-                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 fill-none"
-                }`}
-                aria-label={
-                  idea.isFavorited ? "Unfavorite" : "Add to Favorites"
-                }
-                disabled={favoriteLoading}
-              >
-                {favoriteLoading ? (
-                  <svg
-                    className="animate-spin h-4 w-4 text-red-500"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      fill="none"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v8z"
-                    />
-                  </svg>
-                ) : (
-                  <Heart className={`h-4 w-4`} />
-                )}
-                <span>
-                  {idea.isFavorited ? "Unfavorite" : "Add to Favorites"}
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
+      
       </div>
     </div>
   );

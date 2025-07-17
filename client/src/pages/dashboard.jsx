@@ -18,7 +18,7 @@ const DashboardPage = () => {
   const [ideas, setIdeas] = useState([]);
   const [totalIdeas, setTotalIdeas] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("upvotes");
+  const [sortBy, setSortBy] = useState("rankScore");
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -87,7 +87,7 @@ const DashboardPage = () => {
       setFavoriteIds(ids);
 
       const params = {};
-      if (selectedCategories.length > 0) params.categories = selectedCategories.join(",");
+      if (selectedCategories.length > 0) params.category = selectedCategories.join(",");
       if (searchTerm) params.search = searchTerm;
       if (selectedTags.length > 0) params.tags = selectedTags.join(",");
       params.page = currentPage;
@@ -118,8 +118,8 @@ const DashboardPage = () => {
         isFavorited: idea && idea._id ? ids.includes(idea._id) : false,
       }));
 
-      if (sortBy === "upvotes") {
-        fetchedIdeas = [...fetchedIdeas].sort((a, b) => b.upvotes - a.upvotes);
+      if (sortBy === "rankScore") {
+        fetchedIdeas = [...fetchedIdeas].sort((a, b) => b.rankScore - a.rankScore);
       } else if (sortBy === "newest") {
         fetchedIdeas = [...fetchedIdeas].sort(
           (a, b) => new Date(b.postDate) - new Date(a.postDate)
@@ -148,39 +148,53 @@ const DashboardPage = () => {
     // eslint-disable-next-line
   }, [selectedCategories, searchTerm, sortBy, selectedTags, currentPage]);
 
-  // const handleToggleFavorite = async (ideaId) => {
-  //   const idea = ideas.find((idea) => idea._id === ideaId);
-  //   if (!idea) return;
+  const handleToggleFavorite = async (ideaId) => {
+    // Create a new array with the updated favorite status
+    const updatedIdeas = ideas.map(idea => 
+      idea._id === ideaId 
+        ? { ...idea, isFavorited: !idea.isFavorited } 
+        : idea
+    );
+    
+    // Save the previous state in case we need to revert
+    const prevIdeas = [...ideas];
+    
+    // Update the local state immediately for instant UI feedback
+    setIdeas(updatedIdeas);
+    
+    // Update the favoriteIds state to keep it in sync
+    const newFavoriteStatus = !prevIdeas.find(i => i._id === ideaId)?.isFavorited;
+    setFavoriteIds(prev => 
+      newFavoriteStatus 
+        ? [...prev, ideaId]
+        : prev.filter(id => id !== ideaId)
+    );
 
-  //   const newFavoriteStatus = !idea.isFavorited;
-  //   const prevIdeas = [...ideas];
-
-  //   // Optimistically update the UI
-  //   setIdeas((prev) =>
-  //     prev.map((idea) =>
-  //       idea._id === ideaId ? { ...idea, isFavorited: newFavoriteStatus } : idea
-  //     )
-  //   );
-
-  //   try {
-  //     if (newFavoriteStatus) {
-  //       await apiRequest.post(`/favorites/${ideaId}`);
-  //     } else {
-  //       await apiRequest.delete(`/favorites/${ideaId}`);
-  //     }
-  //     // Refetch favorites and ideas to ensure sync
-  //     const response = await apiRequest.get("/favorites", {
-  //       params: { page: 1, limit: 1000 },
-  //     });
-  //     const ids = (response.data.data || []).map((fav) => fav._id || fav.id);
-  //     setFavoriteIds(ids);
-  //     await fetchIdeas();
-  //   } catch (error) {
-  //     console.error("Error toggling favorite:", error);
-  //     // Revert UI if the request fails
-  //     setIdeas(prevIdeas);
-  //   }
-  // };
+    try {
+      // Make the API call to update the favorite status
+      if (newFavoriteStatus) {
+        await apiRequest.post(`/favorites/${ideaId}`);
+      } else {
+        await apiRequest.delete(`/favorites/${ideaId}`);
+      }
+      
+      // Refresh the ideas to ensure everything is in sync
+      await fetchIdeas();
+      
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+      // Revert to the previous state if there's an error
+      setIdeas(prevIdeas);
+      
+      // Also revert the favoriteIds state
+      const prevFavoriteStatus = prevIdeas.find(i => i._id === ideaId)?.isFavorited;
+      setFavoriteIds(prev => 
+        prevFavoriteStatus 
+          ? [...prev.filter(id => id !== ideaId), ideaId]
+          : prev.filter(id => id !== ideaId)
+      );
+    }
+  };
 
   const handleRefreshIdeas = async () => {
     await fetchIdeas();
@@ -215,16 +229,14 @@ const DashboardPage = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                Idea Dashboard
-              </h1>
-              <p className="mt-2 text-gray-600">
-                Discover and organize the best ideas from Reddit communities
-              </p>
-            </div>
+        <div className="mb-12 text-center">
+          <div className="max-w-3xl mx-auto">
+            <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Idea Dashboard
+            </h1>
+            <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+              Discover and organize the best ideas from Reddit communities
+            </p>
           </div>
         </div>
 
@@ -292,7 +304,7 @@ const DashboardPage = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-white"> 
-                  <SelectItem value="upvotes">Most Upvotes</SelectItem>
+                  <SelectItem value="rankScore">Most Rank Score</SelectItem>
                   <SelectItem value="newest">Newest</SelectItem>
                   <SelectItem value="oldest">Oldest</SelectItem>
                 </SelectContent>
@@ -306,24 +318,37 @@ const DashboardPage = () => {
           <div className="space-y-4">
             {/* Tag Filters */}
             <div className="flex items-start space-x-2">
-              {/* <span className="text-sm font-medium text-gray-700 mt-1">
-                Popular Tags:
-              </span> */}
-              <div className="flex flex-wrap gap-2">
-                {allTags.slice(0, 12).map((tag) => (
-                  <button
-                    key={tag}
-                    onClick={() => handleTagToggle(tag)}
-                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                      selectedTags.includes(tag)
-                        ? "bg-blue-100 text-blue-700 border border-blue-200"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200 border border-transparent"
-                    }`}
-                  >
-                    #{tag}
-                  </button>
-                ))}
-              </div>
+                <div className="space-y-3">
+                  <h3 className="text-sm font-medium text-gray-600">
+                    Popular Tags
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {allTags.slice(0, 12).map((tag) => (
+                      <button
+                        key={tag}
+                        onClick={() => handleTagToggle(tag)}
+                        className={`px-3 py-1.5 text-sm rounded-lg transition-all duration-200 flex items-center ${
+                          selectedTags.includes(tag)
+                            ? 'bg-gradient-to-br from-purple-600 to-blue-600 text-white shadow-md shadow-purple-100 transform scale-105'
+                            : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-purple-700 hover:shadow-sm'
+                        }`}
+                      >
+                        {tag}
+                        {selectedTags.includes(tag) && (
+                          <svg 
+                            className="w-3.5 h-3.5 ml-1.5" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24" 
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
             </div>
 
             {/* Category Filters */}
@@ -352,39 +377,60 @@ const DashboardPage = () => {
             {(selectedTags.length > 0 ||
               selectedCategories.length > 0 ||
               searchTerm) && (
-              <div className="flex items-center space-x-2 pt-2 border-t">
-                <span className="text-sm font-medium text-gray-700">
-                  Active filters:
-                </span>
-                {selectedCategories.map((cat) => (
-                  <Badge
-                    key={cat}
-                    variant="secondary"
-                    className="cursor-pointer"
-                    onClick={() => handleCategoryToggle(cat)}
-                  >
-                    {cat} ×
-                  </Badge>
-                ))}
-                {searchTerm && (
-                  <Badge
-                    variant="secondary"
-                    className="cursor-pointer"
-                    onClick={() => setSearchTerm("")}
-                  >
-                    "{searchTerm}" ×
-                  </Badge>
-                )}
-                {selectedTags.map((tag) => (
-                  <Badge
-                    key={tag}
-                    variant="secondary"
-                    className="cursor-pointer"
-                    onClick={() => handleTagToggle(tag)}
-                  >
-                    #{tag} ×
-                  </Badge>
-                ))}
+              <div className="mt-4">
+                <h4 className="text-sm font-medium text-gray-600 mb-2">Active Filters</h4>
+                <div className="flex flex-wrap gap-2">
+                  {selectedTags.map((tag) => (
+                    <div
+                      key={tag}
+                      className="flex items-center bg-gradient-to-br from-purple-50 to-blue-50 text-purple-700 text-sm px-3 py-1.5 rounded-lg border border-purple-100 shadow-sm"
+                    >
+                      {tag}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleTagToggle(tag);
+                        }}
+                        className="ml-2 text-purple-500 hover:text-purple-700 hover:bg-purple-100 rounded-full w-5 h-5 flex items-center justify-center transition-colors"
+                      >
+                        &times;
+                      </button>
+                    </div>
+                  ))}
+                  {selectedCategories.map((cat) => (
+                    <div
+                      key={cat}
+                      className="flex items-center bg-green-50 text-green-700 text-sm px-3 py-1.5 rounded-lg border border-green-100 shadow-sm"
+                    >
+                      {cat}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCategoryToggle(cat);
+                        }}
+                        className="ml-2 text-green-500 hover:text-green-700 hover:bg-green-100 rounded-full w-5 h-5 flex items-center justify-center transition-colors"
+                      >
+                        &times;
+                      </button>
+                    </div>
+                  ))}
+                  {searchTerm && (
+                    <div
+                      className="flex items-center bg-gray-50 text-gray-700 text-sm px-3 py-1.5 rounded-lg border border-gray-100 shadow-sm"
+                    >
+                      "{searchTerm}"
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSearchTerm("");
+                        }}
+                        className="ml-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full w-5 h-5 flex items-center justify-center transition-colors"
+                      >
+                        &times;
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -424,7 +470,8 @@ const DashboardPage = () => {
             <Table>
               <TableHeader className="bg-gray-50">
                 <TableRow className="border-b border-gray-200">
-                  <TableHead className="px-24 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/5">Business Idea</TableHead>
+                  <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12"></TableHead>
+                  <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/5">Business Idea</TableHead>
                   <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">Source</TableHead>
                   <TableHead className="px-12 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">Category</TableHead>
                   <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12">Score</TableHead>
@@ -436,6 +483,32 @@ const DashboardPage = () => {
               <TableBody className="bg-white">
                 {currentIdeas.map((idea) => (
                   <TableRow key={idea._id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <TableCell className="px-2 py-4 whitespace-nowrap">
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleToggleFavorite(idea._id);
+                        }}
+                        className="p-1.5 rounded-full hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                        title={idea.isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+                      >
+                        <svg
+                          className={`h-5 w-5 ${idea.isFavorited ? 'text-yellow-400 fill-current' : 'text-gray-300 hover:text-yellow-400'}`}
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill={idea.isFavorited ? 'currentColor' : 'none'}
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                          />
+                        </svg>
+                      </button>
+                    </TableCell>
                     <TableCell className="px-6 py-4 whitespace-normal text-sm text-gray-900 max-w-md">
                       <Link 
                         to={`/idea/${idea._id}`}
@@ -530,37 +603,76 @@ const DashboardPage = () => {
         
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-center space-x-2">
+          <div className="flex items-center justify-center space-x-1.5 mt-8">
             <button
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 flex items-center disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-200"
             >
+              <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
               Previous
             </button>
 
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`px-3 py-2 text-sm font-medium rounded-md ${
-                  currentPage === page
-                    ? "text-white bg-purple-600 border border-purple-600"
-                    : "text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
-                }`}
-              >
-                {page}
-              </button>
-            ))}
+            <div className="flex items-center space-x-1.5">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                // Show first page, last page, current page, and pages around current
+                let pageNum;
+                if (totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNum = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNum = totalPages - 4 + i;
+                } else {
+                  pageNum = currentPage - 2 + i;
+                }
+
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`w-10 h-10 flex items-center justify-center text-sm font-medium rounded-lg transition-all duration-200 ${
+                      currentPage === pageNum
+                        ? 'bg-gradient-to-br from-purple-600 to-blue-600 text-white shadow-md shadow-purple-100 transform scale-105'
+                        : 'text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-purple-700'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+              
+              {totalPages > 5 && currentPage < totalPages - 2 && (
+                <span className="px-2 text-gray-400">...</span>
+              )}
+              
+              {totalPages > 5 && currentPage < totalPages - 2 && (
+                <button
+                  onClick={() => setCurrentPage(totalPages)}
+                  className={`w-10 h-10 flex items-center justify-center text-sm font-medium rounded-lg transition-all duration-200 ${
+                    currentPage === totalPages
+                      ? 'bg-gradient-to-br from-purple-600 to-blue-600 text-white shadow-md shadow-purple-100 transform scale-105'
+                      : 'text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-purple-700'
+                  }`}
+                >
+                  {totalPages}
+                </button>
+              )}
+            </div>
 
             <button
               onClick={() =>
                 setCurrentPage((prev) => Math.min(prev + 1, totalPages))
               }
               disabled={currentPage === totalPages}
-              className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 flex items-center disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-200"
             >
               Next
+              <svg className="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
             </button>
           </div>
         )}

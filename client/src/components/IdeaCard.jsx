@@ -48,11 +48,11 @@ const IdeaCard = ({ idea, onToggleFavorite }) => {
             <span className={`px-2 py-1 rounded-full text-xs font-medium ${categoryColors[idea.category]}`}>
               {idea.category}
             </span>
-            {(isRecent() || idea.isNew) && (
+            {/* {(isRecent() || idea.isNew) && (
               <Badge variant="default" className="bg-blue-100 text-blue-800 text-xs">
                 {idea.isNew ? 'New' : 'Recent'}
               </Badge>
-            )}
+            )} */}
           </div>
 
           <div className="flex items-center space-x-1">
@@ -78,8 +78,8 @@ const IdeaCard = ({ idea, onToggleFavorite }) => {
                     onClick={() => handleShare('reddit')}
                     className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
                   >
-                    <ExternalLink className="h-4 w-4" />
-                    <span>Open Reddit</span>
+                    {/* <ExternalLink className="h-4 w-4" />
+                    <span>Open Reddit</span> */}
                   </button>
                 </div>
               )}
@@ -127,8 +127,7 @@ const IdeaCard = ({ idea, onToggleFavorite }) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4 text-sm text-gray-500">
             <div className="flex items-center space-x-1">
-              <ArrowUp className="h-4 w-4" />
-              <span>{idea.upvotes.toLocaleString()}</span>
+              {/* <span>{idea.upvotes.toLocaleString()}</span> */}
             </div>
             <span>r/{idea.subreddit}</span>
           </div>

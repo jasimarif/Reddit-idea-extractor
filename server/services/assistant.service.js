@@ -16,7 +16,7 @@ const assistantConfigs = {
     name: "Pain Point Analyzer Assistant",
     description: "Specialized assistant for extracting and analyzing pain points from social media content",
     model: "gpt-3.5-turbo",
-    instructions: `You are a specialized assistant for analyzing social media content to extract pain points.
+    instructions: `You are a specialized assistant for analyzing social media content to extract pain points that must be converted into business ideas.
         Your role is to:
         1. Identify genuine problems and frustrations in user posts
         2. Extract specific pain points with supporting quotes
@@ -62,7 +62,7 @@ const assistantConfigs = {
                     items: { type: "string" }
                   }
                 },
-                required: ["title", "summary", "category", "intensity"]
+                required: ["title", "summary", "category", "intensity", "description", "quotes"]
               }
             }
           },
@@ -132,6 +132,33 @@ const assistantConfigs = {
 
 const cache = {};
 
+// Initialize all assistants when the service starts
+async function initializeAssistants() {
+  try {
+    console.log('Initializing OpenAI assistants...');
+    
+    // Initialize all assistants in parallel
+    await Promise.all([
+      getOrCreateAssistant('painPoint').catch(err => 
+        logger.error('Failed to initialize painPoint assistant:', err)
+      ),
+      getOrCreateAssistant('marketGap').catch(err => 
+        logger.error('Failed to initialize marketGap assistant:', err)
+      ),
+      getOrCreateAssistant('landingPage').catch(err => 
+        logger.error('Failed to initialize landingPage assistant:', err)
+      )
+    ]);
+    
+    console.log('All assistants initialized successfully');
+  } catch (error) {
+    console.error('Error initializing assistants:', error);
+  }
+}
+
+// Call initialize on require
+initializeAssistants();
+
 async function loadConfig() {
   try {
     const data = await fs.readFile(CONFIG_FILE, "utf8");
@@ -146,26 +173,46 @@ async function saveConfig(config) {
 }
 
 async function getOrCreateAssistant(type) {
-  if (cache[type]) return cache[type];
-
-  const config = await loadConfig();
-  const existingId = config[`${type}AssistantId`];
-
-  if (existingId) {
-    try {
-      const assistant = await openai.beta.assistants.retrieve(existingId);
-      cache[type] = assistant;
-      return assistant;
-    } catch {
-      // Assistant not found, fall through
-    }
+  // Return from cache if available
+  if (cache[type]) {
+    console.log(`Using cached ${type} assistant`);
+    return cache[type];
   }
 
-  const assistant = await openai.beta.assistants.create(assistantConfigs[type]);
-  config[`${type}AssistantId`] = assistant.id;
-  await saveConfig(config);
-  cache[type] = assistant;
-  return assistant;
+  try {
+    const config = await loadConfig();
+    const existingId = config[`${type}AssistantId`];
+
+    // Try to retrieve existing assistant if ID is available
+    if (existingId) {
+      try {
+        console.log(`Retrieving existing ${type} assistant with ID: *******`);
+        const assistant = await openai.beta.assistants.retrieve(existingId);
+        cache[type] = assistant;
+        console.log(`Successfully retrieved ${type} assistant`);
+        return assistant;
+      } catch (error) {
+        console.warn(`Failed to retrieve ${type} assistant (${existingId}), creating new one:`, error.message);
+        // Continue to create a new assistant
+      }
+    }
+
+    // Create new assistant if none exists
+    console.log(`Creating new ${type} assistant...`);
+    const assistant = await openai.beta.assistants.create(assistantConfigs[type]);
+    
+    // Update config with new assistant ID
+    config[`${type}AssistantId`] = assistant.id;
+    config.lastUpdated = new Date().toISOString();
+    await saveConfig(config);
+    
+    cache[type] = assistant;
+    logger.info(`Successfully created ${type} assistant: ${assistant.id}`);
+    return assistant;
+  } catch (error) {
+    logger.error(`Error in getOrCreateAssistant for ${type}:`, error);
+    throw new Error(`Failed to get or create ${type} assistant: ${error.message}`);
+  }
 }
 
 async function updateAssistant(type, updates) {
@@ -198,5 +245,7 @@ module.exports = {
   getOrCreateLandingPageAssistant: () => getOrCreateAssistant("landingPage"),
   updateAssistant,
   listAllAssistants,
-  deleteAssistantByType
+  deleteAssistantByType,
+  // Export the initialize function for explicit initialization if needed
+  initializeAssistants
 };

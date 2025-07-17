@@ -62,14 +62,12 @@ const getPainPoints = async (req, res) => {
       search
     } = req.query;
 
-    // Build query
     const query = {};
     
-    // Handle status filter (include null values if 'all' or no status specified)
     if (status && status !== 'all') {
       query.$or = [
         { status: status },
-        { status: { $exists: false } }  // Include documents where status doesn't exist
+        { status: { $exists: false } }  
       ];
     }
     
@@ -77,12 +75,10 @@ const getPainPoints = async (req, res) => {
     if (intensity && intensity !== 'all') query.intensity = intensity;
     if (minScore > 0) query.rankScore = { $gte: parseInt(minScore) };
     
-    // If no status filter is applied, include all documents
     if (!status || status === 'all') {
       delete query.status;
     }
     
-    // Add text search if search term is provided
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: 'i' } },
@@ -91,7 +87,6 @@ const getPainPoints = async (req, res) => {
       ];
     }
 
-    // Validate sort field
     const allowedSortFields = ['rankScore', 'createdAt', 'frequency', 'upvotes'];
     const sortField = allowedSortFields.includes(sortBy) ? sortBy : 'rankScore';
     const sortOrder = order === 'asc' ? 1 : -1;

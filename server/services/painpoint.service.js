@@ -31,6 +31,8 @@ const findSimilarPainPoint = async (ppData) => {
 };
 
 const extractPainPointsFromThread = async (thread) => {
+  logger.debug(`Extracting pain points from thread: ${thread._id} - ${thread.title?.substring(0, 50)}...`);
+  
   const threadContent = {
     title: thread.title,
     content: thread.content || '',
@@ -41,13 +43,13 @@ const extractPainPointsFromThread = async (thread) => {
     }))
   };
 
-  const extracted = await openaiService.extractPainPoints(threadContent);
-  
-  return extracted.map((pp, index) => {
-    // Ensure we have all required fields with defaults
-    const painPoint = {
+  try {
+    logger.debug('Calling OpenAI service to extract pain points...');
+    const extracted = await openaiService.extractPainPoints(threadContent);
+    logger.debug(`Extracted ${extracted.length} pain points from thread ${thread._id}`);
+    
+    return extracted.map((pp, index) => ({
       // Generate a unique ID for this pain point if sourceId is not available
-      // Generate a truly unique ID using timestamp and random string
       redditPostId: thread.sourceId ? 
         `${thread.sourceId}-${Date.now()}-${Math.random().toString(36).substring(2, 8)}` : 
         `generated-${thread._id}-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
@@ -75,10 +77,11 @@ const extractPainPointsFromThread = async (thread) => {
       // Ensure arrays are properly initialized
       tags: Array.isArray(pp.tags) ? pp.tags : [],
       comments: []
-    };
-    
-    return painPoint;
-  });
+    }));
+  } catch (error) {
+    logger.error(`Error extracting pain points from thread ${thread._id}:`, error);
+    throw error;
+  }
 };
 
 const savePainPoints = async (painPointsData, thread) => {
@@ -107,26 +110,44 @@ const savePainPoints = async (painPointsData, thread) => {
 
 const analyzePainPoints = async (threadIds) => {
   const results = [];
+  logger.info(`Starting pain point analysis for ${threadIds.length} thread(s)`);
 
   for (const threadId of threadIds) {
+    const startTime = Date.now();
+    logger.debug(`Processing thread ${threadId}...`);
+    
     try {
       const thread = await Thread.findById(threadId);
-      if (!thread || thread.painPointsExtracted) {
-        console.log(`Skipping thread ${threadId}`);
+      if (!thread) {
+        const errorMsg = `Thread ${threadId} not found`;
+        logger.warn(errorMsg);
+        results.push({ threadId, status: 'error', error: errorMsg });
         continue;
       }
 
-      const extracted = await extractPainPointsFromThread(thread);
-      const saved = await savePainPoints(extracted, thread);
-
-      thread.painPointsExtracted = true;
-      thread.isProcessed = true;
-      await thread.save();
-
-      results.push({ threadId, painPoints: saved, status: 'success' });
+      logger.debug(`Found thread: ${thread.title?.substring(0, 50)}...`);
+      const painPoints = await extractPainPointsFromThread(thread);
+      logger.debug(`Saving ${painPoints.length} pain points for thread ${threadId}`);
+      
+      const savedPoints = await savePainPoints(painPoints, thread);
+      
+      results.push({
+        threadId,
+        status: 'success',
+        painPoints: savedPoints
+      });
+      
+      const duration = Date.now() - startTime;
+      logger.info(`Processed thread ${threadId} in ${duration}ms with ${savedPoints.length} pain points`);
     } catch (error) {
-      console.error(`Thread ${threadId} error:`, error.message);
-      results.push({ threadId, status: 'error', error: error.message });
+      const errorMsg = `Error processing thread ${threadId}: ${error.message}`;
+      logger.error(errorMsg, { error });
+      
+      results.push({
+        threadId,
+        status: 'error',
+        error: error.message
+      });
     }
   }
 
