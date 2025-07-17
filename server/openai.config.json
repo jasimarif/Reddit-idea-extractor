@@ -1,7 +1,7 @@
 {
-  "painPointAssistantId": "asst_n5NSb7ArhWGtfD5TJ7NkIqKT",
-  "marketGapAssistantId": "asst_6sWVX58PRE0cDpy1WM5bnFdh",
-  "landingPageAssistantId": "asst_pqrCKl2Xax5tf9jtjdkITYGB",
+  "painPointAssistantId": "ass_key",
+  "marketGapAssistantId": "ass_key",
+  "landingPageAssistantId": "ass_key",
   "lastUpdated": "2025-07-17T11:55:01.149Z",
   "note": "This file stores the OpenAI Assistant IDs for each agent type to avoid creating duplicates."
 }
