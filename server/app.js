@@ -37,6 +37,6 @@ app.use("/api/auth", authRoutes);
 app.use("/api/ideas", ideaRoutes);
 app.use("/api/favorites", favoriteRoutes);
 app.use("/api/painpoints", painpointRoutes);
-app.use("/api/market-gap", marketGapRoutes);
+app.use("/api/marketgaps", marketGapRoutes);
 
 module.exports = app;

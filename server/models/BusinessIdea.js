@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const mongoosePaginate = require('mongoose-paginate-v2');
 
 const BusinessIdeaSchema = new mongoose.Schema(
   {
@@ -108,10 +109,19 @@ const BusinessIdeaSchema = new mongoose.Schema(
       default: false,
     },
     tags: [String],
+    differentiator: {
+      type: String,
+      default: '',
+    },
+    useCase: {
+      type: String,
+      default: '',
+    },
   },
   {
     timestamps: true,
   }
 );
-
+// Add pagination plugin to the schema
+BusinessIdeaSchema.plugin(mongoosePaginate);
 module.exports = mongoose.model("BusinessIdea", BusinessIdeaSchema);

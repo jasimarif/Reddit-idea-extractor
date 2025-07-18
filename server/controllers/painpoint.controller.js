@@ -273,12 +273,27 @@ const validatePainPoint = async (req, res) => {
   }
 };
 
+const getPainPointsByThreadId = async (req, res) => {
+  try {
+    const { threadId } = req.params;
+
+    const painPoints = await PainPoint.find({ threadId })
+      .populate('threadId', 'title url platform author score comments');
+
+    res.json({ success: true, data: { painPoints } });
+  } catch (error) {
+    console.error('getPainPointsByThreadId:', error.message);
+    res.status(500).json({ error: 'Failed to get pain points by thread ID', message: error.message });
+  }
+};
+
 module.exports = {
   analyzePainPoints,
   getPainPoints,
   searchPainPoints,
+  getPainPointAnalytics,
   getPainPointById,
   updatePainPointStatus,
-  getPainPointAnalytics,
-  validatePainPoint
+  validatePainPoint,
+  getPainPointsByThreadId
 };

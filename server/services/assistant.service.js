@@ -140,13 +140,13 @@ async function initializeAssistants() {
     // Initialize all assistants in parallel
     await Promise.all([
       getOrCreateAssistant('painPoint').catch(err => 
-        logger.error('Failed to initialize painPoint assistant:', err)
+        console.error('Failed to initialize painPoint assistant:', err)
       ),
       getOrCreateAssistant('marketGap').catch(err => 
-        logger.error('Failed to initialize marketGap assistant:', err)
+        console.error('Failed to initialize marketGap assistant:', err)
       ),
       getOrCreateAssistant('landingPage').catch(err => 
-        logger.error('Failed to initialize landingPage assistant:', err)
+        console.error('Failed to initialize landingPage assistant:', err)
       )
     ]);
     

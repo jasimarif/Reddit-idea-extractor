@@ -31,7 +31,7 @@ const findSimilarPainPoint = async (ppData) => {
 };
 
 const extractPainPointsFromThread = async (thread) => {
-  logger.debug(`Extracting pain points from thread: ${thread._id} - ${thread.title?.substring(0, 50)}...`);
+  console.debug(`Extracting pain points from thread: ${thread._id} - ${thread.title?.substring(0, 50)}...`);
   
   const threadContent = {
     title: thread.title,
@@ -44,9 +44,9 @@ const extractPainPointsFromThread = async (thread) => {
   };
 
   try {
-    logger.debug('Calling OpenAI service to extract pain points...');
+    console.debug('Calling OpenAI service to extract pain points...');
     const extracted = await openaiService.extractPainPoints(threadContent);
-    logger.debug(`Extracted ${extracted.length} pain points from thread ${thread._id}`);
+    console.debug(`Extracted ${extracted.length} pain points from thread ${thread._id}`);
     
     return extracted.map((pp, index) => ({
       // Generate a unique ID for this pain point if sourceId is not available
@@ -79,7 +79,7 @@ const extractPainPointsFromThread = async (thread) => {
       comments: []
     }));
   } catch (error) {
-    logger.error(`Error extracting pain points from thread ${thread._id}:`, error);
+    console.error(`Error extracting pain points from thread ${thread._id}:`, error);
     throw error;
   }
 };
@@ -110,24 +110,24 @@ const savePainPoints = async (painPointsData, thread) => {
 
 const analyzePainPoints = async (threadIds) => {
   const results = [];
-  logger.info(`Starting pain point analysis for ${threadIds.length} thread(s)`);
+  console.info(`Starting pain point analysis for ${threadIds.length} thread(s)`);
 
   for (const threadId of threadIds) {
     const startTime = Date.now();
-    logger.debug(`Processing thread ${threadId}...`);
+    console.debug(`Processing thread ${threadId}...`);
     
     try {
       const thread = await Thread.findById(threadId);
       if (!thread) {
         const errorMsg = `Thread ${threadId} not found`;
-        logger.warn(errorMsg);
+        console.warn(errorMsg);
         results.push({ threadId, status: 'error', error: errorMsg });
         continue;
       }
 
-      logger.debug(`Found thread: ${thread.title?.substring(0, 50)}...`);
+      console.debug(`Found thread: ${thread.title?.substring(0, 50)}...`);
       const painPoints = await extractPainPointsFromThread(thread);
-      logger.debug(`Saving ${painPoints.length} pain points for thread ${threadId}`);
+      console.debug(`Saving ${painPoints.length} pain points for thread ${threadId}`);
       
       const savedPoints = await savePainPoints(painPoints, thread);
       
@@ -138,10 +138,10 @@ const analyzePainPoints = async (threadIds) => {
       });
       
       const duration = Date.now() - startTime;
-      logger.info(`Processed thread ${threadId} in ${duration}ms with ${savedPoints.length} pain points`);
+      console.info(`Processed thread ${threadId} in ${duration}ms with ${savedPoints.length} pain points`);
     } catch (error) {
       const errorMsg = `Error processing thread ${threadId}: ${error.message}`;
-      logger.error(errorMsg, { error });
+      console.error(errorMsg, { error });
       
       results.push({
         threadId,
@@ -240,6 +240,43 @@ const getPainPointAnalytics = async () => {
   };
 };
 
+const getPainPointsByThreadId = async (threadId, limit = 5) => {
+  try {
+    if (!threadId) {
+      throw new Error('Thread ID is required');
+    }
+
+    // First, get all pain points for the thread
+    const painPoints = await PainPoint.find({ threadId })
+      .sort({ rankScore: -1 })
+      .lean();
+
+    // Remove duplicates based on summary text (case insensitive)
+    const uniquePainPoints = [];
+    const seenSummaries = new Set();
+    
+    for (const point of painPoints) {
+      if (!point.summary) continue; // Skip if no summary
+      
+      const normalizedSummary = point.summary.trim().toLowerCase();
+      
+      // If we haven't seen this summary before, add it to the results
+      if (!seenSummaries.has(normalizedSummary)) {
+        seenSummaries.add(normalizedSummary);
+        uniquePainPoints.push(point);
+        
+        // Stop if we've reached the limit
+        if (uniquePainPoints.length >= limit) break;
+      }
+    }
+
+    return uniquePainPoints;
+  } catch (error) {
+    console.error('getPainPointsByThreadId error:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   analyzePainPoints,
   extractPainPointsFromThread,
@@ -250,5 +287,6 @@ module.exports = {
   getTopPainPoints,
   searchPainPoints,
   updatePainPointStatus,
-  getPainPointAnalytics
+  getPainPointAnalytics,
+  getPainPointsByThreadId,
 };

@@ -6,7 +6,8 @@ const {
     getPainPointAnalytics,
     getPainPointById,
     updatePainPointStatus,
-    validatePainPoint
+    validatePainPoint,
+    getPainPointsByThreadId
 } = require('../controllers/painpoint.controller');
 
 const router = express.Router();
@@ -18,6 +19,8 @@ router.get('/pain-points', getPainPoints);
 router.get('/pain-points/search', searchPainPoints);
 
 router.get('/pain-points/analytics', getPainPointAnalytics);
+
+router.get('/pain-points/thread/:threadId', getPainPointsByThreadId);
 
 router.get('/pain-points/:id', getPainPointById);
 
