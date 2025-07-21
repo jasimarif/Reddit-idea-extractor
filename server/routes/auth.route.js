@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
-const { signUp, login, getMe, logout } = require('../controllers/auth.controller');
+const { signUp, login, getMe, logout, updateProfile, changePassword, deleteAccount } = require('../controllers/auth.controller');
 const { protect } = require('../middlewares/auth.middleware'); 
 
 router.get("/google", passport.authenticate("google", {scope: ["profile", "email"]}))
@@ -24,6 +24,9 @@ router.get(
 router.post('/signup', signUp);
 router.post('/login', login);
 router.get('/me', protect, getMe);
+router.put('/me', protect, updateProfile);
+router.post('/change-password', protect, changePassword);
+router.delete('/me', protect, deleteAccount);
 router.post('/logout', logout);
 
 module.exports = router;

@@ -9,6 +9,7 @@ const ideaRoutes = require("./routes/idea.route");
 const favoriteRoutes = require("./routes/favorite.route");
 const painpointRoutes = require("./routes/painpoint.route");
 const marketGapRoutes = require("./routes/marketGap.route");
+const landingPageRoutes = require("./routes/landingPage.route");
 const cookieParser = require("cookie-parser");
 const passport = require("passport");
 require("./config/passport");
@@ -38,5 +39,6 @@ app.use("/api/ideas", ideaRoutes);
 app.use("/api/favorites", favoriteRoutes);
 app.use("/api/painpoints", painpointRoutes);
 app.use("/api/marketgaps", marketGapRoutes);
+app.use("/api/landingpage", landingPageRoutes);
 
 module.exports = app;

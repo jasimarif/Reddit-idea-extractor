@@ -4,6 +4,7 @@ const {
   getCurrentUser,
 } = require("../services/auth.service");
 const { sendTokenResponse } = require("../utils/jwt");
+const User = require("../models/User");
 
 const signUp = async (req, res, next) => {
   try {
@@ -66,4 +67,48 @@ const logout = (req, res, next) => {
   });
 };
 
-module.exports = { signUp, login, getMe, logout };
+const updateProfile = async (req, res, next) => {
+  try {
+    const { name, email } = req.body;
+    if (!name || !email) {
+      return res.status(400).json({ success: false, message: "Name and email are required" });
+    }
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { name, email },
+      { new: true, runValidators: true }
+    );
+    res.status(200).json({ success: true, user: { id: user._id, name: user.name, email: user.email, createdAt: user.createdAt } });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+const changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ success: false, message: "Current and new password are required" });
+    }
+    const user = await User.findById(req.user.id).select('+password');
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) return res.status(400).json({ success: false, message: "Current password is incorrect" });
+    user.password = newPassword;
+    await user.save();
+    res.status(200).json({ success: true, message: "Password updated successfully" });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+const deleteAccount = async (req, res, next) => {
+  try {
+    await User.findByIdAndDelete(req.user.id);
+    res.status(200).json({ success: true, message: "Account deleted successfully" });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = { signUp, login, getMe, logout, updateProfile, changePassword, deleteAccount };
