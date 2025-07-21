@@ -133,6 +133,11 @@ const getBusinessIdeas = async (req, res) => {
         implementationSteps: idea.implementationSteps,
         potentialChallenges: idea.potentialChallenges,
         successMetrics: idea.successMetrics,
+        differentiator: idea.differentiator,
+        useCase: idea.useCase,
+        keywords: idea.keywords,
+        score: idea.score,
+        rankingReason: idea.rankingReason,
         createdAt: idea.createdAt,
         updatedAt: idea.updatedAt
       }));
@@ -277,9 +282,52 @@ const getBusinessIdea = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Get all business ideas for a specific painpoint id
+ * @route   GET /api/market-gap/ideas/by-painpoint/:painPointId
+ * @access  Public
+ */
+const getBusinessIdeasByPainPointId = async (req, res) => {
+  try {
+    const { painPointId } = req.params;
+    const ideas = await marketGapService.getBusinessIdeasByPainPointId(painPointId);
+    const transformedIdeas = ideas.map(idea => ({
+      id: idea._id,
+      title: idea.ideaName,
+      description: idea.solutionOverview,
+      problemStatement: idea.problemStatement,
+      targetAudience: idea.targetAudience,
+      businessModel: idea.businessModel,
+      revenueStreams: idea.revenueStreams,
+      keyFeatures: idea.keyFeatures,
+      implementationSteps: idea.implementationSteps,
+      potentialChallenges: idea.potentialChallenges,
+      successMetrics: idea.successMetrics,
+      differentiator: idea.differentiator || '',
+      useCase: idea.useCase || '',
+      keywords: Array.isArray(idea.keywords) ? idea.keywords : [],
+      score: typeof idea.score === 'number' ? idea.score : 5.0,
+      rankingReason: idea.rankingReason,
+      createdAt: idea.createdAt,
+      updatedAt: idea.updatedAt
+    }));
+    res.status(200).json({
+      success: true,
+      message: 'Business ideas for painpoint retrieved successfully',
+      data: transformedIdeas
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to fetch business ideas by painpoint',
+      data: null
+    });
+  }
+};
 
 module.exports = {
   generateIdeas,
   getBusinessIdeas,
   getBusinessIdea,
+  getBusinessIdeasByPainPointId,
 };

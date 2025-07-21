@@ -173,18 +173,11 @@ const IdeaDetailPage = () => {
   useEffect(() => {
     const fetchBusinessIdeas = async () => {
       if (!idea?._id) return;
-      
       setIsGeneratingIdeas(true);
       try {
         console.log('Fetching business ideas for pain point ID:', idea._id);
-        const response = await apiRequest.post('/marketgaps/generate-ideas', {
-          painPointId: idea._id,
-          // Include related pain points IDs if needed
-          painPointIds: [idea._id, ...relatedPainPoints.map(p => p._id)]
-        });
-        
+        const response = await apiRequest.get(`/marketgaps/ideas/by-painpoint/${idea._id}`);
         console.log('Business ideas response:', response.data);
-        
         if (response.data?.success) {
           setBusinessIdeas(Array.isArray(response.data.data) ? response.data.data : []);
         }
@@ -195,9 +188,8 @@ const IdeaDetailPage = () => {
         setIsGeneratingIdeas(false);
       }
     };
-    
     fetchBusinessIdeas();
-  }, [idea?._id, relatedPainPoints]); // Re-run when idea._id or relatedPainPoints change
+  }, [idea?._id]); 
 
   if (isLoading) {
     return (
@@ -397,7 +389,7 @@ const IdeaDetailPage = () => {
             {isGeneratingIdeas ? (
               <div className="flex flex-col items-center justify-center py-12">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mb-4"></div>
-                <p className="text-gray-600">Generating innovative business ideas...</p>
+                <p className="text-gray-600">Loading innovative business ideas...</p>
               </div>
             ) : businessIdeas.length > 0 ? (
               <div className="space-y-8">
@@ -494,7 +486,7 @@ const IdeaDetailPage = () => {
             ) : (
               <div className="flex flex-col items-center justify-center py-12">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mb-4"></div>
-                <p className="text-gray-600">Generating business ideas. Please wait...</p>
+                <p className="text-gray-600">Loading business ideas. Please wait...</p>
               </div>
             )}
           </CardContent>

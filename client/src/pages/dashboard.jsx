@@ -317,7 +317,7 @@ const DashboardPage = () => {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
           <div className="space-y-4">
             {/* Tag Filters */}
-            <div className="flex items-start space-x-2">
+            {/* <div className="flex items-start space-x-2">
                 <div className="space-y-3">
                   <h3 className="text-sm font-medium text-gray-600">
                     Popular Tags
@@ -349,7 +349,7 @@ const DashboardPage = () => {
                     ))}
                   </div>
                 </div>
-            </div>
+            </div> */}
 
             {/* Category Filters */}
             <div className="flex items-start space-x-2 mt-4">

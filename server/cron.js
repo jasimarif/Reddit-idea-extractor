@@ -1,6 +1,7 @@
 const cron = require('node-cron');
 const ideaService = require('./services/idea.service');
 const painpointService = require('./services/painpoint.service');
+const marketGapService = require('./services/marketGap.service');
 
 const startCronJobs = () => {
   console.log('Starting cron jobs...');
@@ -8,19 +9,12 @@ const startCronJobs = () => {
   const { fetchTopPosts, fetchComments, storeThread } = require('./services/reddit.service');
   const Thread = require('./models/Threads');
   
-  cron.schedule('0 6 * * *', async () => {
+  cron.schedule('13 16 * * *', async () => {
     console.log('Running daily Reddit idea fetch...');
     const subredditList = [
-      "personalfinance",
       "startups",
       "Entrepreneur",
       "smallbusiness",
-      "freelance",
-      "consulting",
-      "overemployed",
-      "jobs",
-      "resumes",
-      "careerguidance",
     ];
     
     const threadIds = [];
@@ -108,6 +102,15 @@ const startCronJobs = () => {
                 const saved = await painpointService.savePainPoints(extracted, thread);
                 console.log(`Successfully saved ${saved.length} pain points`);
                 
+                // === Generate business ideas for these pain points ===
+                if (saved.length > 0) {
+                  try {
+                    const ideas = await marketGapService.generateBusinessIdeas(saved);
+                    console.log(`Generated and saved ${ideas.length} business ideas for thread ${threadId}`);
+                  } catch (ideaError) {
+                    console.error('Error generating business ideas:', ideaError);
+                  }
+                }
                 thread.painPointsExtracted = true;
                 thread.isProcessed = true;
                 await thread.save();
@@ -183,7 +186,7 @@ const startCronJobs = () => {
       console.error('Error in daily Reddit idea fetch:', error);
     }
   }, {
-    timezone: 'America/New_York'
+    timezone: 'Asia/Karachi'
   });
 
   cron.schedule('0 0 * * 0', async () => {
@@ -203,7 +206,7 @@ const startCronJobs = () => {
       console.error('Error in weekly cleanup:', error);
     }
   }, {
-    timezone: 'America/New_York'
+    timezone: 'Asia/Karachi'
   });
 
   console.log('Cron jobs scheduled successfully');

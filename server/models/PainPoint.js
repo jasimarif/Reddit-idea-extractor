@@ -66,8 +66,7 @@ PainPointSchema.statics.findSimilar = async function(keywords, category, limit =
 
   return this.find(query)
     .sort({ rankScore: -1, upvotes: -1 })
-    .limit(limit)
-    .lean();
+    .limit(limit);
 };
 
 PainPointSchema.methods.calculateRankScore = function() {

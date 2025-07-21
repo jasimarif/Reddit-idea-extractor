@@ -1,5 +1,7 @@
 const BusinessIdea = require('../models/BusinessIdea');
 const { generateBusinessIdeas: generateIdeasWithAI } = require('./openAI.service');
+const langchain = require('./langchain.service');
+const { buildBusinessIdeaPrompt } = require('./promptUtils');
 
 async function generateBusinessIdeas(painPoints) {
   console.log('Starting business idea generation with pain points:', JSON.stringify(painPoints, null, 2));
@@ -26,17 +28,24 @@ async function generateBusinessIdeas(painPoints) {
     console.log('Formatted pain points for AI:', JSON.stringify(formattedPainPoints, null, 2));
     
     try {
-      // Generate ideas using the enhanced AI service
-      const aiIdeas = await generateIdeasWithAI(formattedPainPoints);
-      console.log('AI generated ideas:', JSON.stringify(aiIdeas, null, 2));
-
-      // Process and save the generated ideas
+      const agent = langchain.getMarketGapAgent();
+      const prompt = buildBusinessIdeaPrompt(formattedPainPoints);
+      const response = await agent.call({ input: prompt });
+      let aiIdeas;
+      try {
+        aiIdeas = typeof response.response === 'string' ? JSON.parse(response.response) : response.response;
+      } catch (e) {
+        console.error('Failed to parse OpenAI response:', response.response);
+        throw new Error('Invalid JSON response from OpenAI agent');
+      }
+      const ideasArr = Array.isArray(aiIdeas) ? aiIdeas : (aiIdeas.businessIdeas || aiIdeas.ideas || []);
+      if (!Array.isArray(ideasArr) || ideasArr.length === 0) throw new Error('No business ideas returned by OpenAI agent');
       const savedIdeas = [];
       let saveErrors = [];
       
-      for (let i = 0; i < aiIdeas.length; i++) {
-        const aiIdea = aiIdeas[i];
-        console.log(`Processing AI idea ${i + 1}/${aiIdeas.length}`);
+      for (let i = 0; i < ideasArr.length; i++) {
+        const aiIdea = ideasArr[i];
+        console.log(`Processing AI idea ${i + 1}/${ideasArr.length}`);
         
         try {
           // Ensure we have a valid idea object
@@ -198,6 +207,15 @@ async function generateBusinessIdeas(painPoints) {
   }
 }
 
+
+async function getBusinessIdeasByPainPointId(painPointId) {
+  if (!painPointId || typeof painPointId !== 'string' || !/^[0-9a-fA-F]{24}$/.test(painPointId)) {
+    throw new Error('Invalid painPointId');
+  }
+  return BusinessIdea.find({ painPointIds: painPointId }).lean();
+}
+
 module.exports = {
-  generateBusinessIdeas
+  generateBusinessIdeas,
+  getBusinessIdeasByPainPointId,
 };

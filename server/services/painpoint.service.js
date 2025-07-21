@@ -1,6 +1,8 @@
 const PainPoint = require('../models/PainPoint');
 const Thread = require('../models/Threads');
 const openaiService = require('./openAI.service');
+const langchain = require('./langchain.service');
+const { buildPainPointExtractionPrompt } = require('./promptUtils');
 
 const calculateTextSimilarity = (text1, text2) => {
   const words1 = new Set(text1.split(' '));
@@ -30,6 +32,15 @@ const findSimilarPainPoint = async (ppData) => {
   }
 };
 
+// Utility to extract the first JSON object from a string
+function extractFirstJsonObject(text) {
+  const match = text.match(/\{[\s\S]*\}/);
+  if (match) {
+    return match[0];
+  }
+  throw new Error('No JSON object found in response');
+}
+
 const extractPainPointsFromThread = async (thread) => {
   console.debug(`Extracting pain points from thread: ${thread._id} - ${thread.title?.substring(0, 50)}...`);
   
@@ -44,40 +55,56 @@ const extractPainPointsFromThread = async (thread) => {
   };
 
   try {
-    console.debug('Calling OpenAI service to extract pain points...');
-    const extracted = await openaiService.extractPainPoints(threadContent);
-    console.debug(`Extracted ${extracted.length} pain points from thread ${thread._id}`);
-    
-    return extracted.map((pp, index) => ({
-      // Generate a unique ID for this pain point if sourceId is not available
-      redditPostId: thread.sourceId ? 
-        `${thread.sourceId}-${Date.now()}-${Math.random().toString(36).substring(2, 8)}` : 
-        `generated-${thread._id}-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
-      title: pp.title || 'Untitled Pain Point',
-      summary: pp.summary || '',
-      description: pp.description || '',
-      category: pp.category || thread.marketCategory || 'Other',
-      subCategory: pp.subCategory || '',
-      intensity: ['Low', 'Medium', 'High'].includes(pp.intensity) ? pp.intensity : 'Medium',
-      urgency: ['Low', 'Medium', 'High'].includes(pp.urgency) ? pp.urgency : 'Medium',
-      quotes: Array.isArray(pp.quotes) ? pp.quotes : [],
-      keywords: Array.isArray(pp.keywords) ? pp.keywords : [],
-      
-      // Map thread data
-      threadId: thread._id,
-      subreddit: thread.subreddit || 'general',
-      topic: thread.title || 'General',
-      url: thread.url || `https://reddit.com/${thread.sourceId || ''}`,
-      postDate: thread.createdAt || new Date(),
-      
-      // System fields
-      extractedAt: new Date(),
-      extractedBy: 'openai-gpt',
-      
-      // Ensure arrays are properly initialized
-      tags: Array.isArray(pp.tags) ? pp.tags : [],
-      comments: []
-    }));
+    console.debug('Calling LangChain OpenAI agent to extract pain points...');
+    const agent = langchain.getPainPointAgent();
+    const prompt = buildPainPointExtractionPrompt(threadContent);
+    const response = await agent.call({ input: prompt });
+    let extracted;
+    try {
+      let content = response.response;
+      try {
+        extracted = typeof content === 'string' ? JSON.parse(content) : content;
+      } catch (e) {
+        // Try to extract JSON if parsing fails
+        content = extractFirstJsonObject(content);
+        extracted = JSON.parse(content);
+      }
+    } catch (e) {
+      console.error('Failed to parse LLM response:', response.response);
+      throw new Error('Invalid JSON response from LLM');
+    }
+    // Accept both { painPoints: [...] } and single object/array
+    let painPointsArr = [];
+    if (Array.isArray(extracted)) {
+      painPointsArr = extracted;
+    } else if (extracted && Array.isArray(extracted.painPoints)) {
+      painPointsArr = extracted.painPoints;
+    } else if (extracted && typeof extracted === 'object') {
+      painPointsArr = [extracted];
+    } else {
+      throw new Error('LLM agent did not return a valid pain points array');
+    }
+    return painPointsArr.map((pp, index) => ({
+        redditPostId: thread.sourceId ? `${thread.sourceId}-${Date.now()}-${Math.random().toString(36).substring(2, 8)}` : `generated-${thread._id}-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
+        title: pp.title || 'Untitled Pain Point',
+        summary: pp.summary || '',
+        description: pp.description || '',
+        category: pp.category || thread.marketCategory || 'Other',
+        subCategory: pp.subCategory || '',
+        intensity: ['Low', 'Medium', 'High'].includes(pp.intensity) ? pp.intensity : 'Medium',
+        urgency: ['Low', 'Medium', 'High'].includes(pp.urgency) ? pp.urgency : 'Medium',
+        quotes: Array.isArray(pp.quotes) ? pp.quotes : [],
+        keywords: Array.isArray(pp.keywords) ? pp.keywords : [],
+        threadId: thread._id,
+        subreddit: thread.subreddit || 'general',
+        topic: thread.title || 'General',
+        url: thread.url || `https://reddit.com/${thread.sourceId || ''}`,
+        postDate: thread.createdAt || new Date(),
+        extractedAt: new Date(),
+        extractedBy: 'anthropic-langchain',
+        tags: Array.isArray(pp.tags) ? pp.tags : [],
+        comments: []
+      }));
   } catch (error) {
     console.error(`Error extracting pain points from thread ${thread._id}:`, error);
     throw error;
@@ -94,7 +121,9 @@ const savePainPoints = async (painPointsData, thread) => {
       existing.frequency += 1;
       existing.quotes = [...existing.quotes, ...pp.quotes];
       existing.keywords = [...new Set([...existing.keywords, ...pp.keywords])];
-      existing.rankScore = existing.calculateRankScore();
+      if (typeof existing.calculateRankScore === 'function') {
+        existing.rankScore = existing.calculateRankScore();
+      }
       await existing.save();
       saved.push(existing);
     } else {    
