@@ -82,8 +82,8 @@ const IdeaDetailPage = () => {
   const [relatedPainPoints, setRelatedPainPoints] = useState([]);
   const [businessIdeas, setBusinessIdeas] = useState([]);
   const [isGeneratingIdeas, setIsGeneratingIdeas] = useState(false);
-  const [landingPages, setLandingPages] = useState({});
-  const [copiedPromptId, setCopiedPromptId] = useState(null);
+  // const [landingPages, setLandingPages] = useState({});
+  // const [copiedPromptId, setCopiedPromptId] = useState(null);
 
   useEffect(() => {
     const fetchIdea = async () => {
@@ -241,89 +241,89 @@ const IdeaDetailPage = () => {
     fetchBusinessIdeas();
   }, [idea?._id]);
 
-  const copyToClipboard = (text, promptId) => {
-    navigator.clipboard.writeText(text);
-    setCopiedPromptId(promptId);
-    setTimeout(() => setCopiedPromptId(null), 2000);
-  };
+  // const copyToClipboard = (text, promptId) => {
+  //   navigator.clipboard.writeText(text);
+  //   setCopiedPromptId(promptId);
+  //   setTimeout(() => setCopiedPromptId(null), 2000);
+  // };
 
-  const fetchLandingPage = async (businessIdeaId) => {
-    console.log(
-      `Fetching landing page for business idea ID: ${businessIdeaId}`
-    );
-    try {
-      // First, try to get the landing page
-      let response = await apiRequest.get(
-        `/landingpage/landing-page/${businessIdeaId}`
-      );
-      console.log("Landing page response:", response);
+  // const fetchLandingPage = async (businessIdeaId) => {
+  //   console.log(
+  //     `Fetching landing page for business idea ID: ${businessIdeaId}`
+  //   );
+  //   try {
+  //     // First, try to get the landing page
+  //     let response = await apiRequest.get(
+  //       `/landingpage/landing-page/${businessIdeaId}`
+  //     );
+  //     console.log("Landing page response:", response);
 
-      let landingPageData = null;
+  //     let landingPageData = null;
 
-      // Handle different possible response structures
-      if (response.data?.landingPage) {
-        landingPageData = response.data.landingPage;
-      } else if (response.data) {
-        landingPageData = response.data;
-      }
+  //     // Handle different possible response structures
+  //     if (response.data?.landingPage) {
+  //       landingPageData = response.data.landingPage;
+  //     } else if (response.data) {
+  //       landingPageData = response.data;
+  //     }
 
-      // If no landing page exists, generate one
-      if (!landingPageData) {
-        console.log("No landing page found, generating a new one...");
-        const generateResponse = await apiRequest.post(
-          "/generate-landing-page",
-          { businessIdeaId }
-        );
-        console.log("Generate landing page response:", generateResponse);
+  //     // If no landing page exists, generate one
+  //     if (!landingPageData) {
+  //       console.log("No landing page found, generating a new one...");
+  //       const generateResponse = await apiRequest.post(
+  //         "/generate-landing-page",
+  //         { businessIdeaId }
+  //       );
+  //       console.log("Generate landing page response:", generateResponse);
 
-        if (generateResponse.data?.landingPage) {
-          landingPageData = generateResponse.data.landingPage;
-        } else if (generateResponse.data) {
-          landingPageData = generateResponse.data;
-        }
+  //       if (generateResponse.data?.landingPage) {
+  //         landingPageData = generateResponse.data.landingPage;
+  //       } else if (generateResponse.data) {
+  //         landingPageData = generateResponse.data;
+  //       }
 
-        if (!landingPageData) {
-          console.warn("Failed to generate landing page");
-          return null;
-        }
-      }
+  //       if (!landingPageData) {
+  //         console.warn("Failed to generate landing page");
+  //         return null;
+  //       }
+  //     }
 
-      console.log("Landing page data:", landingPageData);
+  //     console.log("Landing page data:", landingPageData);
 
-      // Store the landing page data in state
-      setLandingPages((prev) => ({
-        ...prev,
-        [businessIdeaId]: landingPageData,
-      }));
+  //     // Store the landing page data in state
+  //     setLandingPages((prev) => ({
+  //       ...prev,
+  //       [businessIdeaId]: landingPageData,
+  //     }));
 
-      return landingPageData;
-    } catch (error) {
-      console.error("Failed to fetch landing page data:", error);
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.error("Error response data:", error.response.data);
-        console.error("Error status:", error.response.status);
-        console.error("Error headers:", error.response.headers);
-      } else if (error.request) {
-        // The request was made but no response was received
-        console.error("No response received. Request config:", error.config);
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        console.error("Error message:", error.message);
-      }
-      return null;
-    }
-  };
+  //     return landingPageData;
+  //   } catch (error) {
+  //     console.error("Failed to fetch landing page data:", error);
+  //     if (error.response) {
+  //       // The request was made and the server responded with a status code
+  //       // that falls out of the range of 2xx
+  //       console.error("Error response data:", error.response.data);
+  //       console.error("Error status:", error.response.status);
+  //       console.error("Error headers:", error.response.headers);
+  //     } else if (error.request) {
+  //       // The request was made but no response was received
+  //       console.error("No response received. Request config:", error.config);
+  //     } else {
+  //       // Something happened in setting up the request that triggered an Error
+  //       console.error("Error message:", error.message);
+  //     }
+  //     return null;
+  //   }
+  // };
 
-  // Fetch landing page data when business ideas are loaded
-  useEffect(() => {
-    if (businessIdeas.length > 0) {
-      businessIdeas.forEach((idea) => {
-        fetchLandingPage(idea.id || idea._id);
-      });
-    }
-  }, [businessIdeas]);
+  // // Fetch landing page data when business ideas are loaded
+  // useEffect(() => {
+  //   if (businessIdeas.length > 0) {
+  //     businessIdeas.forEach((idea) => {
+  //       fetchLandingPage(idea.id || idea._id);
+  //     });
+  //   }
+  // }, [businessIdeas]);
 
   if (isLoading) {
     return (
