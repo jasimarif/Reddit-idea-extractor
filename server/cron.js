@@ -9,12 +9,37 @@ const startCronJobs = () => {
   const { fetchTopPosts, fetchComments, storeThread } = require('./services/reddit.service');
   const Thread = require('./models/Threads');
   
-  cron.schedule('58 16 * * *', async () => {
+  cron.schedule('29 20 * * *', async () => {
     console.log('Running daily Reddit idea fetch...');
     const subredditList = [
       "startups",
       "Entrepreneur",
       "smallbusiness",
+      "freelance",
+      "consulting",
+      "overemployed",
+      "jobs",
+      "resumes",
+      "careerguidance",
+      "Health",
+      "mentalhealth",
+      "Anxiety",
+      "depression",
+      "Fitness",
+      "loseit",
+      "ADHD",
+      "ChronicPain",
+      "StopSmoking",
+      "eczema",
+      "personalfinance",
+      "relationships",
+      "relationship_advice",
+      "parenting",
+      "custody",
+      "coparenting",
+      "divorce",
+      "blendedfamilies",
+      "breakups",
     ];
     
     const threadIds = [];
@@ -24,7 +49,7 @@ const startCronJobs = () => {
       for (const subreddit of subredditList) {
         console.log(`\n=== Fetching from r/${subreddit} ===`);
         try {
-          const posts = await fetchTopPosts(subreddit, 5);
+          const posts = await fetchTopPosts(subreddit, 1);
           console.log(`Found ${posts.length} posts in r/${subreddit}`);
           
           for (const post of posts) {

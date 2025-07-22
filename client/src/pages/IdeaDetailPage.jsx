@@ -662,7 +662,7 @@ const IdeaDetailPage = () => {
                       </Badge>
                     </div>
 
-                    {/* Problem Statement */}
+                    {/* Problem Statement
                     <div className="bg-gradient-to-br from-red-50 to-orange-50 p-6 rounded-2xl border border-red-100">
                       <h4 className="text-lg font-semibold text-foreground mb-3 flex items-center">
                         <CheckCircle className="h-5 w-5 mr-2 text-red-600 dark:text-red-400" />
@@ -671,7 +671,7 @@ const IdeaDetailPage = () => {
                       <p className="text-muted-foreground leading-relaxed">
                         {businessIdea.problemStatement}
                       </p>
-                    </div>
+                    </div> */}
 
                     {/* Key Details Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -769,7 +769,7 @@ const IdeaDetailPage = () => {
                 </div>
               ))}
 
-              {/* Landing Page Prompts Section */}
+              {/* Landing Page Prompts Section
               {businessIdeas.length > 0 && (
                 <div className="mt-12">
                   <div className="flex flex-col items-center mb-8">
@@ -871,7 +871,7 @@ const IdeaDetailPage = () => {
                     </div>
                   ))}
                 </div>
-              )}
+              )} */}
             </div>
           ) : (
             <div
