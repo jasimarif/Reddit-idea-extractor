@@ -12,7 +12,8 @@ async function generateLandingPage(businessIdeaId) {
     tagline,
     description,
     keyFeatures = [],
-    painPoints = [],
+    problemStatement = [],
+    solutionOverview,
     founderMessage = '',
     ctaText = ''
   } = idea;
@@ -20,8 +21,8 @@ async function generateLandingPage(businessIdeaId) {
   const headline = ideaName || 'Untitled Landing Page';
   const subheadline = tagline || description || '';
   const bulletPoints = keyFeatures;
-  const painPointsSection = painPoints;
-  const outcomeSection = bulletPoints;
+  const painPointsSection = problemStatement;
+  const outcomeSection = solutionOverview;
 
   const lovablePrompt = await generateLovablePromptBAB({
     title: headline,
@@ -49,6 +50,20 @@ async function generateLandingPage(businessIdeaId) {
   return landingPage;
 }
 
+
+async function getLandingPageByBusinessIdeaId(businessIdeaId) {
+  try {
+    return await LandingPage.findOne({ businessIdeaId })
+      .select('-__v')
+      .lean()
+      .exec();
+  } catch (error) {
+    console.error('Error fetching landing page:', error);
+    throw new Error('Failed to fetch landing page');
+  }
+}
+
 module.exports = {
-  generateLandingPage
-}; 
+  generateLandingPage,
+  getLandingPageByBusinessIdeaId,
+};

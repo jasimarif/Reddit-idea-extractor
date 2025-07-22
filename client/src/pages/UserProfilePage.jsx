@@ -1,51 +1,136 @@
-import React, { useState, useContext } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { User, Mail, Calendar, Edit, Save, X, Lock, LogOut } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import {
+  User,
+  Mail,
+  Calendar,
+  Edit,
+  Save,
+  X,
+  Lock,
+  LogOut,
+} from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import apiRequest from "../lib/apiRequest";
+import { toast } from "sonner";
 
 const UserProfilePage = () => {
   const { user, logout, setUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [editedName, setEditedName] = useState(user?.name || '');
-  const [editedEmail, setEditedEmail] = useState(user?.email || '');
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [userData, setUserData] = useState(null);
+  const [editedName, setEditedName] = useState("");
+  const [editedEmail, setEditedEmail] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const getUserInitials = (name) => {
     return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
+      .split(" ")
+      .map((word) => word[0])
+      .join("")
       .toUpperCase()
       .slice(0, 2);
   };
 
+  // Fetch user data on component mount
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await apiRequest.get("/auth/me");
+        if (response.data?.user) {
+          const { name, email, createdAt } = response.data.user;
+          // Ensure createdAt is properly formatted
+          const formattedDate = createdAt
+            ? new Date(createdAt).toISOString()
+            : new Date().toISOString();
+          setUserData({ name, email, createdAt: formattedDate });
+          setEditedName(name);
+          setEditedEmail(email);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
+        toast.error(error.response?.data?.message || "Failed to load profile");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    try {
+      const response = await apiRequest.get("/auth/me");
+      if (response.data?.user) {
+        const { name, email, createdAt } = response.data.user;
+        // Ensure createdAt is properly formatted
+        const formattedDate = createdAt
+          ? new Date(createdAt).toISOString()
+          : new Date().toISOString();
+        setUserData({ name, email, createdAt: formattedDate });
+        setEditedName(name);
+        setEditedEmail(email);
+        return { name, email, createdAt: formattedDate };
+      }
+    } catch (error) {
+      console.error("Failed to fetch user data:", error);
+      toast.error(error.response?.data?.message || "Failed to load profile");
+      throw error;
+    }
+  };
+
+  // Fetch user data on component mount
+  useEffect(() => {
+    const loadUserData = async () => {
+      setIsLoading(true);
+      try {
+        await fetchUserData();
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadUserData();
+  }, []);
+
   const handleSave = async () => {
     try {
-      const res = await apiRequest.put("/auth/me", {
+      const response = await apiRequest.put("/auth/me", {
         name: editedName,
         email: editedEmail,
       });
-      setUser(prev => ({
-        ...prev,
-        name: res.data.user.name,
-        email: res.data.user.email
-      }));
-      alert("Profile updated successfully!");
-      setIsEditing(false);
+
+      if (response.data?.user) {
+        // Refresh user data from server to ensure consistency
+        const updatedUser = await fetchUserData();
+
+        // Update the auth context with fresh data
+        setUser((prev) => ({
+          ...prev,
+          name: updatedUser.name,
+          email: updatedUser.email,
+          updatedAt: new Date().toISOString(),
+        }));
+
+        toast.success("Profile updated successfully!");
+        setIsEditing(false);
+      } else {
+        throw new Error("Failed to update profile");
+      }
     } catch (error) {
-      alert(error.response?.data?.message || error.message || "Failed to update profile");
+      console.error("Update profile error:", error);
+      toast.error(error.response?.data?.message || "Failed to update profile");
     }
   };
 
   const handleCancel = () => {
-    setEditedName(user?.name || '');
-    setEditedEmail(user?.email || '');
+    setEditedName(user?.name || "");
+    setEditedEmail(user?.email || "");
     setIsEditing(false);
   };
 
@@ -53,49 +138,104 @@ const UserProfilePage = () => {
     try {
       await logout();
     } catch (error) {
-      console.error('Failed to log out', error);
+      console.error("Failed to log out", error);
     }
   };
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
+
     if (newPassword !== confirmPassword) {
-      alert("New passwords don't match!");
+      toast.error("New passwords don't match!");
       return;
     }
+
+    if (newPassword.length < 8) {
+      toast.error("Password must be at least 8 characters long");
+      return;
+    }
+
     try {
-      await apiRequest.post("/auth/change-password", {
+      const response = await apiRequest.post("/auth/change-password", {
         currentPassword,
         newPassword,
       });
-      alert("Password updated successfully!");
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
+
+      if (response.data?.success) {
+        // Show success message
+        toast.success("Password updated successfully!");
+
+        // Clear the form
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+
+        // Log any potential issues with the toast
+        console.log("Password updated successfully, showing toast");
+      } else {
+        throw new Error("Failed to update password");
+      }
     } catch (error) {
-      alert(error.response?.data?.message || error.message || "Failed to update password");
+      console.error("Password change error:", error);
+      // Show more detailed error message
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to update password. Please try again.";
+      toast.error(errorMessage);
     }
   };
 
   const handleDeleteAccount = async () => {
-    if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+    if (
+      window.confirm(
+        "Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed."
+      )
+    ) {
       try {
-        await apiRequest.delete("/auth/me");
-        alert("Account deleted successfully");
-        await logout();
+        const response = await apiRequest.delete("/auth/me");
+        if (response.data?.success) {
+          toast.success("Account deleted successfully");
+          await logout();
+        }
       } catch (error) {
-        alert(error.response?.data?.message || error.message || "Failed to delete account");
+        console.error("Account deletion error:", error);
+        toast.error(
+          error.response?.data?.message || "Failed to delete account"
+        );
       }
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+      </div>
+    );
+  }
+
   if (!user) {
-    return null;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center p-8 bg-white rounded-xl shadow-lg max-w-md w-full mx-4">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Profile Not Found
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Unable to load profile information. Please try again later.
+          </p>
+          <Button onClick={() => window.location.reload()} className="mt-4">
+            Refresh Page
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <div className="flex-1 w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 py-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">My Profile</h1>
           <div className="flex items-center space-x-4">
@@ -111,9 +251,9 @@ const UserProfilePage = () => {
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* Profile Section */}
-          <Card>
+          <Card className="rounded-2xl shadow-lg border-0 overflow-hidden bg-white">
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle>Profile Information</CardTitle>
@@ -196,13 +336,16 @@ const UserProfilePage = () => {
                       Member Since
                     </label>
                     <p className="text-lg">
-                      {user.createdAt
-                        ? new Date(user.createdAt).toLocaleDateString(undefined, {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                          })
-                        : 'N/A'}
+                      {userData?.createdAt
+                        ? new Date(userData.createdAt).toLocaleDateString(
+                            undefined,
+                            {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            }
+                          )
+                        : "N/A"}
                     </p>
                   </div>
                 </div>
@@ -211,19 +354,24 @@ const UserProfilePage = () => {
           </Card>
 
           {/* Security Section */}
-          <Card>
+          <Card className="rounded-2xl shadow-lg border-0 overflow-hidden bg-white">
             <CardHeader>
               <CardTitle>Security</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 p-8">
               <div className="space-y-4">
                 <h3 className="font-medium flex items-center">
                   <Lock className="h-5 w-5 mr-2 text-amber-500" />
                   Change Password
                 </h3>
-                <form onSubmit={handlePasswordChange} className="space-y-4 pl-7">
+                <form
+                  onSubmit={handlePasswordChange}
+                  className="space-y-4 pl-7"
+                >
                   <div>
-                    <label className="block text-sm font-medium mb-1">Current Password</label>
+                    <label className="block text-sm font-medium mb-1">
+                      Current Password
+                    </label>
                     <input
                       type="password"
                       value={currentPassword}
@@ -234,7 +382,9 @@ const UserProfilePage = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">New Password</label>
+                    <label className="block text-sm font-medium mb-1">
+                      New Password
+                    </label>
                     <input
                       type="password"
                       value={newPassword}
@@ -245,7 +395,9 @@ const UserProfilePage = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Confirm New Password</label>
+                    <label className="block text-sm font-medium mb-1">
+                      Confirm New Password
+                    </label>
                     <input
                       type="password"
                       value={confirmPassword}
@@ -269,10 +421,11 @@ const UserProfilePage = () => {
                   <div className="space-y-2">
                     <p className="font-medium">Delete Account</p>
                     <p className="text-sm text-muted-foreground">
-                      Permanently delete your account and all associated data. This action cannot be undone.
+                      Permanently delete your account and all associated data.
+                      This action cannot be undone.
                     </p>
-                    <Button 
-                      variant="destructive" 
+                    <Button
+                      variant="destructive"
                       className="mt-2"
                       onClick={handleDeleteAccount}
                     >

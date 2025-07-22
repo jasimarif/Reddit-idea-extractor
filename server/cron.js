@@ -9,7 +9,7 @@ const startCronJobs = () => {
   const { fetchTopPosts, fetchComments, storeThread } = require('./services/reddit.service');
   const Thread = require('./models/Threads');
   
-  cron.schedule('13 16 * * *', async () => {
+  cron.schedule('58 16 * * *', async () => {
     console.log('Running daily Reddit idea fetch...');
     const subredditList = [
       "startups",

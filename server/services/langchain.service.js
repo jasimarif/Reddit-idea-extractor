@@ -40,178 +40,29 @@ async function generateLovablePromptBAB({
   outcomes = [], 
   founderMessage = '', 
   ctaText = '',
-  targetAudience = '', // NEW: Better targeting
-  industry = '', // NEW: Industry-specific customization
-  uniqueValue = '' // NEW: Key differentiator
+  targetAudience = '', 
+  industry = '', 
+  uniqueValue = '' 
 }) {
   const openai = new ChatOpenAI({
     apiKey: process.env.OPENAI_API_KEY,
-    model: 'gpt-3.5-turbo', // Upgraded for better idea analysis
-    temperature: 0.4, // Slightly more creative for better copy
-    maxTokens: 3200,
+    model: 'gpt-3.5-turbo', // Upgraded for better output quality
+    temperature: 0.3, // Lower for more consistent prompt generation
+    maxTokens: 4000, // Increased for complete prompt
   });
 
-  // Enhanced pre-processing with idea-specific intelligence
-  const processedPainPoints = painPoints.length > 0 
-    ? painPoints.map(p => `• ${p}`).join('\n')
-    : "• [Extract pain points from target audience and industry context]";
-
-  const processedOutcomes = outcomes.length > 0
-    ? outcomes.map((o, i) => `${i+1}. ${o}`).join('\n')
-    : "• [Generate outcomes based on solution and target audience needs]";
-
-  // Smart CTA generation based on business type
-  const intelligentCTA = ctaText || generateSmartCTA(title, description, industry);
-  
-  // Industry-specific customizations
-  const industryInsights = getIndustryInsights(industry, description);
-  const audienceInsights = getAudienceInsights(targetAudience, description);
-
-  const template = `You are a conversion-optimized landing page expert with deep understanding of business psychology. Analyze the business idea and generate a Lovable.dev prompt that creates a perfectly targeted landing page.
-
-BUSINESS CONTEXT ANALYSIS:
-Title: "${title}"
-Description: "${description}"
-Target Audience: "${targetAudience || 'Analyze and determine from description'}"
-Industry: "${industry || 'Determine from business context'}"
-Unique Value: "${uniqueValue || 'Extract key differentiator from description'}"
-
-GENERATE A LOVABLE.DEV PROMPT FOLLOWING THIS STRUCTURE:
-
-1️⃣ ABOVE THE FOLD SECTION
-HEADLINE: Create a powerful headline based on "${title}" that:
-- Speaks directly to the target audience's biggest desire
-- Uses emotional trigger words relevant to the industry
-- Makes an immediate value promise
-- Alternative: Transform "${title}" into a benefit-driven statement
-
-SUBHEADLINE: Transform "${description}" into a compelling subheadline that:
-- Clarifies WHO this is for (be specific about target audience)
-- States WHAT problem it solves (main pain point)
-- Explains HOW it's different (unique approach/advantage)
-- Uses industry-appropriate language and tone
-
-BENEFIT BULLETS (3-5 bullets):
-${processedOutcomes}
-→ Convert each to powerful benefits using format: "[Specific Feature] → [Time/Money/Stress Saved] → [Emotional Payoff]"
-→ Focus on outcomes that matter most to the target audience
-→ Use quantifiable results where possible
-
-PRIMARY CTA: "${intelligentCTA}"
-→ Make it action-oriented and outcome-focused
-→ Add urgency/scarcity element appropriate for the business type
-
-2️⃣ CURRENT PAIN SECTION (THE "BEFORE")
-TITLE: Create an empathetic question that immediately resonates with target audience struggles
-
-PAIN POINTS (Expand and enhance these):
-${processedPainPoints}
-→ Format each as: "Current Frustrating Situation → Negative Consequence → Emotional Impact"
-→ Use specific scenarios the target audience faces daily
-→ Include industry-specific frustrations and terminology
-→ Make it feel like you're reading their mind
-
-BELIEF DECONSTRUCTION BLOCK:
-"Here's why [current industry solutions] keep failing you:
-- [Common Approach #1] → [Why it doesn't work] → [Wasted time/money/effort]
-- [Common Approach #2] → [Hidden problems] → [Continued frustration]
-- [Common Approach #3] → [Missing piece] → [Never getting results]
-
-*Does this sound familiar?* It's not your fault - the current way is broken."
-
-3️⃣ DESIRED OUTCOME SECTION (THE "AFTER")
-TITLE: "Imagine [Specific Target Audience Goal] Without [Biggest Pain Point]"
-
-OUTCOME TRANSFORMATION BLOCKS:
-Create 3 compelling vision blocks based on the target audience's dreams:
-1. **Immediate Relief:** "[Quick win] → [Feel immediate relief] → [First positive result]"
-2. **Growing Success:** "[Building momentum] → [Gaining confidence] → [Measurable improvement]"  
-3. **Ultimate Transformation:** "[Final state] → [Identity shift] → [Dream lifestyle/business state]"
-
-NEW PARADIGM INTRODUCTION:
-"The breakthrough that changes everything: Instead of [old industry way], what if you could [innovative approach from description]?
-
-This works because [core insight that makes the solution unique and powerful]..."
-
-4️⃣ INTRODUCING THE SOLUTION (THE "BRIDGE")
-PRODUCT NAME: "${title}"
-COMPELLING TAGLINE: Create a memorable tagline that captures the unique value proposition
-
-3-STEP PROCESS (Make it seem effortless):
-Analyze the business model and create 3 simple steps:
-1. **[Easy First Step]** → [Immediate small win] → [Customer feels progress in minutes]
-2. **[Guided Second Step]** → [Building momentum] → [Customer sees real results in days]
-3. **[Transformative Final Step]** → [Complete solution] → [Customer achieves main goal]
-
-FOUNDER MESSAGE: 
-"${founderMessage || '[Create authentic founder story that connects personal experience to customer pain + why this solution was built]'}"
-+ Add credibility indicator: "[Relevant experience/customers helped/time in business/results achieved]"
-
-FINAL CTA BLOCK:
-PRIMARY CTA: "${intelligentCTA} → [Main Transformation Promise]"
-URGENCY HOOK: "[Create time-sensitive or scarcity reason appropriate for business type]"
-RISK REVERSAL: "[Guarantee/trial/money-back offer that reduces purchase anxiety]"
-
-=== DESIGN & TECHNICAL SPECIFICATIONS ===
-
-**Visual Design Requirements:**
-• Mobile-first responsive layout optimized for target audience device usage
-• Industry-appropriate color psychology:
-  - Primary: [Choose color based on industry and trust factors]
-  - CTA: [High-conversion color for target audience psychology]
-  - Accent: [Emotional color matching desired feelings]
-
-**Layout Optimization:**
-• Z-pattern flow for maximum conversion
-• Strategic CTA placement:
-  - Hero section (primary)
-  - After pain points (secondary)
-  - Final conversion zone (tertiary with email capture)
-• Progressive disclosure with scroll-triggered animations
-
-**Typography Hierarchy:**
-• H1: 3.5rem bold, emotionally charged headline
-• H2: 2.5rem semi-bold section headers
-• Body: 1.1rem, 1.6 line-height, easy readability
-• CTAs: 1.3rem bold, action-oriented
-
-**Conversion Psychology Elements:**
-• Social proof placement after credibility moments
-• Trust indicators relevant to target audience concerns  
-• FOMO elements appropriate for business urgency level
-• Risk reversal offers that address main purchase objections
-
-=== CONTENT OPTIMIZATION RULES ===
-1. **Target Audience Language:** Use vocabulary and tone that resonates with specific audience
-2. **Industry Authority:** Include terminology that shows expertise without confusing prospects
-3. **Emotional Triggers:** Focus on feelings and transformations, not just features
-4. **Specificity:** Use concrete numbers, timeframes, and results wherever possible
-5. **Flow Logic:** Each section naturally leads to the next with transitional CTAs
-6. **Authenticity:** Make it sound genuine and personal, not corporate or salesy
-
-**SPECIAL INSTRUCTIONS FOR LOVABLE:**
-- Create a fully functional single-page application
-- Include smooth scroll navigation between sections
-- Add subtle animations for engagement (fade-ins, hover effects)
-- Implement email capture form with validation
-- Make all CTAs trackable for conversion analysis
-- Ensure 100% mobile responsiveness
-- Include meta tags for SEO optimization
-
-Generate the complete Lovable.dev prompt that will create a high-converting landing page perfectly tailored to this specific business idea, target audience, and industry context.
-
-OUTPUT: Complete Lovable.dev prompt ready to copy-paste (no additional commentary).`;
-
-  // Helper functions for intelligent generation
+  // Helper functions for intelligent analysis
   function generateSmartCTA(title, description, industry) {
     const ctaMap = {
-      'saas': 'Start Free Trial',
-      'service': 'Get Started Today', 
-      'product': 'Order Now',
-      'course': 'Enroll Now',
-      'consulting': 'Book Consultation',
-      'app': 'Download Free',
-      'default': 'Get Started Free'
+      'saas': 'Start Your Free Trial',
+      'service': 'Get Your Free Consultation', 
+      'product': 'Order Now - Free Shipping',
+      'course': 'Enroll Today - Limited Spots',
+      'consulting': 'Book Your Strategy Call',
+      'app': 'Download Free - Get Started',
+      'marketplace': 'Join the Platform',
+      'tool': 'Try It Free - No Credit Card',
+      'default': 'Get Started Free Today'
     };
     
     const detectedType = detectBusinessType(description);
@@ -220,11 +71,13 @@ OUTPUT: Complete Lovable.dev prompt ready to copy-paste (no additional commentar
 
   function detectBusinessType(description) {
     const keywords = {
-      saas: ['software', 'platform', 'dashboard', 'tool', 'app', 'system'],
-      service: ['service', 'consulting', 'agency', 'done-for-you'],
-      product: ['product', 'physical', 'item', 'buy', 'purchase'],
-      course: ['course', 'training', 'learn', 'education', 'teach'],
-      app: ['mobile', 'app', 'download', 'smartphone']
+      saas: ['software', 'platform', 'dashboard', 'tool', 'system', 'cloud'],
+      service: ['service', 'consulting', 'agency', 'done-for-you', 'management'],
+      product: ['product', 'physical', 'item', 'buy', 'purchase', 'sell'],
+      course: ['course', 'training', 'learn', 'education', 'teach', 'program'],
+      app: ['mobile', 'app', 'download', 'smartphone', 'ios', 'android'],
+      marketplace: ['marketplace', 'connect', 'network', 'community', 'collaborative'],
+      tool: ['generator', 'creator', 'builder', 'analyzer', 'optimizer']
     };
 
     const lowerDesc = description.toLowerCase();
@@ -236,40 +89,224 @@ OUTPUT: Complete Lovable.dev prompt ready to copy-paste (no additional commentar
     return 'default';
   }
 
-  function getIndustryInsights(industry, description) {
-    // This could be expanded with industry-specific insights
-    return industry || detectBusinessType(description);
+  function getIndustryColor(industry, businessType) {
+    const colorMap = {
+      'tech': { primary: '#2563eb', cta: '#f59e0b', accent: '#10b981' },
+      'health': { primary: '#059669', cta: '#dc2626', accent: '#3b82f6' },
+      'finance': { primary: '#1e40af', cta: '#f59e0b', accent: '#059669' },
+      'education': { primary: '#7c3aed', cta: '#f59e0b', accent: '#06b6d4' },
+      'marketing': { primary: '#dc2626', cta: '#f59e0b', accent: '#8b5cf6' },
+      'saas': { primary: '#2563eb', cta: '#10b981', accent: '#f59e0b' },
+      'default': { primary: '#2563eb', cta: '#f59e0b', accent: '#10b981' }
+    };
+
+    return colorMap[industry] || colorMap[businessType] || colorMap.default;
   }
 
-  function getAudienceInsights(audience, description) {
-    // This could be expanded with audience-specific insights
-    return audience || 'professionals looking for better solutions';
-  }
+  // Enhanced pre-processing
+  // Ensure painPoints is always an array
+  const processedPainPoints = Array.isArray(painPoints) 
+    ? painPoints 
+    : (typeof painPoints === 'string' ? [painPoints] : []);
 
-  // Create and execute the prompt chain
+    const processedOutcome = Array.isArray(outcomes) 
+    ? outcomes 
+    : (typeof outcomes === 'string' ? [outcomes] : []);
+
+  const businessType = detectBusinessType(description);
+  const detectedIndustry = industry || businessType;
+  const intelligentCTA = ctaText || generateSmartCTA(title, description, detectedIndustry);
+  const colors = getIndustryColor(detectedIndustry, businessType);
+
+  // Main prompt template that generates the FINAL Lovable.dev prompt
+  const template = `You are an expert landing page copywriter and Lovable.dev prompt specialist. Your task is to generate a COMPLETE, READY-TO-COPY-PASTE Lovable.dev prompt for creating a high-converting landing page.
+
+BUSINESS ANALYSIS:
+- Title: "${title}"
+- Description: "${description}"
+- Target Audience: "${targetAudience || 'Extract from description'}"
+- Business Type: "${businessType}"
+- Industry: "${detectedIndustry}"
+- Pain Points: ${processedPainPoints.length > 0 ? processedPainPoints.join(', ') : 'Extract from context'}
+- Desired Outcomes: ${processedOutcome.length > 0 ? processedOutcome.join(', ') : 'Generate based on solution'}
+- Unique Value: "${uniqueValue || 'Determine from description'}"
+
+CRITICAL INSTRUCTIONS:
+1. Generate a COMPLETE Lovable.dev prompt (not a template)
+2. Include specific headlines, copy, and design specifications
+3. Use the Before-After-Bridge framework
+4. Make it copy-paste ready for immediate use
+5. No placeholders - write actual copy
+
+OUTPUT FORMAT: Generate the complete Lovable.dev prompt following this exact structure:
+
+---
+
+Create a modern, high-converting landing page for "${title}" using React and Tailwind CSS.
+
+**DESIGN REQUIREMENTS:**
+- Mobile-first responsive design with smooth micro-animations
+- Modern UI with glassmorphism effects and subtle gradients
+- Color scheme: Primary ${colors.primary}, CTA ${colors.cta}, Accent ${colors.accent}
+- Clean typography using Inter font family
+- Conversion-optimized layout with clear visual hierarchy
+- Fast-loading animations and hover effects
+
+**PAGE STRUCTURE:**
+
+🎯 **HERO SECTION:**
+[Generate compelling headline based on the business idea]
+[Write benefit-focused subheadline]
+[Create 3-4 specific benefit bullets with icons]
+[Include primary CTA: "${intelligentCTA}"]
+[Add hero visual description]
+
+😰 **PAIN POINTS SECTION:**
+[Write empathetic section title]
+[Create 3 specific pain point descriptions]
+[Add belief deconstruction paragraph]
+
+✨ **TRANSFORMATION SECTION:**
+[Write aspirational section title]
+[Create 3 outcome transformation blocks]
+[Add new paradigm introduction]
+
+🚀 **SOLUTION SECTION:**
+[Product introduction with tagline]
+[3-step process explanation]
+[Founder message: "${founderMessage || 'Generate authentic founder story'}"]
+[Social proof elements]
+
+💰 **FINAL CTA SECTION:**
+[Primary CTA with urgency]
+[Risk reversal guarantee]
+[Trust signals]
+
+**TECHNICAL SPECIFICATIONS:**
+- Single-page React component
+- Email capture form integration
+- Smooth scroll navigation
+- Mobile-responsive buttons and forms
+- Loading states and error handling
+- SEO meta tags
+- Accessibility features (ARIA labels, keyboard navigation)
+- Contact form in footer
+- Cookie consent banner
+
+**FUNCTIONALITY:**
+- Form validation for email capture
+- Smooth scrolling between sections
+- Animated counters for statistics
+- Image lazy loading
+- Progressive web app features
+- Social sharing buttons
+
+Build this as a production-ready, fully functional landing page with all content, styling, and interactions included.
+
+---
+
+IMPORTANT: 
+- Write ACTUAL copy, not placeholders
+- Include specific design details
+- Make technical specifications clear
+- Ensure the prompt is immediately usable
+- Focus on conversion optimization
+- Use emotional, benefit-driven language`;
+
   const prompt = new PromptTemplate({
     template,
     inputVariables: ['title', 'description', 'painPoints', 'outcomes', 'founderMessage', 'ctaText', 'targetAudience', 'industry', 'uniqueValue'],
   });
 
   const chain = RunnableSequence.from([prompt, openai]);
-  const response = await chain.invoke({
+  
+  // Prepare the input for the chain
+  const chainInput = {
     title,
     description,
-    painPoints: processedPainPoints,
-    outcomes: processedOutcomes,
-    founderMessage,
+    painPoints: processedPainPoints.length > 0 ? processedPainPoints.join(', ') : 'Extract from context',
+    outcomes: processedOutcome.length > 0 ? processedOutcome.join(', ') : 'Generate based on solution',
+    founderMessage: founderMessage || 'Generate authentic founder story',
     ctaText: intelligentCTA,
-    targetAudience,
-    industry,
-    uniqueValue
-  });
+    targetAudience: targetAudience || 'Extract from description',
+    industry: detectedIndustry,
+    uniqueValue: uniqueValue || 'Determine from description'
+  };
+
+  // Log the input for debugging
+  console.log('Chain input:', JSON.stringify(chainInput, null, 2));
   
-  return response.content;
+  const response = await chain.invoke(chainInput);
+  
+  // Clean up the response to ensure it's a proper prompt
+  let lovablePrompt = response.content;
+  
+  // Remove any meta-commentary and ensure clean format
+  if (lovablePrompt.includes('```')) {
+    const matches = lovablePrompt.match(/```[\s\S]*?```/);
+    if (matches) {
+      lovablePrompt = matches[0].replace(/```/g, '').trim();
+    }
+  }
+  
+  // Ensure the prompt starts correctly
+  if (!lovablePrompt.startsWith('Create a modern')) {
+    lovablePrompt = `Create a modern, high-converting landing page for "${title}" using React and Tailwind CSS.\n\n` + lovablePrompt;
+  }
+  
+  return lovablePrompt;
+}
+
+// Enhanced function to parse the response and extract structured data for MongoDB
+function parseLovablePromptResponse(lovablePrompt, originalData) {
+  // Extract headline from the prompt
+  const headlineMatch = lovablePrompt.match(/headline[:\s]*["']([^"']+)["']/i);
+  const headline = headlineMatch ? headlineMatch[1] : originalData.title;
+  
+  // Extract subheadline
+  const subheadlineMatch = lovablePrompt.match(/subheadline[:\s]*["']([^"']+)["']/i);
+  const subheadline = subheadlineMatch ? subheadlineMatch[1] : originalData.description;
+  
+  // Extract bullet points
+  const bulletMatches = lovablePrompt.match(/bullet[s]?[:\s]*[\n\r]*((?:[\s]*[•\-\*][\s]*[^\n\r]+[\n\r]*){2,})/i);
+  const bulletPoints = bulletMatches 
+    ? bulletMatches[1].split(/[\n\r]+/).map(b => b.replace(/^[\s]*[•\-\*][\s]*/, '').trim()).filter(Boolean)
+    : originalData.outcomes || ['Enhanced productivity', 'Better results', 'Time savings'];
+  
+  // Extract pain points
+  const painMatches = lovablePrompt.match(/pain[s]?[:\s]*[\n\r]*((?:[\s]*[•\-\*][\s]*[^\n\r]+[\n\r]*){2,})/i);
+  const painPointsSection = painMatches 
+    ? painMatches[1].split(/[\n\r]+/).map(p => p.replace(/^[\s]*[•\-\*][\s]*/, '').trim()).filter(Boolean)
+    : originalData.painPoints || ['Current struggles with existing solutions'];
+  
+  // Extract outcomes
+  const outcomeMatches = lovablePrompt.match(/outcome[s]?[:\s]*[\n\r]*((?:[\s]*[•\-\*][\s]*[^\n\r]+[\n\r]*){2,})/i);
+  const outcomeSection = outcomeMatches 
+    ? outcomeMatches[1].split(/[\n\r]+/).map(o => o.replace(/^[\s]*[•\-\*][\s]*/, '').trim()).filter(Boolean)
+    : bulletPoints;
+  
+  // Extract founder message
+  const founderMatch = lovablePrompt.match(/founder[s]?\s+message[:\s]*["']([^"']+)["']/i);
+  const founderMessage = founderMatch ? founderMatch[1] : originalData.founderMessage || '';
+  
+  // Extract CTA text
+  const ctaMatch = lovablePrompt.match(/(?:primary\s+)?cta[:\s]*["']([^"']+)["']/i);
+  const ctaText = ctaMatch ? ctaMatch[1] : originalData.ctaText || 'Get Started Free';
+  
+  return {
+    headline,
+    subheadline,
+    bulletPoints: bulletPoints.slice(0, 5), // Limit to 5 bullets
+    painPointsSection: painPointsSection.slice(0, 3), // Limit to 3 pain points
+    outcomeSection: outcomeSection.slice(0, 3), // Limit to 3 outcomes
+    founderMessage,
+    ctaText
+  };
 }
 
 module.exports = {
   getPainPointAgent,
   getMarketGapAgent,
-  generateLovablePromptBAB,
+  parseLovablePromptResponse,
+  generateLovablePromptBAB  
 }; 

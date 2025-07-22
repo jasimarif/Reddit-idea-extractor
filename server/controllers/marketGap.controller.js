@@ -306,7 +306,7 @@ const getBusinessIdeasByPainPointId = async (req, res) => {
       differentiator: idea.differentiator || '',
       useCase: idea.useCase || '',
       keywords: Array.isArray(idea.keywords) ? idea.keywords : [],
-      score: typeof idea.score === 'number' ? idea.score : 5.0,
+      score: idea.feasibilityScore,
       rankingReason: idea.rankingReason,
       createdAt: idea.createdAt,
       updatedAt: idea.updatedAt

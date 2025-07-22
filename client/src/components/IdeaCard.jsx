@@ -56,34 +56,6 @@ const IdeaCard = ({ idea, onToggleFavorite }) => {
           </div>
 
           <div className="flex items-center space-x-1">
-            {/* Share Button */}
-            <div className="relative">
-              <button
-                onClick={() => setShowShareMenu(!showShareMenu)}
-                className="p-2 rounded-full transition-colors text-gray-400 hover:text-gray-600 hover:bg-gray-50"
-              >
-                <Share className="h-4 w-4" />
-              </button>
-
-              {showShareMenu && (
-                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-10 min-w-[120px]">
-                  <button
-                    onClick={() => handleShare('link')}
-                    className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                  >
-                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                    <span>{copied ? 'Copied!' : 'Copy Link'}</span>
-                  </button>
-                  <button
-                    onClick={() => handleShare('reddit')}
-                    className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                  >
-                    {/* <ExternalLink className="h-4 w-4" />
-                    <span>Open Reddit</span> */}
-                  </button>
-                </div>
-              )}
-            </div>
 
             {/* Favorite Button */}
             <button
@@ -129,7 +101,7 @@ const IdeaCard = ({ idea, onToggleFavorite }) => {
             <div className="flex items-center space-x-1">
               {/* <span>{idea.upvotes.toLocaleString()}</span> */}
             </div>
-            <span>r/{idea.subreddit}</span>
+            <span>r/{idea.category}</span>
           </div>
 
           <div className="flex items-center space-x-2">

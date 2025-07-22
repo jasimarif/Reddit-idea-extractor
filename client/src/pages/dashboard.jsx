@@ -1,8 +1,20 @@
 import apiRequest from "../lib/apiRequest";
 import React, { useState, useEffect } from "react";
 import { Search, RefreshCw, Calendar, ExternalLink } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/card";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "../components/ui/table";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "../components/ui/card";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "../components/ui/table";
 import { Button } from "../components/ui/button";
 import { Link } from "react-router-dom";
 import {
@@ -49,7 +61,9 @@ const DashboardPage = () => {
         const response = await apiRequest.get("/ideas/categories");
         // Wrap string categories as objects with a 'name' property for UI compatibility
         const data = response.data?.data || [];
-        const normalized = data.map(cat => typeof cat === 'string' ? { name: cat } : cat);
+        const normalized = data.map((cat) =>
+          typeof cat === "string" ? { name: cat } : cat
+        );
         setCategories(normalized);
       } catch (error) {
         console.error("Failed to fetch categories:", error);
@@ -87,15 +101,16 @@ const DashboardPage = () => {
       setFavoriteIds(ids);
 
       const params = {};
-      if (selectedCategories.length > 0) params.category = selectedCategories.join(",");
+      if (selectedCategories.length > 0)
+        params.category = selectedCategories.join(",");
       if (searchTerm) params.search = searchTerm;
       if (selectedTags.length > 0) params.tags = selectedTags.join(",");
       params.page = currentPage;
       params.limit = itemsPerPage;
 
-      console.log('Fetching ideas with params:', params);
+      console.log("Fetching ideas with params:", params);
       const response = await apiRequest.get("/ideas", { params });
-      console.log('Ideas API response:', response.data);
+      console.log("Ideas API response:", response.data);
       let fetchedIdeas = Array.isArray(response.data.data)
         ? response.data.data.filter(Boolean)
         : [];
@@ -104,9 +119,9 @@ const DashboardPage = () => {
         fetchedIdeas = fetchedIdeas.filter((idea) => {
           const cat = idea.category || idea.topic;
           if (!cat) return false;
-          if (typeof cat === 'string') {
+          if (typeof cat === "string") {
             return selectedCategories.includes(cat);
-          } else if (typeof cat === 'object' && cat.name) {
+          } else if (typeof cat === "object" && cat.name) {
             return selectedCategories.includes(cat.name);
           }
           return false;
@@ -119,7 +134,9 @@ const DashboardPage = () => {
       }));
 
       if (sortBy === "rankScore") {
-        fetchedIdeas = [...fetchedIdeas].sort((a, b) => b.rankScore - a.rankScore);
+        fetchedIdeas = [...fetchedIdeas].sort(
+          (a, b) => b.rankScore - a.rankScore
+        );
       } else if (sortBy === "newest") {
         fetchedIdeas = [...fetchedIdeas].sort(
           (a, b) => new Date(b.postDate) - new Date(a.postDate)
@@ -150,24 +167,21 @@ const DashboardPage = () => {
 
   const handleToggleFavorite = async (ideaId) => {
     // Create a new array with the updated favorite status
-    const updatedIdeas = ideas.map(idea => 
-      idea._id === ideaId 
-        ? { ...idea, isFavorited: !idea.isFavorited } 
-        : idea
+    const updatedIdeas = ideas.map((idea) =>
+      idea._id === ideaId ? { ...idea, isFavorited: !idea.isFavorited } : idea
     );
-    
+
     // Save the previous state in case we need to revert
     const prevIdeas = [...ideas];
-    
+
     // Update the local state immediately for instant UI feedback
     setIdeas(updatedIdeas);
-    
+
     // Update the favoriteIds state to keep it in sync
-    const newFavoriteStatus = !prevIdeas.find(i => i._id === ideaId)?.isFavorited;
-    setFavoriteIds(prev => 
-      newFavoriteStatus 
-        ? [...prev, ideaId]
-        : prev.filter(id => id !== ideaId)
+    const newFavoriteStatus = !prevIdeas.find((i) => i._id === ideaId)
+      ?.isFavorited;
+    setFavoriteIds((prev) =>
+      newFavoriteStatus ? [...prev, ideaId] : prev.filter((id) => id !== ideaId)
     );
 
     try {
@@ -177,21 +191,22 @@ const DashboardPage = () => {
       } else {
         await apiRequest.delete(`/favorites/${ideaId}`);
       }
-      
+
       // Refresh the ideas to ensure everything is in sync
       await fetchIdeas();
-      
     } catch (error) {
       console.error("Error toggling favorite:", error);
       // Revert to the previous state if there's an error
       setIdeas(prevIdeas);
-      
+
       // Also revert the favoriteIds state
-      const prevFavoriteStatus = prevIdeas.find(i => i._id === ideaId)?.isFavorited;
-      setFavoriteIds(prev => 
-        prevFavoriteStatus 
-          ? [...prev.filter(id => id !== ideaId), ideaId]
-          : prev.filter(id => id !== ideaId)
+      const prevFavoriteStatus = prevIdeas.find(
+        (i) => i._id === ideaId
+      )?.isFavorited;
+      setFavoriteIds((prev) =>
+        prevFavoriteStatus
+          ? [...prev.filter((id) => id !== ideaId), ideaId]
+          : prev.filter((id) => id !== ideaId)
       );
     }
   };
@@ -226,7 +241,7 @@ const DashboardPage = () => {
   const currentIdeas = ideas;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-12 text-center">
@@ -303,7 +318,7 @@ const DashboardPage = () => {
                 <SelectTrigger className="w-40">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-white"> 
+                <SelectContent className="bg-white">
                   <SelectItem value="rankScore">Most Rank Score</SelectItem>
                   <SelectItem value="newest">Newest</SelectItem>
                   <SelectItem value="oldest">Oldest</SelectItem>
@@ -378,7 +393,9 @@ const DashboardPage = () => {
               selectedCategories.length > 0 ||
               searchTerm) && (
               <div className="mt-4">
-                <h4 className="text-sm font-medium text-gray-600 mb-2">Active Filters</h4>
+                <h4 className="text-sm font-medium text-gray-600 mb-2">
+                  Active Filters
+                </h4>
                 <div className="flex flex-wrap gap-2">
                   {selectedTags.map((tag) => (
                     <div
@@ -415,9 +432,7 @@ const DashboardPage = () => {
                     </div>
                   ))}
                   {searchTerm && (
-                    <div
-                      className="flex items-center bg-gray-50 text-gray-700 text-sm px-3 py-1.5 rounded-lg border border-gray-100 shadow-sm"
-                    >
+                    <div className="flex items-center bg-gray-50 text-gray-700 text-sm px-3 py-1.5 rounded-lg border border-gray-100 shadow-sm">
                       "{searchTerm}"
                       <button
                         onClick={(e) => {
@@ -445,162 +460,201 @@ const DashboardPage = () => {
             </div>
           ) : (
             <p className="text-sm text-gray-600">
-              {totalIdeas > 0 
-                ? `Showing ${Math.min(currentIdeas.length, itemsPerPage)} of ${totalIdeas} ideas${selectedCategories.length > 0 ? ` in ${selectedCategories.join(", ")}` : ''}`
-                : 'No ideas found matching your criteria'}
+              {totalIdeas > 0
+                ? `Showing ${Math.min(
+                    currentIdeas.length,
+                    itemsPerPage
+                  )} of ${totalIdeas} ideas${
+                    selectedCategories.length > 0
+                      ? ` in ${selectedCategories.join(", ")}`
+                      : ""
+                  }`
+                : "No ideas found matching your criteria"}
             </p>
           )}
         </div>
 
         {/* Ideas Table */}
-      <Card className="bg-white rounded-xl shadow-sm border border-gray-200">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-semibold text-gray-900">Business Ideas ({currentIdeas.length})</CardTitle>
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm" onClick={handleRefreshIdeas} disabled={isLoading} className="border-gray-300">
-                <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                Refresh
-              </Button>
+        <Card className="bg-white rounded-xl shadow-sm border border-gray-200">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg font-semibold text-gray-900">
+                Business Ideas ({currentIdeas.length})
+              </CardTitle>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRefreshIdeas}
+                  disabled={isLoading}
+                  className="border-gray-300"
+                >
+                  <RefreshCw
+                    className={`h-4 w-4 mr-2 ${
+                      isLoading ? "animate-spin" : ""
+                    }`}
+                  />
+                  Refresh
+                </Button>
+              </div>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="overflow-hidden">
-            <Table>
-              <TableHeader className="bg-gray-50">
-                <TableRow className="border-b border-gray-200">
-                  <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12"></TableHead>
-                  <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/5">Business Idea</TableHead>
-                  <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">Source</TableHead>
-                  <TableHead className="px-12 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">Category</TableHead>
-                  <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12">Score</TableHead>
-                  <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">Date</TableHead>
-                  <TableHead className="px-12 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">Status</TableHead>
-                  <TableHead className="px-10 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody className="bg-white">
-                {currentIdeas.map((idea) => (
-                  <TableRow key={idea._id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <TableCell className="px-2 py-4 whitespace-nowrap">
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleToggleFavorite(idea._id);
-                        }}
-                        className="p-1.5 rounded-full hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
-                        title={idea.isFavorited ? 'Remove from favorites' : 'Add to favorites'}
-                      >
-                        <svg
-                          className={`h-5 w-5 ${idea.isFavorited ? 'text-yellow-400 fill-current' : 'text-gray-300 hover:text-yellow-400'}`}
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          fill={idea.isFavorited ? 'currentColor' : 'none'}
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                          />
-                        </svg>
-                      </button>
-                    </TableCell>
-                    <TableCell className="px-6 py-4 whitespace-normal text-sm text-gray-900 max-w-md">
-                      <Link 
-                        to={`/idea/${idea._id}`}
-                        className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
-                      >
-                        {idea.title || idea.summary}
-                      </Link>
-                      {idea.summary && (
-                        <p className="text-gray-600 text-sm mt-1 line-clamp-2">
-                          {idea.summary}
-                        </p>
-                      )}
-                    </TableCell>
-                    
-                    <TableCell className="px-4 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        {idea.url ? (
-                          <a 
-                            href={idea.url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
-                          >
-                            {idea.platform || 'reddit'}
-                          </a>
-                        ) : (
-                          <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded">
-                            {idea.platform || 'reddit'}
-                          </span>
-                        )}
-                      </div>
-                    </TableCell>
-                    
-                    <TableCell className="px-4 py-4 whitespace-nowrap">
-                      <Badge 
-                        variant="outline" 
-                        className={`${getCategoryColor(idea.category)} uppercase tracking-wide text-xs font-semibold`}
-                      >
-                        {idea.category || 'General'}
-                      </Badge>
-                    </TableCell>
-                    
-                    <TableCell className="px-4 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <span className="px-2 py-1 bg-blue-50 text-blue-700 text-sm font-medium rounded">
-                          {idea.rankScore?.toFixed(2) || 'N/A'}
-                        </span>
-                      </div>
-                    </TableCell>
-                    
-                    <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <div className="flex items-center">
-                        <Calendar className="h-4 w-4 mr-1.5 text-gray-400" />
-                        {new Date(idea.postDate).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
-                        })}
-                      </div>
-                    </TableCell>
-                    
-                    <TableCell className="px-4 py-4 whitespace-nowrap">
-                      <Badge className="bg-green-50 text-green-700 border border-green-100 text-xs font-medium">
-                        {idea.status}
-                      </Badge>
-                    </TableCell>
-                    
-                    <TableCell className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <Link to={`/idea/${idea._id}`}>
-                        <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800 hover:bg-blue-50">
-                          <ExternalLink className="h-4 w-4 mr-1.5" />
-                          View
-                        </Button>
-                      </Link>
-                    </TableCell>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-hidden">
+              <Table>
+                <TableHeader className="bg-gray-50">
+                  <TableRow className="border-b border-gray-200">
+                    <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12"></TableHead>
+                    <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/5">
+                      Business Idea
+                    </TableHead>
+                    <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">
+                      Source
+                    </TableHead>
+                    <TableHead className="px-12 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">
+                      Category
+                    </TableHead>
+                    <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12">
+                      Score
+                    </TableHead>
+                    <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">
+                      Date
+                    </TableHead>
+                    <TableHead className="px-12 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">
+                      Status
+                    </TableHead>
+                    <TableHead className="px-10 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">
+                      Actions
+                    </TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-          
-          {currentIdeas.length === 0 && (
-            <div className="text-center py-12">
-              <div className="text-slate-400 mb-2">No ideas found</div>
-              <p className="text-slate-600">Try adjusting your filters to see more results.</p>
+                </TableHeader>
+                <TableBody className="bg-white">
+                  {currentIdeas.map((idea) => (
+                    <TableRow
+                      key={idea._id}
+                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                    >
+                      <TableCell className="px-2 py-4 whitespace-nowrap">
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleToggleFavorite(idea._id);
+                          }}
+                          className="p-1.5 rounded-full hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                          title={
+                            idea.isFavorited
+                              ? "Remove from favorites"
+                              : "Add to favorites"
+                          }
+                        >
+                          <svg
+                            className={`h-5 w-5 ${
+                              idea.isFavorited
+                                ? "text-yellow-400 fill-current"
+                                : "text-gray-300 hover:text-yellow-400"
+                            }`}
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill={idea.isFavorited ? "currentColor" : "none"}
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                            />
+                          </svg>
+                        </button>
+                      </TableCell>
+                      <TableCell className="px-6 py-4 whitespace-normal text-sm text-gray-900 max-w-md">
+                        <Link
+                          to={`/idea/${idea._id}`}
+                          className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                        >
+                          {idea.title || idea.summary}
+                        </Link>
+                        {idea.summary && (
+                          <p className="text-gray-600 text-sm mt-1 line-clamp-2">
+                            {idea.summary}
+                          </p>
+                        )}
+                      </TableCell>
+
+                      <TableCell className="px-4 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors">
+                            {idea.platform || "reddit"}
+                          </span>
+                        </div>
+                      </TableCell>
+
+                      <TableCell className="px-4 py-4 whitespace-nowrap">
+                        <Badge
+                          variant="outline"
+                          className={`${getCategoryColor(
+                            idea.category
+                          )} uppercase tracking-wide text-xs font-semibold`}
+                        >
+                          {idea.category || "General"}
+                        </Badge>
+                      </TableCell>
+
+                      <TableCell className="px-4 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <span className="px-2 py-1 bg-blue-50 text-blue-700 text-sm font-medium rounded">
+                            {idea.rankScore?.toFixed(2) || "N/A"}
+                          </span>
+                        </div>
+                      </TableCell>
+
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <div className="flex items-center">
+                          <Calendar className="h-4 w-4 mr-1.5 text-gray-400" />
+                          {new Date(idea.postDate).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </div>
+                      </TableCell>
+
+                      <TableCell className="px-4 py-4 whitespace-nowrap">
+                        <Badge className="bg-green-50 text-green-700 border border-green-100 text-xs font-medium">
+                          {idea.status}
+                        </Badge>
+                      </TableCell>
+
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <Link to={`/idea/${idea._id}`}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                          >
+                            <ExternalLink className="h-4 w-4 mr-1.5" />
+                            View
+                          </Button>
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
-          )}
-        </CardContent>
-      </Card>
 
+            {currentIdeas.length === 0 && (
+              <div className="text-center py-12">
+                <div className="text-slate-400 mb-2">No ideas found</div>
+                <p className="text-slate-600">
+                  Try adjusting your filters to see more results.
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-        
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-center space-x-1.5 mt-8">
@@ -609,8 +663,19 @@ const DashboardPage = () => {
               disabled={currentPage === 1}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 flex items-center disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-200"
             >
-              <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <svg
+                className="w-4 h-4 mr-1.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
               Previous
             </button>
@@ -635,26 +700,26 @@ const DashboardPage = () => {
                     onClick={() => setCurrentPage(pageNum)}
                     className={`w-10 h-10 flex items-center justify-center text-sm font-medium rounded-lg transition-all duration-200 ${
                       currentPage === pageNum
-                        ? 'bg-gradient-to-br from-purple-600 to-blue-600 text-white shadow-md shadow-purple-100 transform scale-105'
-                        : 'text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-purple-700'
+                        ? "bg-gradient-to-br from-purple-600 to-blue-600 text-white shadow-md shadow-purple-100 transform scale-105"
+                        : "text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-purple-700"
                     }`}
                   >
                     {pageNum}
                   </button>
                 );
               })}
-              
+
               {totalPages > 5 && currentPage < totalPages - 2 && (
                 <span className="px-2 text-gray-400">...</span>
               )}
-              
+
               {totalPages > 5 && currentPage < totalPages - 2 && (
                 <button
                   onClick={() => setCurrentPage(totalPages)}
                   className={`w-10 h-10 flex items-center justify-center text-sm font-medium rounded-lg transition-all duration-200 ${
                     currentPage === totalPages
-                      ? 'bg-gradient-to-br from-purple-600 to-blue-600 text-white shadow-md shadow-purple-100 transform scale-105'
-                      : 'text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-purple-700'
+                      ? "bg-gradient-to-br from-purple-600 to-blue-600 text-white shadow-md shadow-purple-100 transform scale-105"
+                      : "text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-purple-700"
                   }`}
                 >
                   {totalPages}
@@ -670,8 +735,19 @@ const DashboardPage = () => {
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 flex items-center disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-200"
             >
               Next
-              <svg className="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <svg
+                className="w-4 h-4 ml-1.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
               </svg>
             </button>
           </div>

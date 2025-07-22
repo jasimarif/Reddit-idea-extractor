@@ -68,6 +68,7 @@ function buildPainPointExtractionPrompt(threadContent) {
       "subCategory": "More specific category if possible",
       "intensity": "Low | Medium | High",
       "urgency": "Low | Medium | High",
+      "subreddit": "The subreddit where the pain point was extracted",
       "quotes": ["...", "...", "..."],
       "keywords": ["keyword1", "keyword2", "keyword3"],
       "businessPotential": "High | Medium | Low"
@@ -93,11 +94,12 @@ function buildBusinessIdeaPrompt(painPoints) {
   - Include a 2-3 sentence description of the idea and how it solves the pain point.
   - Write a problemStatement in the user's voice (first person, as if quoting a real user, e.g., "I always forget to...").
   - List at least 2 keyFeatures, 2 revenueStreams, 2 implementationSteps, 2 potentialChallenges, and 2 successMetrics, all with concrete, non-placeholder content.
-  - Include a targetAudience, businessModel (choose from: Freemium, Subscription, Ads, Marketplace, Licensing, One-time purchase, SaaS, Service, Platform, Other), differentiator, useCase (realistic scenario), keywords (array of 3-8 relevant terms), score (float 0-10), and rankingReason (1-2 sentences justifying the score).
+  - List at least 2 uniqueValueProposition
+  - Include a targetAudience, businessModel (choose from: Freemium, Subscription, Ads, Marketplace, Licensing, One-time purchase, SaaS, Service, Platform, Other), marketCategory, differentiators, useCase (realistic scenario), keywords (array of 3-8 relevant terms), overallScore (float 0-10), and feasibilityScore (float 0-10).
   - Do NOT repeat the same description or features for each idea.
   - Do NOT use generic phrases like "A business opportunity addressing key market needs."
   - Each idea must be distinct and creative.
-  - Use the exact field names: ideaName, description, problemStatement, keyFeatures, revenueStreams, implementationSteps, potentialChallenges, successMetrics, targetAudience, businessModel, differentiator, useCase, keywords, score, rankingReason.
+  - Use the exact field names: ideaName, description, problemStatement, keyFeatures, revenueStreams, implementationSteps, potentialChallenges, uniqueValueProposition, successMetrics, targetAudience, businessModel, differentiators, useCase, keywords, overallScore, feasibilityScore.
   - Each idea must include a field: relatedPainPointTitle (must match one of the pain point summary above).
   - Each idea must include a field: howItSolvesPainPoint (explain how the idea addresses the pain point summary).
   - Each idea must address a different pain point from the list above.
@@ -117,6 +119,7 @@ function buildBusinessIdeaPrompt(painPoints) {
   category: ${pp.category}
   Intensity: ${pp.intensity}
   Urgency: ${pp.urgency}
+  subreddit: ${pp.subreddit}
   `
     )
     .join("\n\n")}
@@ -143,10 +146,11 @@ function buildBusinessIdeaPrompt(painPoints) {
         ],
         "potentialChallenges": ["User notification fatigue", "Calendar integration complexity"],
         "successMetrics": ["Daily active users", "Retention after 30 days", "Reminder response rate"],
-        "differentiator": "Unlike generic reminder apps, this adapts to user routines and combines wellness domains (hydration, mindfulness, nutrition)",
+        "differentiators": "Unlike generic reminder apps, this adapts to user routines and combines wellness domains (hydration, mindfulness, nutrition)",
         "useCase": "A remote worker gets reminders to stretch and drink water between meetings, reducing back pain and fatigue.",
         "keywords": ["hydration", "self-care", "health tracking", "productivity"],
-        "score": 8.7,
+        "overallScore": 8.7,
+        "feasibilityScore": 8.7,
         "rankingReason": "Frequent pain point on Reddit, clear target market, and high engagement potential with freemium model."
       }
     ]
