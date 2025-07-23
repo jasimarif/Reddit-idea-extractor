@@ -122,71 +122,62 @@ ${JSON.stringify(threadContent, null, 2)}
 
 async function extractPainPoints(threadContent) {
   try {
+    const assistant = await getPainPointAssistant();
     const prompt = buildPainPointExtractionPrompt(threadContent);
 
-    const response = await openai.chat.completions.create({
-      model,
+    // Create a thread
+    const thread = await openai.beta.threads.create({
       messages: [
         {
-          role: "system",
-          content: `
-                You are a Senior Market Research Analyst specializing in pain point extraction with 15 years of experience. Your task:
-
-                1. ANALYSIS FRAMEWORK:
-                - Identify both explicit and latent pain points
-                - Categorize by intensity (High/Medium/Low) and urgency
-                - Extract verbatim user quotes that best illustrate each pain point
-                - Note frequency patterns across the conversation
-
-                2. OUTPUT REQUIREMENTS:
-                - Strictly respond with valid JSON only
-                - Structure: { "painPoints": [...] }
-                - Each pain point must include:
-                  * Direct user quotes (3-5 per point)
-                  * Emotional impact analysis
-                  * Business opportunity potential
-
-                3. QUALITY CONTROLS:
-                - Reject superficial complaints without evidence
-                - Validate pain points appear multiple times or with high intensity
-                - Cross-reference similar pain points across different user comments
-                - Never invent pain points not supported by the text
-
-                4. FORMAT EXAMPLE:
-                {
-                  "painPoints": [{
-                    "title": "Specific, concise pain description",
-                    "category": "Most relevant domain",
-                    "intensity": "High/Medium/Low",
-                    "urgency": "High/Medium/Low",
-                    "quotes": ["verbatim user text", ...],
-                    "businessPotential": "High/Medium/Low"
-                  }]
-                }
-  `,
-        },
-        {
           role: "user",
-          content: prompt,
-        },
-      ],
-      max_tokens: maxTokens,
-      temperature: 0.3,
-      response_format: { type: "json_object" }, // This is correct
+          content: prompt
+        }
+      ]
     });
 
-    // Add validation for the response format
-    if (!response.choices?.[0]?.message?.content) {
-      throw new Error("Invalid response format from OpenAI");
+    // Run the assistant on the thread
+    const run = await openai.beta.threads.runs.create(
+      thread.id,
+      { assistant_id: assistant.id }
+    );
+
+    // Wait for the run to complete
+    let runStatus = await openai.beta.threads.runs.retrieve(
+      thread.id,
+      run.id
+    );
+
+    // Poll for completion
+    while (runStatus.status !== 'completed') {
+      if (['failed', 'cancelled', 'expired'].includes(runStatus.status)) {
+        throw new Error(`Assistant run failed with status: ${runStatus.status}`);
+      }
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      runStatus = await openai.beta.threads.runs.retrieve(
+        thread.id,
+        run.id
+      );
     }
 
-    const content = response.choices[0].message.content;
+    // Get the assistant's response
+    const messages = await openai.beta.threads.messages.list(thread.id);
+    const assistantMessages = messages.data.filter(msg => msg.role === 'assistant');
+    
+    if (assistantMessages.length === 0) {
+      throw new Error("No response from assistant");
+    }
+
+    const content = assistantMessages[0].content[0].text.value;
     let result;
+    
     try {
-      result = typeof content === "string" ? JSON.parse(content) : content;
+      // Try to extract JSON from the response if it's wrapped in code blocks
+      const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+      const jsonString = jsonMatch ? jsonMatch[1] : content;
+      result = JSON.parse(jsonString);
     } catch (e) {
-      console.error("Failed to parse OpenAI response:", content);
-      throw new Error("Invalid JSON response from OpenAI");
+      console.error("Failed to parse assistant response:", content);
+      throw new Error("Invalid JSON response from assistant");
     }
 
     return validatePainPointExtraction(result);
@@ -221,7 +212,7 @@ function validatePainPointExtraction(result) {
 }
 
 function buildBusinessIdeaPrompt(painPoints) {
-  return `You are an expert Business Opportunity Strategist. Given the following pain points, generate 2-3 unique, actionable business ideas which should necessarily solve the problem defined in summary of the painpoint. Each idea must:
+  return `You are an expert Business Opportunity Strategist. Given the following pain points, generate atleast 2-3 unique, actionable business ideas which should necessarily solve the problem defined in summary of the painpoint. Each idea must:
 
   NOTE: Only generate ideas that solve the summary-level problem. Do not create general solutions or ideas that only address related symptoms.
 

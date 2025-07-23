@@ -85,7 +85,7 @@ function buildPainPointExtractionPrompt(threadContent) {
 }
 
 function buildBusinessIdeaPrompt(painPoints) {
-    return `You are an expert Business Opportunity Strategist. Given the following pain points, generate 2-3 unique, actionable business ideas which should necessarily solve the problem defined in summary of the painpoint. Each idea must:
+    return `You are an expert Business Opportunity Strategist. Given the following pain points, generate atleast 2-3 unique, actionable business ideas which should necessarily solve the problem defined in summary of the painpoint. Each idea must:
 
     NOTE: Only generate ideas that solve the summary-level problem. Do not create general solutions or ideas that only address related symptoms.
   

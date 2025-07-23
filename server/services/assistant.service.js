@@ -16,7 +16,7 @@ const assistantConfigs = {
   painPoint: {
     name: "Pain Point Analyzer Assistant",
     description: "Specialized assistant for extracting and analyzing pain points from social media content",
-    model: "gpt-3.5-turbo",
+    model: "gpt-4",
     instructions: `RESPOND ONLY WITH VALID JSON. DO NOT INCLUDE ANY EXPLANATIONS, MARKDOWN, OR COMMENTARY.
     I'm analyzing Reddit conversations to identify common pain points and problems within a specific market. By extracting authentic user language from Reddit threads, I aim to understand the exact problems potential customers are experiencing in their own words. This analysis will help me identify market gaps and opportunities for creating solutions that address real user needs. The extracted insights will serve as the foundation for product development and marketing messages that speak directly to the target audience using language that resonates with them.
     
@@ -140,8 +140,8 @@ const assistantConfigs = {
   marketGap: {
     name: "Market Gap Generator Assistant",
     description: "Assistant for generating business ideas from pain points",
-    model: "gpt-3.5-turbo",
-    instructions: `You are an expert Business Opportunity Strategist. Given the following pain points, generate 2-3 unique, actionable business ideas which should necessarily solve the problem defined in summary of the painpoint. Each idea must:
+    model: "gpt-4",
+    instructions: `You are an expert Business Opportunity Strategist. Given the following pain points, generate atleast 2-3 unique, actionable business ideas which should necessarily solve the problem defined in summary of the painpoint. Each idea must:
 
     NOTE: Only generate ideas that solve the summary-level problem. Do not create general solutions or ideas that only address related symptoms.
   
@@ -193,7 +193,7 @@ const assistantConfigs = {
   landingPage: {
     name: "Landing Page Generator Assistant",
     description: "Assistant for generating landing page copy from business ideas",
-    model: "gpt-3.5-turbo",
+    model: "gpt-4",
     instructions: `You are a startup copywriter. Write compelling landing page content using the Before-After-Bridge (BAB) formula.
         Input: One business idea.
 

@@ -394,11 +394,11 @@ const IdeaDetailPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
       {/* Header */}
-      <div className="w-full px-6 py-4">
-        <div className="flex items-center justify-between">
+      <div className="px-4 py-3">
+        <div className="max-w-7xl mx-auto">
           <Link
             to="/dashboard"
-            className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors w-fit"
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Back to Ideas</span>
@@ -406,41 +406,27 @@ const IdeaDetailPage = () => {
         </div>
       </div>
 
-      <div className="w-full px-6 py-8">
-        {/* Pain Point Analysis Section */}
-        <div className="mb-16 animate-fade-in">
-          {/* Section Header */}
-          <div className="flex flex-col items-center mb-8">
-            <div className="flex items-center space-x-4">
-              <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-primary/20 to-primary/10 rounded-2xl flex items-center justify-center animate-scale-in">
-                <Brain className="h-6 w-6 text-primary" />
-              </div>
-              <h1 className="text-3xl font-bold text-foreground">
-                Pain Points
-              </h1>
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* Pain Points Section */}
+        <div className="mb-8">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-8 h-8 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg flex items-center justify-center">
+              <Brain className="h-5 w-5 text-primary" />
             </div>
-            <p className="text-lg text-muted-foreground mt-2 text-center">
-              AI-powered insights extracted from real user feedback and
-              discussions
-            </p>
+            <h2 className="text-2xl font-bold text-foreground">Pain Points</h2>
           </div>
 
           {/* Main Pain Point Card */}
-          <div
-            className="w-full bg-gray-50 rounded-3xl p-8 shadow-lg mb-8 hover:shadow-xl transition-all duration-300 animate-scale-in"
-            style={{ border: "1px solid rgba(0, 0, 0, 0.05)" }}
-          >
-            <div className="space-y-6">
+          <div className="bg-white rounded-2xl p-6 shadow-sm border mb-6">
+            <div className="space-y-4">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <div className="flex items-center space-x-3 mb-3">
-                    <h2 className="text-2xl font-bold text-foreground leading-tight">
-                      {idea.title}
-                    </h2>
-                  </div>
-                  <div className="flex items-center space-x-3 mb-4">
+                  <h2 className="text-xl font-bold text-foreground mb-2 text-left">
+                    {idea.title}
+                  </h2>
+                  <div className="flex items-center gap-2 mb-3 flex-wrap">
                     <Badge
-                      className={`${getCategoryColor(idea.category)} px-3 py-1`}
+                      className={`${getCategoryColor(idea.category)} px-2 py-1 text-xs`}
                       variant="outline"
                     >
                       {idea.category}
@@ -448,91 +434,77 @@ const IdeaDetailPage = () => {
                     <Badge
                       className={`${getBadgeVariant(idea.intensity).bg} ${
                         getBadgeVariant(idea.intensity).text
-                      } border-0 px-3 py-1`}
+                      } border-0 px-2 py-1 text-xs`}
                     >
-                      🔥 {idea.intensity} Intensity
+                      🔥 {idea.intensity}
                     </Badge>
                     <Badge
                       className={`${getBadgeVariant(idea.urgency).bg} ${
                         getBadgeVariant(idea.urgency).text
-                      } border-0 px-3 py-1`}
+                      } border-0 px-2 py-1 text-xs`}
                     >
-                      ⚡ {idea.urgency} Urgency
+                      ⚡ {idea.urgency}
                     </Badge>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-3xl font-bold text-primary">
+                  <div className="text-2xl font-bold text-primary">
                     {idea.rankScore}
                   </div>
-                  <div className="text-sm text-muted-foreground">AI Score</div>
+                  <div className="text-xs text-muted-foreground">AI Score</div>
                 </div>
               </div>
 
-              <div
-                className="bg-gradient-to-br from-muted/30 to-muted/10 p-6 rounded-2xl"
-                style={{ border: "1px solid rgba(0, 0, 0, 0.05)" }}
-              >
-                <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center">
-                  <Target className="h-5 w-5 mr-2 text-primary" />
+              <div className="bg-gradient-to-br from-muted/30 to-muted/10 p-4 rounded-xl">
+                <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center">
+                  <Target className="h-4 w-4 mr-2 text-primary" />
                   Problem Summary
                 </h3>
-                <p className="text-muted-foreground leading-relaxed text-lg">
+                <p className="text-muted-foreground text-sm leading-relaxed">
                   {idea.summary}
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div
-                  className="bg-white p-4 rounded-xl hover:bg-gray-50 transition-colors"
-                  style={{ border: "1px solid rgba(0, 0, 0, 0.05)" }}
-                >
-                  <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center">
-                    <div className="w-2 h-2 bg-primary rounded-full mr-2"></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <h3 className="text-xs font-semibold text-foreground mb-1 flex items-center">
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full mr-2"></div>
                     Discussion Topic
                   </h3>
-                  <p className="text-muted-foreground">{idea.topic}</p>
+                  <p className="text-muted-foreground text-sm">{idea.topic}</p>
                 </div>
-                <div
-                  className="bg-white p-4 rounded-xl hover:bg-gray-50 transition-colors"
-                  style={{ border: "1px solid rgba(0, 0, 0, 0.05)" }}
-                >
-                  <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center">
-                    <div className="w-2 h-2 bg-primary rounded-full mr-2"></div>
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <h3 className="text-xs font-semibold text-foreground mb-1 flex items-center">
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full mr-2"></div>
                     Source Community
                   </h3>
-                  <p className="text-muted-foreground">r/{idea.category}</p>
+                  <p className="text-muted-foreground text-sm text-left ml-4">r/{idea.category}</p>
                 </div>
               </div>
 
               {idea.quotes && idea.quotes.length > 0 && (
-                <div className="bg-gradient-to-r from-primary/5 to-accent/5 border-l-4 border-primary p-6 rounded-r-2xl">
-                  <h3 className="text-sm font-semibold text-primary mb-3 flex items-center">
+                <div className="bg-gradient-to-r from-primary/5 to-accent/5 border-l-4 border-primary p-4 rounded-r-lg">
+                  <h3 className="text-xs font-semibold text-primary mb-2 text-left">
                     💬 Real User Quote
                   </h3>
-                  <blockquote className="text-muted-foreground italic text-lg leading-relaxed">
+                  <blockquote className="text-muted-foreground italic text-sm leading-relaxed">
                     "{idea.quotes[0]}"
                   </blockquote>
                 </div>
               )}
 
-              <div
-                className="flex items-center justify-between pt-4 text-sm"
-                style={{ borderTop: "1px solid rgba(0, 0, 0, 0.05)" }}
-              >
-                <div className="flex items-center space-x-6">
-                  <span className="flex items-center text-muted-foreground">
-                    <Clock className="h-4 w-4 mr-2" />
-                    {new Date(idea.postDate).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </span>
-                </div>
+              <div className="flex items-center justify-between pt-3 text-xs border-t">
+                <span className="flex items-center text-muted-foreground">
+                  <Clock className="h-3 w-3 mr-1" />
+                  {new Date(idea.postDate).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </span>
                 <Badge
                   variant={idea.potentialSolvability ? "default" : "outline"}
-                  className="px-3 py-1"
+                  className="px-2 py-1 text-xs"
                 >
                   {idea.potentialSolvability
                     ? "✅ Solvable"
@@ -543,153 +515,113 @@ const IdeaDetailPage = () => {
           </div>
 
           {/* Related Pain Points */}
-          <div
-            className="w-full bg-gray-50 rounded-2xl p-6 shadow-md hover:shadow-lg transition-all duration-300"
-            style={{ border: "1px solid rgba(0, 0, 0, 0.05)" }}
-          >
-            <h3 className="text-xl font-bold text-foreground mb-6 flex items-center">
-              <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center mr-3">
-                <Target className="h-5 w-5 text-primary" />
-              </div>
+          {relatedPainPoints.length > 0 && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
+              <Target className="h-4 w-4 mr-2 text-gray-600" />
               Related Pain Points
             </h3>
-
-            {relatedPainPoints.length > 0 ? (
-              <div className="space-y-4">
-                {relatedPainPoints.slice(0, 4).map((point, index) => (
-                  <div
-                    key={point._id}
-                    className="flex items-start space-x-4 p-4 bg-muted/20 rounded-xl hover:bg-muted/30 transition-colors cursor-pointer group"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <div className="w-8 h-8 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                      <span className="text-primary font-semibold text-sm">
-                        {index + 1}
-                      </span>
-                    </div>
-                    <p className="text-muted-foreground leading-relaxed group-hover:text-foreground transition-colors">
-                      {point.summary}
-                    </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {relatedPainPoints.slice(0, 4).map((point, index) => (
+                <div
+                  key={point._id}
+                  className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-blue-600 font-medium text-xs">
+                      {index + 1}
+                    </span>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Target className="h-8 w-8" />
+                  <p className="text-gray-700 text-sm leading-relaxed text-left">
+                    {point.summary}
+                  </p>
                 </div>
-                <p>No related pain points found</p>
-              </div>
-            )}
+              ))}
+            </div>
           </div>
+        )}
         </div>
 
         {/* Business Solutions Section */}
-        <div className="animate-fade-in" style={{ animationDelay: "200ms" }}>
-          {/* Section Header */}
-          <div className="flex flex-col items-center mb-8">
-            <div className="flex items-center space-x-4">
-              <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-accent/20 to-accent/10 rounded-2xl flex items-center justify-center animate-scale-in">
-                <Lightbulb className="h-6 w-6 text-accent-foreground" />
-              </div>
-              <h1 className="text-3xl font-bold text-foreground">
-                Business Solutions
-              </h1>
+        <div>
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-8 h-8 bg-gradient-to-br from-accent/20 to-accent/10 rounded-lg flex items-center justify-center">
+              <Lightbulb className="h-5 w-5 text-accent-foreground" />
             </div>
-            <p className="text-lg text-muted-foreground mt-2 text-center">
-              AI-generated innovative business ideas to solve this pain point
-            </p>
+            <h2 className="text-2xl font-bold text-foreground">Business Solutions</h2>
           </div>
 
-          {/* Business Ideas */}
           {isGeneratingIdeas ? (
-            <div
-              className="w-full bg-white rounded-3xl p-12 shadow-lg text-center"
-              style={{ border: "1px solid rgba(0, 0, 0, 0.05)" }}
-            >
-              <div className="flex flex-col items-center space-y-6">
+            <div className="bg-white rounded-2xl p-8 shadow-sm border text-center">
+              <div className="flex flex-col items-center space-y-4">
                 <div className="relative">
-                  <div className="animate-spin rounded-full h-16 w-16 border-4 border-accent/20 border-t-accent"></div>
+                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-accent/20 border-t-accent"></div>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <Lightbulb className="h-6 w-6 text-accent animate-pulse" />
+                    <Lightbulb className="h-5 w-5 text-accent animate-pulse" />
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-foreground mb-2">
+                  <h3 className="text-lg font-semibold text-foreground mb-1">
                     Generating Solutions...
                   </h3>
-                  <p className="text-muted-foreground">
-                    Our AI is analyzing the pain point and creating innovative
-                    business ideas
+                  <p className="text-muted-foreground text-sm">
+                    Creating innovative business ideas for this pain point
                   </p>
                 </div>
               </div>
             </div>
           ) : businessIdeas.length > 0 ? (
-            <div className="space-y-8">
-              {businessIdeas.slice(0, 3).map((businessIdea, index) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {businessIdeas.map((businessIdea, index) => (
                 <div
                   key={businessIdea.id}
-                  className="w-full bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 group animate-scale-in"
-                  style={{
-                    animationDelay: `${index * 150}ms`,
-                    border: "1px solid rgba(0, 0, 0, 0.05)",
-                  }}
+                  className="bg-white rounded-2xl p-5 shadow-sm border hover:shadow-md transition-all duration-300 group"
                 >
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     {/* Header */}
                     <div className="flex items-start justify-between">
-                      <div className="flex items-start space-x-4 flex-1">
-                        <div className="w-12 h-12 bg-gradient-to-br from-accent/20 to-accent/10 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                          <span className="text-xl font-bold text-accent-foreground">
+                      <div className="flex items-start flex-1">
+                        <div className="w-8 h-8 bg-gradient-to-br from-accent/20 to-accent/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <span className="text-sm font-bold text-accent-foreground">
                             {index + 1}
                           </span>
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-2xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+                          <h3 className="text-lg font-bold text-foreground mb-2">
                             {businessIdea.title}
                           </h3>
-                          <p className="text-muted-foreground text-lg leading-relaxed">
-                            {businessIdea.description}
-                          </p>
+                          <Badge
+                            variant="outline"
+                            className="text-xs px-2 py-1 mb-2 "
+                          >
+                            {businessIdea.businessModel || "SaaS"}
+                          </Badge>
                         </div>
                       </div>
-                      <Badge
-                        variant="outline"
-                        className="ml-4 px-3 py-1 text-sm"
-                      >
-                        {businessIdea.businessModel || "SaaS"}
-                      </Badge>
                     </div>
 
-                    {/* Problem Statement
-                    <div className="bg-gradient-to-br from-red-50 to-orange-50 p-6 rounded-2xl border border-red-100">
-                      <h4 className="text-lg font-semibold text-foreground mb-3 flex items-center">
-                        <CheckCircle className="h-5 w-5 mr-2 text-red-600 dark:text-red-400" />
-                        Problem Statement
-                      </h4>
-                      <p className="text-muted-foreground leading-relaxed">
-                        {businessIdea.problemStatement}
-                      </p>
-                    </div> */}
+                    <p className="text-muted-foreground text-sm leading-relaxed ">
+                      {businessIdea.description}
+                    </p>
 
-                    {/* Key Details Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-6 rounded-2xl border border-blue-100">
-                        <h4 className="text-lg font-semibold text-foreground mb-3 flex items-center">
-                          <Users className="h-5 w-5 mr-2 text-blue-600 dark:text-blue-400" />
+                    {/* Key Details */}
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                        <h4 className="text-xs font-semibold text-foreground mb-1 flex items-center">
+                          <Users className="h-3 w-3 mr-1 text-blue-600" />
                           Target Audience
                         </h4>
-                        <p className="text-muted-foreground leading-relaxed">
+                        <p className="text-muted-foreground text-xs leading-relaxed">
                           {businessIdea.targetAudience}
                         </p>
                       </div>
-                      <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-2xl border border-purple-100">
-                        <h4 className="text-lg font-semibold text-foreground mb-3 flex items-center">
-                          <Zap className="h-5 w-5 mr-2 text-purple-600 dark:text-purple-400" />
+                      
+                      <div className="bg-purple-50 p-3 rounded-lg border border-purple-100">
+                        <h4 className="text-xs font-semibold text-foreground mb-1 flex items-center">
+                          <Zap className="h-3 w-3 mr-1 text-purple-600" />
                           Key Differentiator
                         </h4>
-                        <p className="text-muted-foreground leading-relaxed">
+                        <p className="text-muted-foreground text-xs leading-relaxed">
                           {businessIdea.differentiator}
                         </p>
                       </div>
@@ -698,21 +630,21 @@ const IdeaDetailPage = () => {
                     {/* Key Features */}
                     {businessIdea.keyFeatures &&
                       businessIdea.keyFeatures.length > 0 && (
-                        <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-2xl border border-green-100">
-                          <h4 className="text-lg font-semibold text-foreground mb-4 flex items-center">
-                            <Star className="h-5 w-5 mr-2 text-green-600 dark:text-green-400" />
+                        <div className="bg-green-50 p-3 rounded-lg border border-green-100">
+                          <h4 className="text-xs font-semibold text-foreground mb-2 flex items-center">
+                            <Star className="h-3 w-3 mr-1 text-green-600" />
                             Key Features
                           </h4>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div className="space-y-1">
                             {businessIdea.keyFeatures
-                              .slice(0, 4)
+                              .slice(0, 3)
                               .map((feature, idx) => (
                                 <div
                                   key={idx}
-                                  className="flex items-start space-x-3"
+                                  className="flex items-start space-x-2"
                                 >
-                                  <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                                  <span className="text-muted-foreground leading-relaxed">
+                                  <div className="w-1 h-1 bg-green-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                                  <span className="text-muted-foreground text-xs leading-relaxed">
                                     {feature}
                                   </span>
                                 </div>
@@ -723,173 +655,44 @@ const IdeaDetailPage = () => {
 
                     {/* Use Case */}
                     {businessIdea.useCase && (
-                      <div className="bg-gradient-to-br from-amber-50 to-yellow-50 p-6 rounded-2xl border border-amber-100">
-                        <h4 className="text-lg font-semibold text-foreground mb-3 flex items-center">
-                          💡 Real-World Use Case
+                      <div className="bg-amber-50 p-3 rounded-lg border border-amber-100">
+                        <h4 className="text-xs font-semibold text-foreground mb-1">
+                          💡 Use Case
                         </h4>
-                        <p className="text-muted-foreground leading-relaxed italic">
+                        <p className="text-muted-foreground text-xs leading-relaxed italic">
                           {businessIdea.useCase}
                         </p>
                       </div>
                     )}
 
                     {/* Footer */}
-                    <div className="flex items-center justify-between pt-6 border-t border-border/30 text-sm">
-                      <div className="flex items-center space-x-6">
-                        <span className="flex items-center text-foreground font-medium">
-                          <Star className="h-4 w-4 mr-2 text-yellow-500" />
-                          AI Score: {businessIdea.score || "N/A"}
-                        </span>
-                        {businessIdea.keywords &&
-                          businessIdea.keywords.length > 0 && (
-                            <div className="flex items-center space-x-2">
-                              <span className="text-muted-foreground">
-                                Tags:
-                              </span>
-                              {businessIdea.keywords
-                                .slice(0, 2)
-                                .map((keyword, idx) => (
-                                  <Badge
-                                    key={idx}
-                                    variant="outline"
-                                    className="text-xs px-2 py-1"
-                                  >
-                                    {keyword}
-                                  </Badge>
-                                ))}
-                            </div>
-                          )}
-                      </div>
+                    <div className="flex items-center justify-between pt-3 border-t text-xs">
+                      <span className="flex items-center text-foreground font-medium">
+                        <Star className="h-3 w-3 mr-1 text-yellow-500" />
+                        {businessIdea.score || "N/A"}
+                      </span>
                       <span className="text-muted-foreground">
-                        Generated:{" "}
                         {new Date(businessIdea.createdAt).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
                 </div>
               ))}
-
-              {/* Landing Page Prompts Section
-              {businessIdeas.length > 0 && (
-                <div className="mt-12">
-                  <div className="flex flex-col items-center mb-8">
-                    <div className="mt-12 flex items-center space-x-4">
-                      <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-purple-100 to-blue-100 rounded-2xl flex items-center justify-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="h-6 w-6 text-purple-600"
-                        >
-                          <path d="M2 3h20"></path>
-                          <path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"></path>
-                          <path d="m7 21 5-5 5 5"></path>
-                        </svg>
-                      </div>
-                      <h1 className="text-2xl font-bold text-foreground">
-                        Landing Page Prompts
-                      </h1>
-                    </div>
-                    <p className="text-muted-foreground mt-2 text-center">
-                      Copy and use these prompts to generate landing pages for
-                      your business ideas
-                    </p>
-                  </div>
-
-                  {businessIdeas.map((businessIdea) => (
-                    <div
-                      key={`prompt-${businessIdea.id || businessIdea._id}`}
-                      className="mb-8"
-                    >
-                      <div className="p-6 rounded-2xl bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100">
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="font-semibold text-slate-900">
-                            Idea: {businessIdea.title}
-                          </h4>
-                          <Button
-                            onClick={() => {
-                              const landingPage =
-                                landingPages[
-                                  businessIdea.id || businessIdea._id
-                                ];
-                              copyToClipboard(
-                                landingPage?.lovablePrompt ||
-                                  "No prompt available",
-                                businessIdea.id || businessIdea._id
-                              );
-                            }}
-                            variant="outline"
-                            size="sm"
-                            className="flex items-center space-x-2"
-                          >
-                            {copiedPromptId ===
-                            (businessIdea.id || businessIdea._id) ? (
-                              <Check className="h-4 w-4 text-green-600" />
-                            ) : (
-                              <Copy className="h-4 w-4" />
-                            )}
-                            <span>
-                              {copiedPromptId ===
-                              (businessIdea.id || businessIdea._id)
-                                ? "Copied!"
-                                : "Copy Prompt"}
-                            </span>
-                          </Button>
-                        </div>
-                        <div className="p-4 bg-white rounded-lg border border-gray-200 shadow-sm text-sm font-mono text-slate-700 max-h-64 overflow-y-auto">
-                          <pre className="whitespace-pre-wrap text-left">
-                            {(() => {
-                              const landingPageData =
-                                landingPages[
-                                  businessIdea.id || businessIdea._id
-                                ];
-                              console.log(
-                                "Rendering landing page data for",
-                                businessIdea.id || businessIdea._id,
-                                ":",
-                                landingPageData
-                              );
-
-                              // Handle different possible response structures
-                              const prompt =
-                                landingPageData?.lovablePrompt ||
-                                landingPageData?.landingPage?.lovablePrompt ||
-                                "No prompt available";
-
-                              console.log("Extracted prompt:", prompt);
-                              return prompt;
-                            })()}
-                          </pre>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )} */}
             </div>
           ) : (
-            <div
-              className="w-full bg-white rounded-3xl p-12 shadow-lg text-center"
-              style={{ border: "1px solid rgba(0, 0, 0, 0.05)" }}
-            >
-              <div className="flex flex-col items-center space-y-6">
+            <div className="bg-white rounded-2xl p-8 shadow-sm border text-center">
+              <div className="flex flex-col items-center space-y-4">
                 <div className="relative">
-                  <div className="animate-spin rounded-full h-16 w-16 border-4 border-accent/20 border-t-accent"></div>
+                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-accent/20 border-t-accent"></div>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <Lightbulb className="h-6 w-6 text-accent animate-pulse" />
+                    <Lightbulb className="h-5 w-5 text-accent animate-pulse" />
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-foreground mb-2">
+                  <h3 className="text-lg font-semibold text-foreground mb-1">
                     Loading Solutions...
                   </h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     Please wait while we generate business ideas
                   </p>
                 </div>

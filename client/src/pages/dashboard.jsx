@@ -27,6 +27,7 @@ import {
 import { Badge } from "../components/ui/badge";
 
 const DashboardPage = () => {
+    const [allIdeas, setAllIdeas] = useState([]);
   const [ideas, setIdeas] = useState([]);
   const [totalIdeas, setTotalIdeas] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
@@ -89,7 +90,7 @@ const DashboardPage = () => {
     fetchFavorites();
   }, []);
 
-  const fetchIdeas = async () => {
+  const fetchAllIdeas = async () => {
     setIsLoading(true);
     try {
       const favResponse = await apiRequest.get("/favorites", {
@@ -101,20 +102,20 @@ const DashboardPage = () => {
       setFavoriteIds(ids);
 
       const params = {};
-      if (selectedCategories.length > 0)
-        params.category = selectedCategories.join(",");
+      if (selectedCategories.length > 0) params.category = selectedCategories.join(",");
       if (searchTerm) params.search = searchTerm;
       if (selectedTags.length > 0) params.tags = selectedTags.join(",");
-      params.page = currentPage;
-      params.limit = itemsPerPage;
+      params.limit = 1000; // Fetch all ideas at once
 
-      console.log("Fetching ideas with params:", params);
+      console.log("Fetching all ideas with params:", params);
       const response = await apiRequest.get("/ideas", { params });
       console.log("Ideas API response:", response.data);
+      
       let fetchedIdeas = Array.isArray(response.data.data)
         ? response.data.data.filter(Boolean)
         : [];
 
+      // Apply category filter if any categories are selected
       if (selectedCategories.length > 0) {
         fetchedIdeas = fetchedIdeas.filter((idea) => {
           const cat = idea.category || idea.topic;
@@ -128,31 +129,32 @@ const DashboardPage = () => {
         });
       }
 
+      // Mark favorites
       fetchedIdeas = fetchedIdeas.map((idea) => ({
         ...idea,
         isFavorited: idea && idea._id ? ids.includes(idea._id) : false,
       }));
 
+      // Apply sorting
       if (sortBy === "rankScore") {
         fetchedIdeas = [...fetchedIdeas].sort(
-          (a, b) => b.rankScore - a.rankScore
+          (a, b) => (b.rankScore || 0) - (a.rankScore || 0)
         );
       } else if (sortBy === "newest") {
         fetchedIdeas = [...fetchedIdeas].sort(
-          (a, b) => new Date(b.postDate) - new Date(a.postDate)
+          (a, b) => new Date(b.postDate || 0) - new Date(a.postDate || 0)
         );
       } else if (sortBy === "oldest") {
         fetchedIdeas = [...fetchedIdeas].sort(
-          (a, b) => new Date(a.postDate) - new Date(b.postDate)
+          (a, b) => new Date(a.postDate || 0) - new Date(b.postDate || 0)
         );
       }
 
-      setIdeas(fetchedIdeas);
-      setTotalIdeas(
-        response.data.pagination?.totalItems || fetchedIdeas.length
-      );
+      setAllIdeas(fetchedIdeas);
+      setTotalIdeas(fetchedIdeas.length);
     } catch (error) {
       console.error("Failed to fetch ideas:", error);
+      setAllIdeas([]);
       setIdeas([]);
       setTotalIdeas(0);
     } finally {
@@ -160,10 +162,24 @@ const DashboardPage = () => {
     }
   };
 
+  // Fetch and filter ideas when filters/sort change
   useEffect(() => {
-    fetchIdeas();
+    fetchAllIdeas();
+    setCurrentPage(1); // Reset to first page when filters change
     // eslint-disable-next-line
-  }, [selectedCategories, searchTerm, sortBy, selectedTags, currentPage]);
+  }, [selectedCategories, searchTerm, sortBy, selectedTags]);
+
+  // Apply pagination when currentPage or allIdeas change
+  useEffect(() => {
+    if (allIdeas.length > 0) {
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const paginatedIdeas = allIdeas.slice(startIndex, endIndex);
+      setIdeas(paginatedIdeas);
+    } else {
+      setIdeas([]);
+    }
+  }, [currentPage, allIdeas, itemsPerPage]);
 
   const handleToggleFavorite = async (ideaId) => {
     // Create a new array with the updated favorite status

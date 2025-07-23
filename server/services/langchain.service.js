@@ -1,6 +1,5 @@
 // LangChain integration using initialized assistants
 const { ChatOpenAI } = require('@langchain/openai');
-const { ChatAnthropic } = require('@langchain/anthropic');
 const { ConversationChain } = require('langchain/chains');
 const { BufferMemory } = require('langchain/memory');
 const { RunnableSequence } = require('@langchain/core/runnables');
@@ -36,7 +35,7 @@ const getOrCreateAgent = async (type, getAssistantFn) => {
       baseURL: 'https://api.openai.com/v1',
     },
     temperature: type === 'marketGap' ? 0.7 : 0.3, // Different temperature based on agent type
-    maxTokens: 4000,
+    maxTokens: 5000,
   });
 
   // Create and cache the agent
