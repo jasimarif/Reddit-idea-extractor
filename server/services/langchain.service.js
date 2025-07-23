@@ -1,36 +1,64 @@
-// LangChain integration for Anthropic (PainPoint) and OpenAI (MarketGap)
+// LangChain integration using initialized assistants
 const { ChatOpenAI } = require('@langchain/openai');
 const { ChatAnthropic } = require('@langchain/anthropic');
 const { ConversationChain } = require('langchain/chains');
 const { BufferMemory } = require('langchain/memory');
-const { RunnableSequence } = require('@langchain/core/runnables'); 
-const { PromptTemplate } = require('@langchain/core/prompts'); 
+const { RunnableSequence } = require('@langchain/core/runnables');
+const { PromptTemplate } = require('@langchain/core/prompts');
+const { 
+  getOrCreatePainPointAssistant, 
+  getOrCreateMarketGapAssistant,
+  getOrCreateLandingPageAssistant,
+  ensureInitialized
+} = require('./assistant.service');
 
-// --- Anthropic PainPoint Agent ---
-function getPainPointAgent() {
+// Cache for initialized assistants
+const agentCache = new Map();
+
+// Helper function to create and cache an agent
+const getOrCreateAgent = async (type, getAssistantFn) => {
+  const cacheKey = `${type}Agent`;
+  
+  // Return cached agent if available
+  if (agentCache.has(cacheKey)) {
+    return agentCache.get(cacheKey);
+  }
+  
+  // Ensure assistant exists and get its details
+  await ensureInitialized();
+  const assistant = await getAssistantFn();
+  
+  // Create new ChatOpenAI instance with assistant's configuration
   const openai = new ChatOpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-    model: 'gpt-3.5-turbo', // or your preferred model
-    temperature: 0.3,
+    openAIApiKey: process.env.OPENAI_API_KEY,
+    modelName: assistant.model,
+    configuration: {
+      baseURL: 'https://api.openai.com/v1',
+    },
+    temperature: type === 'marketGap' ? 0.7 : 0.3, // Different temperature based on agent type
     maxTokens: 4000,
   });
 
+  // Create and cache the agent
   const memory = new BufferMemory();
-  // You can add tools or custom prompt templates here for advanced features
-  return new ConversationChain({ llm: openai, memory });
+  const agent = new ConversationChain({ 
+    llm: openai, 
+    memory,
+    // Add any assistant-specific configuration here
+  });
+  
+  agentCache.set(cacheKey, agent);
+  return agent;
+}; 
+
+// --- PainPoint Agent ---
+async function getPainPointAgent() {
+  return getOrCreateAgent('painPoint', getOrCreatePainPointAssistant);
 }
 
-// --- OpenAI MarketGap Agent ---
-function getMarketGapAgent() {
-  const openai = new ChatOpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-    model: 'gpt-3.5-turbo', // or your preferred model
-    temperature: 0.7,
-    maxTokens: 4000,
-  });
-  const memory = new BufferMemory();
-  // You can add tools or custom prompt templates here for advanced features
-  return new ConversationChain({ llm: openai, memory });
+// --- MarketGap Agent ---
+async function getMarketGapAgent() {
+  return getOrCreateAgent('marketGap', getOrCreateMarketGapAssistant);
 }
 
 async function generateLovablePromptBAB({ 
@@ -44,12 +72,11 @@ async function generateLovablePromptBAB({
   industry = '', 
   uniqueValue = '' 
 }) {
-  const openai = new ChatOpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-    model: 'gpt-3.5-turbo', // Upgraded for better output quality
-    temperature: 0.3, // Lower for more consistent prompt generation
-    maxTokens: 4000, // Increased for complete prompt
-  });
+  // Get or create the landing page agent
+  const agent = await getOrCreateAgent('landingPage', getOrCreateLandingPageAssistant);
+  
+  // Use the agent's LLM for the completion
+  const openai = agent.llm;
 
   // Helper functions for intelligent analysis
   function generateSmartCTA(title, description, industry) {

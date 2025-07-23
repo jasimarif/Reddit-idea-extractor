@@ -28,12 +28,13 @@ async function generateBusinessIdeas(painPoints) {
     console.log('Formatted pain points for AI:', JSON.stringify(formattedPainPoints, null, 2));
     
     try {
-      const agent = langchain.getMarketGapAgent();
+      const agent = await langchain.getMarketGapAgent();
       const prompt = buildBusinessIdeaPrompt(formattedPainPoints);
-      const response = await agent.call({ input: prompt });
+      const response = await agent.invoke({ input: prompt });
       let aiIdeas;
       try {
-        aiIdeas = typeof response.response === 'string' ? JSON.parse(response.response) : response.response;
+        const responseContent = response.response || response.text || response;
+        aiIdeas = typeof responseContent === 'string' ? JSON.parse(responseContent) : responseContent;
       } catch (e) {
         console.error('Failed to parse OpenAI response:', response.response);
         throw new Error('Invalid JSON response from OpenAI agent');

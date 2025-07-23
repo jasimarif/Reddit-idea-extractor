@@ -3,6 +3,7 @@ const fs = require("fs").promises;
 const path = require("path");
 require("dotenv").config();
 
+
 if (!process.env.OPENAI_API_KEY) {
   throw new Error("OPENAI_API_KEY environment variable is required");
 }
@@ -16,14 +17,79 @@ const assistantConfigs = {
     name: "Pain Point Analyzer Assistant",
     description: "Specialized assistant for extracting and analyzing pain points from social media content",
     model: "gpt-3.5-turbo",
-    instructions: `You are a specialized assistant for analyzing social media content to extract pain points that must be converted into business ideas.
-        Your role is to:
-        1. Identify genuine problems and frustrations in user posts
-        2. Extract specific pain points with supporting quotes
-        3. Categorize pain points by market (Health, Wealth, Relationships, Technology, Education, Entertainment, Other)
-        4. Rate intensity and urgency levels
-        5. Provide structured JSON responses
-        Always focus on actionable pain points that could lead to business opportunities.`,
+    instructions: `RESPOND ONLY WITH VALID JSON. DO NOT INCLUDE ANY EXPLANATIONS, MARKDOWN, OR COMMENTARY.
+    I'm analyzing Reddit conversations to identify common pain points and problems within a specific market. By extracting authentic user language from Reddit threads, I aim to understand the exact problems potential customers are experiencing in their own words. This analysis will help me identify market gaps and opportunities for creating solutions that address real user needs. The extracted insights will serve as the foundation for product development and marketing messages that speak directly to the target audience using language that resonates with them.
+    
+    Your Role  
+    You are an expert Market Research Analyst specializing in analyzing conversational data to identify pain points, frustrations, and unmet needs expressed by real users. Your expertise is in distilling lengthy Reddit threads into clear, actionable insights while preserving the authentic language users employ to describe their problems.
+    
+    Your Mission  
+    - Carefully analyze provided Reddit conversations and comments  
+    - Identify distinct pain points, problems, and frustrations mentioned by users  
+    - Extract and organize these pain points into clear categories  
+    - For each pain point, include all direct quotes from users that best illustrate this specific problem  
+    - Extract EVERY valuable pain point - thoroughness is crucial  
+    
+    Analysis Criteria  
+    **INCLUDE:**  
+    - Specific problems users are experiencing  
+    - Frustrations with existing solutions  
+    - Unmet needs and desires  
+    - Workarounds users have created  
+    - Specific usage scenarios where problems occur  
+    - Emotional impact of problems  
+    
+    **DO NOT INCLUDE:**  
+    - General discussion not related to problems or pain points  
+    - Simple questions asking for advice without describing a problem  
+    - Generic complaints without specific details  
+    - Positive experiences or success stories (unless they contrast with a problem)  
+    - Discussions about news, politics, or unrelated topics  
+    
+    Output Format  
+    **Pain Point Analysis Summary:** Begin with a brief overview of the major pain points identified across the data  
+    
+    **Categorized Pain Points:** Organize findings into clear thematic categories (e.g., "Problems with Existing Solutions", "Physical Symptoms", "Emotional Challenges")  
+    For each pain point:  
+    - Create a clear, descriptive heading that captures the essence of the pain point  
+    - Provide a brief 4-5 sentence summary  
+    - **Use the following format for 'description':**  
+      > **Analysis & Insights**  
+      > This pain point has been identified as a significant opportunity due to its [intensity] intensity and [urgency] urgency.  
+      > The frequency of similar issues in the general community suggests a broader market need that could be addressed with a targeted solution.  
+      >  
+      > **Key observations:**  
+      > - Frequently mentioned in general community discussions  
+      > - Shows clear indicators of user frustration and need  
+      > - Potential for creating a solution with [impact] impact  
+    - List 3-5 direct user quotes  
+    - Include a note on the apparent frequency/intensity of this pain point across the data  
+    
+    **Priority Ranking:** Conclude with a ranked list of pain points based on:  
+    - Frequency  
+    - Intensity  
+    - Specificity  
+    - Potential solvability  
+    
+    **Output JSON Structure**  
+    Return a JSON object with a \`painPoints\` array where each item has the following structure:
+    
+    \`\`\`json
+    {
+      "title": "Short descriptive title of the pain point",
+      "summary": "Concise 4-5 sentence summary of the pain point",
+      "description": "Formatted as 'Analysis & Insights' per instructions",
+      "category": "One of [Health, Wealth, Relationships, Technology, Education, Entertainment] or a specific custom category",
+      "subCategory": "More specific category if possible",
+      "intensity": "Low | Medium | High",
+      "urgency": "Low | Medium | High",
+      "subreddit": "The subreddit where the pain point was extracted",
+      "quotes": ["...", "...", "..."],
+      "keywords": ["keyword1", "keyword2", "keyword3"],
+      "businessPotential": "High | Medium | Low"
+    }
+    \`\`\`
+    `,
     tools: [{
       type: "function",
       function: {
@@ -75,13 +141,26 @@ const assistantConfigs = {
     name: "Market Gap Generator Assistant",
     description: "Assistant for generating business ideas from pain points",
     model: "gpt-3.5-turbo",
-    instructions: `You are a startup strategist. Based on the pain points provided, generate 3 innovative business ideas.
-        Each idea should:
-        - Target a specific **audience**
-        - Solve a **concrete pain point**
-        - Show evidence of **market demand**
-        - Include a suggested **business model**
-        - Mention **competitor gaps**`,
+    instructions: `You are an expert Business Opportunity Strategist. Given the following pain points, generate 2-3 unique, actionable business ideas which should necessarily solve the problem defined in summary of the painpoint. Each idea must:
+
+    NOTE: Only generate ideas that solve the summary-level problem. Do not create general solutions or ideas that only address related symptoms.
+  
+  - Have a clear, descriptive ideaName.
+  - Be tailored to the specific pain point(s) provided.
+  - Include a 2-3 sentence description of the idea and how it solves the pain point.
+  - Write a problemStatement in the user's voice (first person, as if quoting a real user, e.g., "I always forget to...").
+  - List at least 2 keyFeatures, 2 revenueStreams, 2 implementationSteps, 2 potentialChallenges, and 2 successMetrics, all with concrete, non-placeholder content.
+  - List at least 2 uniqueValueProposition
+  - Include a targetAudience, businessModel (choose from: Freemium, Subscription, Ads, Marketplace, Licensing, One-time purchase, SaaS, Service, Platform, Other), marketCategory, differentiators, useCase (realistic scenario), keywords (array of 3-8 relevant terms), overallScore (float 0-10), and feasibilityScore (float 0-10).
+  - Do NOT repeat the same description or features for each idea.
+  - Do NOT use generic phrases like "A business opportunity addressing key market needs."
+  - Each idea must be distinct and creative.
+  - Use the exact field names: ideaName, description, problemStatement, keyFeatures, revenueStreams, implementationSteps, potentialChallenges, uniqueValueProposition, successMetrics, targetAudience, businessModel, differentiators, useCase, keywords, overallScore, feasibilityScore.
+  - Each idea must include a field: relatedPainPointTitle (must match one of the pain point summary above).
+  - Each idea must include a field: howItSolvesPainPoint (explain how the idea addresses the pain point summary).
+  - Each idea must address a different pain point from the list above.
+  - Incorporate user quotes and keywords from the pain point in the idea's description or problem statement.
+  `,
     tools: [{
       type: "function",
       function: {
@@ -135,20 +214,19 @@ const cache = {};
 // Initialize all assistants when the service starts
 async function initializeAssistants() {
   try {
-    console.log('Initializing OpenAI assistants...');
     
     // Initialize all assistants in parallel
-    await Promise.all([
-      getOrCreateAssistant('painPoint').catch(err => 
-        console.error('Failed to initialize painPoint assistant:', err)
-      ),
-      getOrCreateAssistant('marketGap').catch(err => 
-        console.error('Failed to initialize marketGap assistant:', err)
-      ),
-      getOrCreateAssistant('landingPage').catch(err => 
-        console.error('Failed to initialize landingPage assistant:', err)
-      )
-    ]);
+    // await Promise.all([
+    //   getOrCreateAssistant('painPoint').catch(err => 
+    //     console.error('Failed to initialize painPoint assistant:', )
+    //   ),
+    //   getOrCreateAssistant('marketGap').catch(err => 
+    //     console.error('Failed to initialize marketGap assistant:', )
+    //   ),
+    //   getOrCreateAssistant('landingPage').catch(err => 
+    //     console.error('Failed to initialize landingPage assistant:', )
+    //   )
+    // ]);
     
     console.log('All assistants initialized successfully');
   } catch (error) {
@@ -156,8 +234,24 @@ async function initializeAssistants() {
   }
 }
 
-// Call initialize on require
-initializeAssistants();
+// Initialize assistants on first use
+let isInitialized = false;
+const initializationPromise = initializeAssistants().then(() => {
+  isInitialized = true;
+  return true;
+}).catch(err => {
+  console.error('Initialization failed:', err);
+  isInitialized = false;
+  throw err;
+});
+
+// Export a function to check initialization status
+const ensureInitialized = async () => {
+  if (!isInitialized) {
+    await initializationPromise;
+  }
+  return true;
+};
 
 async function loadConfig() {
   try {
@@ -173,9 +267,11 @@ async function saveConfig(config) {
 }
 
 async function getOrCreateAssistant(type) {
+  // Ensure we're initialized
+  await ensureInitialized();
+  
   // Return from cache if available
   if (cache[type]) {
-    console.log(`Using cached ${type} assistant`);
     return cache[type];
   }
 
@@ -190,13 +286,11 @@ async function getOrCreateAssistant(type) {
         cache[type] = assistant;
         return assistant;
       } catch (error) {
-        console.warn(`Failed to retrieve ${type} assistant (${existingId}), creating new one:`, error.message);
         // Continue to create a new assistant
       }
     }
 
     // Create new assistant if none exists
-    console.log(`Creating new ${type} assistant...`);
     const assistant = await openai.beta.assistants.create(assistantConfigs[type]);
     
     // Update config with new assistant ID
@@ -205,11 +299,8 @@ async function getOrCreateAssistant(type) {
     await saveConfig(config);
     
     cache[type] = assistant;
-    logger.info(`Successfully created ${type} assistant: ${assistant.id}`);
     return assistant;
   } catch (error) {
-    logger.error(`Error in getOrCreateAssistant for ${type}:`, error);
-    throw new Error(`Failed to get or create ${type} assistant: ${error.message}`);
   }
 }
 
@@ -226,15 +317,57 @@ async function listAllAssistants() {
 }
 
 async function deleteAssistantByType(type) {
-  const config = await loadConfig();
-  const id = config[`${type}AssistantId`];
-  if (!id) return false;
+  try {
+    const config = await loadConfig();
+    const assistantId = config[`${type}AssistantId`];
+    if (assistantId) {
+      await openai.beta.assistants.del(assistantId);
+      delete config[`${type}AssistantId`];
+      await saveConfig(config);
+      delete cache[type];
+    }
+  } catch (error) {
+  }
+}
 
-  await openai.beta.assistants.del(id);
-  delete config[`${type}AssistantId`];
-  await saveConfig(config);
-  delete cache[type];
-  return true;
+/**
+ * Deletes all assistants and clears the configuration
+ * @returns {Promise<Object>} Result of the operation
+ */
+async function deleteAllAssistants() {
+  try {
+    await ensureInitialized();
+    const config = await loadConfig();
+    const assistantTypes = ['painPoint', 'marketGap', 'landingPage'];
+    
+    // Delete all assistants from OpenAI
+    const deletePromises = assistantTypes.map(async (type) => {
+      const assistantId = config[`${type}AssistantId`];
+      if (assistantId) {
+        try {
+          await openai.beta.assistants.del(assistantId);
+        } catch (error) {
+          // Continue with other deletions even if one fails
+        }
+      }
+    });
+
+    await Promise.all(deletePromises);
+    
+    // Clear the configuration
+    const newConfig = { lastCleared: new Date().toISOString() };
+    await saveConfig(newConfig);
+    
+    // Clear the cache
+    Object.keys(cache).forEach(key => delete cache[key]);
+    
+    return { 
+      success: true, 
+      message: 'All assistants have been deleted and configuration has been reset',
+      timestamp: newConfig.lastCleared
+    };
+  } catch (error) {
+  }
 }
 
 module.exports = {
@@ -244,6 +377,8 @@ module.exports = {
   updateAssistant,
   listAllAssistants,
   deleteAssistantByType,
-  // Export the initialize function for explicit initialization if needed
-  initializeAssistants
+  deleteAllAssistants,
+  initializeAssistants,
+  isInitialized: () => isInitialized,
+  ensureInitialized
 };

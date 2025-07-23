@@ -56,12 +56,12 @@ const extractPainPointsFromThread = async (thread) => {
 
   try {
     console.debug('Calling LangChain OpenAI agent to extract pain points...');
-    const agent = langchain.getPainPointAgent();
+    const agent = await langchain.getPainPointAgent();
     const prompt = buildPainPointExtractionPrompt(threadContent);
-    const response = await agent.call({ input: prompt });
+    const response = await agent.invoke({ input: prompt });
     let extracted;
     try {
-      let content = response.response;
+      let content = response.response || response.text || response;
       try {
         extracted = typeof content === 'string' ? JSON.parse(content) : content;
       } catch (e) {

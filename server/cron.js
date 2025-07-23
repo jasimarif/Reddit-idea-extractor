@@ -9,7 +9,7 @@ const startCronJobs = () => {
   const { fetchTopPosts, fetchComments, storeThread } = require('./services/reddit.service');
   const Thread = require('./models/Threads');
   
-  cron.schedule('29 20 * * *', async () => {
+  cron.schedule('34 12 * * *', async () => {
     console.log('Running daily Reddit idea fetch...');
     const subredditList = [
       "startups",
@@ -39,7 +39,7 @@ const startCronJobs = () => {
       "coparenting",
       "divorce",
       "blendedfamilies",
-      "breakups",
+      "breakups"
     ];
     
     const threadIds = [];
