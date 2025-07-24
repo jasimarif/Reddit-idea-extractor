@@ -28,12 +28,6 @@ const HomePage = () => {
                 Browse Ideas
               </Link>
 
-              <Link
-                to="/signup"
-                className="px-8 py-4 text-lg font-semibold text-purple-600 bg-white rounded-full hover:bg-gray-50 transition-all duration-300 border-2 border-purple-200 hover:border-purple-300"
-              >
-                Get Started Free
-              </Link>
             </div>
           </div>
         </div>

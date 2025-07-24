@@ -16,7 +16,7 @@ const agentCache = new Map();
 
 // Helper function to create and cache an agent
 const getOrCreateAgent = async (type, getAssistantFn) => {
-  const cacheKey = `${type}Agent`;
+  const cacheKey = `${type}AssistantId`;
   
   // Return cached agent if available
   if (agentCache.has(cacheKey)) {
@@ -35,7 +35,7 @@ const getOrCreateAgent = async (type, getAssistantFn) => {
       baseURL: 'https://api.openai.com/v1',
     },
     temperature: type === 'marketGap' ? 0.7 : 0.3, // Different temperature based on agent type
-    maxTokens: 5000,
+    maxTokens: 2000,
   });
 
   // Create and cache the agent

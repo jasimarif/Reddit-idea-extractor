@@ -234,73 +234,73 @@ const UserProfilePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 py-8">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">My Profile</h1>
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleLogout}
-              className="flex items-center space-x-2"
-            >
-              <LogOut className="h-4 w-4" />
-              <span>Logout</span>
-            </Button>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 py-4 sm:py-6 px-3 sm:px-4">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleLogout}
+            className="flex items-center gap-2 w-full sm:w-auto justify-center"
+          >
+            <LogOut className="h-4 w-4" />
+            <span>Logout</span>
+          </Button>
         </div>
 
-        <div className="space-y-8">
+        <div className="space-y-5">
           {/* Profile Section */}
-          <Card className="rounded-2xl shadow-lg border-0 overflow-hidden bg-white">
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle>Profile Information</CardTitle>
+          <Card className="rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <CardHeader className="p-4 sm:p-6 pb-0 sm:pb-0">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <CardTitle className="text-lg">Profile Information</CardTitle>
                 {!isEditing ? (
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setIsEditing(true)}
-                    className="flex items-center space-x-2"
+                    className="flex items-center gap-2 w-full sm:w-auto justify-center"
                   >
                     <Edit className="h-4 w-4" />
                     <span>Edit Profile</span>
                   </Button>
                 ) : (
-                  <div className="flex space-x-2">
+                  <div className="flex gap-2 w-full sm:w-auto">
                     <Button
                       size="sm"
                       onClick={handleSave}
-                      className="flex items-center space-x-2"
+                      className="flex-1 sm:flex-none justify-center"
                     >
-                      <Save className="h-4 w-4" />
-                      <span>Save</span>
+                      <Save className="h-4 w-4 mr-1" />
+                      Save
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={handleCancel}
-                      className="flex items-center space-x-2"
+                      className="flex-1 sm:flex-none justify-center"
                     >
-                      <X className="h-4 w-4" />
-                      <span>Cancel</span>
+                      <X className="h-4 w-4 mr-1" />
+                      Cancel
                     </Button>
                   </div>
                 )}
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="flex items-start space-x-6">
-                <Avatar className="h-20 w-20">
-                  <AvatarFallback className="bg-purple-100 text-purple-700 text-xl font-semibold">
-                    {getUserInitials(user.name)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 space-y-4">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row items-start gap-4">
+                <div className="flex-shrink-0 mx-auto sm:mx-0">
+                  <Avatar className="h-16 w-16 sm:h-20 sm:w-20">
+                    <AvatarFallback className="bg-purple-100 text-purple-700 text-lg sm:text-xl font-semibold">
+                      {getUserInitials(user.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+                <div className="flex-1 w-full space-y-3 sm:space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">
-                      <User className="h-4 w-4 inline mr-1" />
+                    <label className="block text-sm font-medium text-gray-600 mb-1">
+                      <User className="h-3.5 w-3.5 inline mr-1.5 -mt-0.5" />
                       Full Name
                     </label>
                     {isEditing ? (
@@ -308,15 +308,15 @@ const UserProfilePage = () => {
                         type="text"
                         value={editedName}
                         onChange={(e) => setEditedName(e.target.value)}
-                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-transparent"
+                        className="w-full px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       />
                     ) : (
-                      <p className="text-lg">{user.name}</p>
+                      <p className="text-base">{user.name}</p>
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">
-                      <Mail className="h-4 w-4 inline mr-1" />
+                    <label className="block text-sm font-medium text-gray-600 mb-1">
+                      <Mail className="h-3.5 w-3.5 inline mr-1.5 -mt-0.5" />
                       Email Address
                     </label>
                     {isEditing ? (
@@ -324,27 +324,24 @@ const UserProfilePage = () => {
                         type="email"
                         value={editedEmail}
                         onChange={(e) => setEditedEmail(e.target.value)}
-                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-transparent"
+                        className="w-full px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       />
                     ) : (
-                      <p className="text-lg">{user.email}</p>
+                      <p className="text-base">{user.email}</p>
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">
-                      <Calendar className="h-4 w-4 inline mr-1" />
+                    <label className="block text-sm font-medium text-gray-600 mb-1">
+                      <Calendar className="h-3.5 w-3.5 inline mr-1.5 -mt-0.5" />
                       Member Since
                     </label>
-                    <p className="text-lg">
+                    <p className="text-base">
                       {userData?.createdAt
-                        ? new Date(userData.createdAt).toLocaleDateString(
-                            undefined,
-                            {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            }
-                          )
+                        ? new Date(userData.createdAt).toLocaleDateString(undefined, {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })
                         : "N/A"}
                     </p>
                   </div>
@@ -354,84 +351,85 @@ const UserProfilePage = () => {
           </Card>
 
           {/* Security Section */}
-          <Card className="rounded-2xl shadow-lg border-0 overflow-hidden bg-white">
-            <CardHeader>
-              <CardTitle>Security</CardTitle>
+          <Card className="rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <CardHeader className="p-4 sm:p-6 pb-0 sm:pb-0">
+              <CardTitle className="text-lg">Security</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6 p-8">
-              <div className="space-y-4">
-                <h3 className="font-medium flex items-center">
-                  <Lock className="h-5 w-5 mr-2 text-amber-500" />
+            <CardContent className="p-4 sm:p-6 space-y-5">
+              <div>
+                <h3 className="font-medium text-sm flex items-center text-gray-700 mb-3">
+                  <Lock className="h-4 w-4 mr-2 text-amber-500" />
                   Change Password
                 </h3>
-                <form
-                  onSubmit={handlePasswordChange}
-                  className="space-y-4 pl-7"
-                >
+                <form onSubmit={handlePasswordChange} className="space-y-3 sm:pl-6">
                   <div>
-                    <label className="block text-sm font-medium mb-1">
+                    <label className="block text-xs font-medium text-gray-600 mb-1">
                       Current Password
                     </label>
                     <input
                       type="password"
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
-                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-transparent"
+                      className="w-full px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       placeholder="Enter current password"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">
+                    <label className="block text-xs font-medium text-gray-600 mb-1">
                       New Password
                     </label>
                     <input
                       type="password"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-transparent"
+                      className="w-full px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       placeholder="Enter new password"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">
+                    <label className="block text-xs font-medium text-gray-600 mb-1">
                       Confirm New Password
                     </label>
                     <input
                       type="password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-transparent"
+                      className="w-full px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       placeholder="Confirm new password"
                       required
                     />
                   </div>
-                  <Button type="submit" className="mt-2">
+                  <Button 
+                    type="submit" 
+                    size="sm"
+                    className="w-full sm:w-auto mt-1"
+                  >
                     Update Password
                   </Button>
                 </form>
               </div>
 
-              <Separator className="my-6" />
+              <Separator className="my-4 sm:my-5" />
 
-              <div className="space-y-4">
-                <h3 className="font-medium text-red-500">Danger Zone</h3>
-                <div className="p-4 border border-red-200 dark:border-red-900/50 rounded-lg bg-red-50/50 dark:bg-red-900/10">
-                  <div className="space-y-2">
-                    <p className="font-medium">Delete Account</p>
-                    <p className="text-sm text-muted-foreground">
-                      Permanently delete your account and all associated data.
-                      This action cannot be undone.
-                    </p>
-                    <Button
-                      variant="destructive"
-                      className="mt-2"
-                      onClick={handleDeleteAccount}
-                    >
-                      Delete My Account
-                    </Button>
-                  </div>
+              <div>
+                <h3 className="font-medium text-sm text-red-500 mb-3">
+                  Danger Zone
+                </h3>
+                <div className="p-3 border border-red-200 rounded-lg bg-red-50/50">
+                  <p className="font-medium text-sm mb-1">Delete Account</p>
+                  <p className="text-xs text-gray-600 mb-3">
+                    Permanently delete your account and all associated data. This action cannot be undone.
+                  </p>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleDeleteAccount}
+                    className="w-full sm:w-auto"
+                  >
+                    Delete My Account
+                  </Button>
                 </div>
               </div>
             </CardContent>

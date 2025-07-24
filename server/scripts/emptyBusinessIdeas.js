@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const PainPoint = require('../models/Threads');
+const PainPoint = require('../models/BusinessIdea');
 const dbConfig = require('../config/db');
 
 async function emptyBusinessIdeas() {

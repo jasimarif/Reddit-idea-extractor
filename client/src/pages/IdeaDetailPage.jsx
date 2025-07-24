@@ -78,8 +78,6 @@ const IdeaDetailPage = () => {
   const { id } = useParams();
   const [idea, setIdea] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingRelated, setIsLoadingRelated] = useState(true);
-  const [relatedPainPoints, setRelatedPainPoints] = useState([]);
   const [businessIdeas, setBusinessIdeas] = useState([]);
   const [isGeneratingIdeas, setIsGeneratingIdeas] = useState(false);
   // const [landingPages, setLandingPages] = useState({});
@@ -124,96 +122,7 @@ const IdeaDetailPage = () => {
     fetchIdea();
   }, [id]);
 
-  const fetchRelatedPainPoints = async () => {
-    const threadId = idea?.threadId || idea?._id;
-    if (!threadId) {
-      console.log("No thread ID available");
-      setRelatedPainPoints([]);
-      setIsLoadingRelated(false);
-      return;
-    }
 
-    console.log("Fetching related pain points for thread ID:", threadId);
-    setIsLoadingRelated(true);
-    try {
-      const response = await apiRequest.get(
-        `/painpoints/pain-points/thread/${threadId}`
-      );
-      console.log("API Response:", response);
-
-      if (!response || !response.data) {
-        throw new Error("No response data received");
-      }
-
-      if (!response.data.success) {
-        throw new Error(
-          response.data.error || "Failed to load related pain points"
-        );
-      }
-
-      // Extract pain points from the nested data.painPoints array
-      const relatedPainPointsData = response.data.data?.painPoints || [];
-      console.log("Related pain points data:", relatedPainPointsData);
-
-      // Get current pain point summary for comparison
-      const currentPainPointSummary = idea?.painPoint?.summary
-        ?.toLowerCase()
-        .trim();
-      const seenSummaries = new Set();
-
-      // Process and filter pain points
-      const formattedPainPoints = relatedPainPointsData
-        // Filter out duplicates based on summary (case-insensitive)
-        .filter((point) => {
-          if (!point.summary) return false; // Skip if no summary
-
-          const normalizedSummary = point.summary.toLowerCase().trim();
-
-          // Skip if this is the current pain point or a duplicate summary
-          if (
-            normalizedSummary === currentPainPointSummary ||
-            seenSummaries.has(normalizedSummary)
-          ) {
-            return false;
-          }
-
-          seenSummaries.add(normalizedSummary);
-          return true;
-        })
-        // Map to the expected format
-        .map((point) => ({
-          _id: point._id,
-          title: point.title,
-          summary: point.summary,
-          category: point.category,
-          intensity: point.intensity,
-          urgency: point.urgency,
-          keywords: point.keywords || [],
-        }))
-        // Limit to 5 items
-        .slice(0, 5);
-
-      console.log("Filtered related pain points:", formattedPainPoints);
-      console.log("Current pain point summary:", currentPainPointSummary);
-      setRelatedPainPoints(formattedPainPoints);
-    } catch (error) {
-      console.error("Failed to fetch related pain points:", error);
-      setRelatedPainPoints([]);
-    } finally {
-      setIsLoadingRelated(false);
-    }
-  };
-
-  // Fetch related pain points when the idea is loaded
-  useEffect(() => {
-    if (idea?._id) {
-      console.log(
-        "Idea loaded, fetching related pain points for thread ID:",
-        idea.threadId || idea._id
-      );
-      fetchRelatedPainPoints();
-    }
-  }, [idea?._id]);
 
   // Fetch business ideas when the idea is loaded
   useEffect(() => {
@@ -436,14 +345,14 @@ const IdeaDetailPage = () => {
                         getBadgeVariant(idea.intensity).text
                       } border-0 px-2 py-1 text-xs`}
                     >
-                      🔥 {idea.intensity}
+                      Intensity: 🔥 {idea.intensity}
                     </Badge>
                     <Badge
                       className={`${getBadgeVariant(idea.urgency).bg} ${
                         getBadgeVariant(idea.urgency).text
                       } border-0 px-2 py-1 text-xs`}
                     >
-                      ⚡ {idea.urgency}
+                      Urgency: ⚡ {idea.urgency}
                     </Badge>
                   </div>
                 </div>
@@ -482,17 +391,6 @@ const IdeaDetailPage = () => {
                 </div>
               </div>
 
-              {idea.quotes && idea.quotes.length > 0 && (
-                <div className="bg-gradient-to-r from-primary/5 to-accent/5 border-l-4 border-primary p-4 rounded-r-lg">
-                  <h3 className="text-xs font-semibold text-primary mb-2 text-left">
-                    💬 Real User Quote
-                  </h3>
-                  <blockquote className="text-muted-foreground italic text-sm leading-relaxed">
-                    "{idea.quotes[0]}"
-                  </blockquote>
-                </div>
-              )}
-
               <div className="flex items-center justify-between pt-3 text-xs border-t">
                 <span className="flex items-center text-muted-foreground">
                   <Clock className="h-3 w-3 mr-1" />
@@ -502,44 +400,16 @@ const IdeaDetailPage = () => {
                     day: "numeric",
                   })}
                 </span>
+                
                 <Badge
                   variant={idea.potentialSolvability ? "default" : "outline"}
                   className="px-2 py-1 text-xs"
                 >
-                  {idea.potentialSolvability
-                    ? "✅ Solvable"
-                    : "🔍 Needs Research"}
+                  Potential Solvability: {idea.businessPotential}
                 </Badge>
               </div>
             </div>
           </div>
-
-          {/* Related Pain Points */}
-          {relatedPainPoints.length > 0 && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
-              <Target className="h-4 w-4 mr-2 text-gray-600" />
-              Related Pain Points
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {relatedPainPoints.slice(0, 4).map((point, index) => (
-                <div
-                  key={point._id}
-                  className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-blue-600 font-medium text-xs">
-                      {index + 1}
-                    </span>
-                  </div>
-                  <p className="text-gray-700 text-sm leading-relaxed text-left">
-                    {point.summary}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
         </div>
 
         {/* Business Solutions Section */}
@@ -578,101 +448,118 @@ const IdeaDetailPage = () => {
                   className="bg-white rounded-2xl p-5 shadow-sm border hover:shadow-md transition-all duration-300 group"
                 >
                   <div className="space-y-4">
-                    {/* Header */}
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start flex-1">
-                        <div className="w-8 h-8 bg-gradient-to-br from-accent/20 to-accent/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <span className="text-sm font-bold text-accent-foreground">
-                            {index + 1}
-                          </span>
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="text-lg font-bold text-foreground mb-2">
-                            {businessIdea.title}
-                          </h3>
-                          <Badge
-                            variant="outline"
-                            className="text-xs px-2 py-1 mb-2 "
-                          >
-                            {businessIdea.businessModel || "SaaS"}
-                          </Badge>
-                        </div>
+                    {/* Header with ID and Scores */}
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      {/* <span className="bg-gray-100 px-2 py-0.5 rounded">ID: {businessIdea._id?.substring(0, 8)}...</span> */}
+                      <div className="flex items-center space-x-2">
+                        <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded">Score: {businessIdea.feasibilityScore || businessIdea.score || "N/A"}</span>
+                        {/* <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded">Feasibility: {businessIdea.feasibilityScore || "N/A"}</span> */}
                       </div>
                     </div>
 
-                    <p className="text-muted-foreground text-sm leading-relaxed ">
-                      {businessIdea.description}
-                    </p>
-
-                    {/* Key Details */}
+                    {/* Main Content */}
                     <div className="space-y-3">
-                      <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
-                        <h4 className="text-xs font-semibold text-foreground mb-1 flex items-center">
-                          <Users className="h-3 w-3 mr-1 text-blue-600" />
-                          Target Audience
-                        </h4>
-                        <p className="text-muted-foreground text-xs leading-relaxed">
-                          {businessIdea.targetAudience}
-                        </p>
-                      </div>
-                      
-                      <div className="bg-purple-50 p-3 rounded-lg border border-purple-100">
-                        <h4 className="text-xs font-semibold text-foreground mb-1 flex items-center">
-                          <Zap className="h-3 w-3 mr-1 text-purple-600" />
-                          Key Differentiator
-                        </h4>
-                        <p className="text-muted-foreground text-xs leading-relaxed">
-                          {businessIdea.differentiator}
-                        </p>
-                      </div>
-                    </div>
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h3 className="text-lg font-bold text-foreground mb-1">
+                            {businessIdea.ideaName || businessIdea.title}
+                          </h3>
+                          <div className="flex items-center space-x-2">
+                            <Badge variant="outline" className="text-xs">
+                              {businessIdea.businessModel || "SaaS"}
+                            </Badge>
 
-                    {/* Key Features */}
-                    {businessIdea.keyFeatures &&
-                      businessIdea.keyFeatures.length > 0 && (
-                        <div className="bg-green-50 p-3 rounded-lg border border-green-100">
-                          <h4 className="text-xs font-semibold text-foreground mb-2 flex items-center">
-                            <Star className="h-3 w-3 mr-1 text-green-600" />
-                            Key Features
-                          </h4>
-                          <div className="space-y-1">
-                            {businessIdea.keyFeatures
-                              .slice(0, 3)
-                              .map((feature, idx) => (
-                                <div
-                                  key={idx}
-                                  className="flex items-start space-x-2"
-                                >
-                                  <div className="w-1 h-1 bg-green-500 rounded-full mt-1.5 flex-shrink-0"></div>
-                                  <span className="text-muted-foreground text-xs leading-relaxed">
-                                    {feature}
-                                  </span>
-                                </div>
-                              ))}
                           </div>
+                        </div>
+                      </div>
+
+                      {/* Description */}
+                      <p className="text-muted-foreground text-sm">
+                        {businessIdea.description || businessIdea.solutionOverview}
+                      </p>
+
+                      {/* Problem & Solution */}
+                      {/* <div className="space-y-2">
+                        <div className="bg-blue-50 p-3 rounded-lg">
+                          <h4 className="text-xs font-semibold text-foreground mb-1">Problem</h4>
+                          <p className="text-muted-foreground text-xs">{businessIdea.problemDescription || "N/A"}</p>
+                        </div>
+                      </div> */}
+
+                      {/* Key Details Grid */}
+                      <div className="grid grid-cols-2 gap-2">
+                        {/* Target Audience */}
+                        <div className="bg-gray-50 p-2 rounded">
+                          <h4 className="text-[10px] font-semibold text-foreground">Target Audience</h4>
+                          <p className="text-muted-foreground text-xs">{businessIdea.targetAudience || "N/A"}</p>
+                        </div>
+                        
+                        {/* Revenue Streams */}
+                        <div className="bg-green-50 p-2 rounded">
+                          <h4 className="text-[10px] font-semibold text-foreground">Revenue Streams</h4>
+                          <p className="text-muted-foreground text-xs">
+                            {businessIdea.revenueStreams?.join(", ") || "N/A"}
+                          </p>
+                        </div>
+                      </div>
+
+                     
+                      {/* Key Features */}
+                      {businessIdea.keyFeatures?.length > 0 && (
+                        <div className="bg-amber-50 p-3 rounded-lg">
+                          <h4 className="text-xs font-semibold text-foreground mb-1">Key Features</h4>
+                          <ul className="list-disc pl-5 space-y-1">
+                            {businessIdea.keyFeatures.slice(0, 3).map((feature, idx) => (
+                              <li key={idx} className="text-left text-muted-foreground text-xs">
+                                {feature}
+                              </li>
+                            ))}
+                          </ul>
                         </div>
                       )}
 
-                    {/* Use Case */}
-                    {businessIdea.useCase && (
-                      <div className="bg-amber-50 p-3 rounded-lg border border-amber-100">
-                        <h4 className="text-xs font-semibold text-foreground mb-1">
-                          💡 Use Case
-                        </h4>
-                        <p className="text-muted-foreground text-xs leading-relaxed italic">
-                          {businessIdea.useCase}
-                        </p>
+                      {/* Implementation & Challenges */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="bg-indigo-50 p-2 rounded">
+                          <h4 className="text-[10px] font-semibold text-foreground">Implementation Steps</h4>
+                          <p className="text-muted-foreground text-xs line-clamp-2">
+                            {businessIdea.implementationSteps?.[0] || "N/A"}
+                          </p>
+                        </div>
+                        <div className="bg-rose-50 p-2 rounded">
+                          <h4 className="text-[10px] font-semibold text-foreground">Potential Challenges</h4>
+                          <p className="text-muted-foreground text-xs line-clamp-2">
+                            {businessIdea.potentialChallenges?.[0] || "N/A"}
+                          </p>
+                        </div>
                       </div>
-                    )}
+
+                      {/* Use Case */}
+                      <div className="space-y-2">
+                        <div className="bg-blue-50 p-3 rounded-lg">
+                          <h4 className="text-xs font-semibold text-foreground mb-1">Use Case</h4>
+                          <p className="text-muted-foreground text-xs">{businessIdea.useCase || "N/A"}</p>
+                        </div>
+                      </div>
+
+                      {/* Keywords and Metadata */}
+                      <div className="flex flex-wrap gap-1 pt-1">
+                        {businessIdea.keywords?.slice(0, 3).map((keyword, idx) => (
+                          <span key={idx} className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                            {keyword}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
 
                     {/* Footer */}
-                    <div className="flex items-center justify-between pt-3 border-t text-xs">
-                      <span className="flex items-center text-foreground font-medium">
-                        <Star className="h-3 w-3 mr-1 text-yellow-500" />
-                        {businessIdea.score || "N/A"}
-                      </span>
-                      <span className="text-muted-foreground">
-                        {new Date(businessIdea.createdAt).toLocaleDateString()}
+                    <div className="flex items-center justify-between pt-2 border-t text-[11px] text-muted-foreground">
+                      <div className="flex items-center space-x-2">
+                        {/* <span>Source: {businessIdea.source || "ai-generated"}</span> */}
+                        {/* <span>{businessIdea.status}</span> */}
+                      </div>
+                      <span>
+                        {new Date(businessIdea.updatedAt || businessIdea.createdAt).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
@@ -693,7 +580,7 @@ const IdeaDetailPage = () => {
                     Loading Solutions...
                   </h3>
                   <p className="text-muted-foreground text-sm">
-                    Please wait while we generate business ideas
+                    Please wait while fetching business ideas
                   </p>
                 </div>
               </div>

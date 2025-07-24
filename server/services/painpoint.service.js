@@ -1,6 +1,5 @@
 const PainPoint = require('../models/PainPoint');
 const Thread = require('../models/Threads');
-const openaiService = require('./openAI.service');
 const langchain = require('./langchain.service');
 const { buildPainPointExtractionPrompt } = require('./promptUtils');
 
@@ -47,6 +46,9 @@ const extractPainPointsFromThread = async (thread) => {
   const threadContent = {
     title: thread.title,
     content: thread.content || '',
+    url: thread.permalink,
+    upvotes: thread.upvotes || 0,
+      subreddit: thread.subreddit,
     comments: (thread.comments || []).map(c => ({
       author: c.author || 'anonymous',
       content: c.text || c.content || '',
@@ -56,9 +58,11 @@ const extractPainPointsFromThread = async (thread) => {
 
   try {
     console.debug('Calling LangChain OpenAI agent to extract pain points...');
+    console.log(`LLM request for thread ${thread._id}:`, threadContent);
     const agent = await langchain.getPainPointAgent();
-    const prompt = buildPainPointExtractionPrompt(threadContent);
+    const prompt = (threadContent);
     const response = await agent.invoke({ input: prompt });
+    console.log(`LLM response received for thread ${thread._id}:`, response);
     let extracted;
     try {
       let content = response.response || response.text || response;
@@ -89,21 +93,21 @@ const extractPainPointsFromThread = async (thread) => {
         title: pp.title || 'Untitled Pain Point',
         summary: pp.summary || '',
         description: pp.description || '',
-        category: pp.category || thread.marketCategory || 'Other',
         subCategory: pp.subCategory || '',
+        upvotes: thread.upvotes || 0,
+        category: pp.category || thread.marketCategory || 'Other',
         intensity: ['Low', 'Medium', 'High'].includes(pp.intensity) ? pp.intensity : 'Medium',
         urgency: ['Low', 'Medium', 'High'].includes(pp.urgency) ? pp.urgency : 'Medium',
         quotes: Array.isArray(pp.quotes) ? pp.quotes : [],
         keywords: Array.isArray(pp.keywords) ? pp.keywords : [],
         threadId: thread._id,
-        subreddit: thread.subreddit || 'general',
+        subreddit: pp.subreddit,
+        businessPotential: pp.businessPotential || 'Low',
         topic: thread.title || 'General',
-        url: thread.url || `https://reddit.com/${thread.sourceId || ''}`,
+        url: thread.url || thread.permalink || '',
         postDate: thread.createdAt || new Date(),
         extractedAt: new Date(),
         extractedBy: 'anthropic-langchain',
-        tags: Array.isArray(pp.tags) ? pp.tags : [],
-        comments: []
       }));
   } catch (error) {
     console.error(`Error extracting pain points from thread ${thread._id}:`, error);

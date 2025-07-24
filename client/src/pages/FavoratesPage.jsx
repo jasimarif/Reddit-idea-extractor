@@ -112,48 +112,47 @@ const FavoritesPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 ">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6">
         {/* Enhanced Header */}
-        <div className="mb-12 text-center lg:text-left">
-          <div className="inline-flex items-center justify-center lg:justify-start bg-white/80 backdrop-blur-sm rounded-2xl px-6 py-4 shadow-sm border border-gray-100 mb-4">
-            <div className="p-2.5 bg-pink-100 rounded-xl mr-4 shadow-inner">
-              <Heart className="h-8 w-8 text-pink-600" fill="currentColor" />
+        <div className="mb-8 sm:mb-12 text-center sm:text-left">
+          <div className="inline-flex flex-col sm:flex-row items-center sm:items-start sm:justify-start mt-8">
+            <div className="p-2 bg-pink-100 rounded-lg sm:rounded-xl mr-0 sm:mr-4 mb-2 sm:mb-0 shadow-inner">
+              <Heart className="h-6 w-6 sm:h-8 sm:w-8 text-pink-600" fill="currentColor" />
             </div>
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+            <div className="text-center sm:text-left">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
                 Your Favorite Ideas
-              </h1>
-              <p className="mt-1.5 text-gray-600 text-sm md:text-base">
-                All your saved ideas in one place
-                <span className="hidden sm:inline"> • Quickly find what inspired you</span>
+              </h2>
+              <p className="mt-1 text-gray-600 text-sm sm:text-base">
+                {window.innerWidth < 640 ? 'All your saved ideas' : 'All your saved ideas in one place • Quickly find what inspired you'}
               </p>
             </div>
           </div>
           
           {/* Stats Bar */}
-          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mt-6">
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl px-5 py-3 shadow-sm border border-gray-100 flex items-center">
-              <div className="p-1.5 bg-blue-100 rounded-lg mr-3">
-                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center sm:justify-start gap-3 sm:gap-4 mt-4 sm:mt-6">
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-xl px-3 py-2 sm:px-5 sm:py-3 shadow-sm border border-gray-100 flex items-center w-full sm:w-auto">
+              <div className="p-1 sm:p-1.5 bg-blue-100 rounded-md sm:rounded-lg mr-2 sm:mr-3">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Total Saved</p>
-                <p className="text-lg font-semibold text-gray-800">{favorites.length} {favorites.length === 1 ? 'Idea' : 'Ideas'}</p>
+                <p className="text-[10px] sm:text-xs text-gray-500">Total Saved</p>
+                <p className="text-sm sm:text-lg font-semibold text-gray-800">{favorites.length} {favorites.length === 1 ? 'Idea' : 'Ideas'}</p>
               </div>
             </div>
             
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl px-5 py-3 shadow-sm border border-gray-100 flex items-center">
-              <div className="p-1.5 bg-purple-100 rounded-lg mr-3">
-                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-xl px-3 py-2 sm:px-5 sm:py-3 shadow-sm border border-gray-100 flex items-center w-full sm:w-auto">
+              <div className="p-1 sm:p-1.5 bg-purple-100 rounded-md sm:rounded-lg mr-2 sm:mr-3">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
                 </svg>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Categories</p>
-                <p className="text-lg font-semibold text-gray-800">
+                <p className="text-[10px] sm:text-xs text-gray-500">Categories</p>
+                <p className="text-sm sm:text-lg font-semibold text-gray-800">
                   {new Set(favorites.map(f => f.category)).size}
                 </p>
               </div>
@@ -186,42 +185,39 @@ const FavoritesPage = () => {
         ) : (
           <>
             {/* Filters and Search */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+            <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-6 sm:mb-8">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
                 {/* Category Filters */}
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5 sm:gap-2 overflow-x-auto pb-1 -mx-1 sm:mx-0">
                   {availableCategories.map((category) => {
                     const categoryName = category.name || category;
                     return (
                       <button
                         key={categoryName}
                         onClick={() => setSelectedCategory(categoryName === "All" ? "All" : categoryName)}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-md sm:rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
                           selectedCategory === categoryName
-                            ? "bg-purple-100 text-purple-700 border border-purple-200"
-                            : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-transparent"
+                            ? "bg-purple-100 text-purple-700"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                         }`}
                       >
-                        {categoryName === "Health" && "💊 "}
-                        {categoryName === "Wealth" && "💸 "}
-                        {categoryName === "Relationships" && "❤️ "}
                         {categoryName}
                       </button>
                     );
                   })}
                 </div>
 
-                {/* Search */}
-                <div className="relative">
+                {/* Search Bar */}
+                <div className="relative w-full sm:w-auto sm:min-w-[200px] mt-2 sm:mt-0">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search className="h-5 w-5 text-gray-400" />
+                    <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
                   </div>
                   <input
                     type="text"
                     placeholder="Search favorites..."
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
+                    className="block w-full pl-9 sm:pl-10 pr-3 py-1.5 sm:py-2 border border-gray-300 rounded-lg bg-white text-xs sm:text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   />
                 </div>
               </div>
@@ -236,18 +232,18 @@ const FavoritesPage = () => {
               </p>
             </div>
 
-            {/* Favorites Grid */}
+            {/* Ideas Grid */}
             {filteredFavorites.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-gray-400 text-lg mb-2">
+              <div className="text-center py-8 sm:py-12">
+                <div className="text-gray-400 text-base sm:text-lg mb-1.5 sm:mb-2">
                   No favorites found
                 </div>
-                <p className="text-gray-500">
+                <p className="text-gray-500 text-sm sm:text-base">
                   Try adjusting your filters or search terms
                 </p>
               </div>
             ) : (
-              <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
                 {filteredFavorites.filter(Boolean).map((idea) => (
                   <IdeaCard
                     key={idea._id}

@@ -21,19 +21,17 @@ const PainPointSchema = new mongoose.Schema({
     },
     default: null
   },
-  subreddit: { type: String, default: 'general' },
+  subreddit: { type: String },
   topic: { type: String, default: 'General' },
   url: { type: String, default: '' },
   postDate: { type: Date, default: Date.now },
   quotes: [String], // 3-5 direct user quotes
-  frequency: { type: Number, default: 1 }, // Number of mentions
   title: { type: String, required: true, default: 'Untitled' },
   body: { type: String, default: '' },
   upvotes: { type: Number, default: 0 },
-  potentialSolvability: { type: Boolean, default: false },
+  businessPotential: { type: String, enum: ["Low", "Medium", "High"], default: "Medium" },
   rankScore: { type: Number, default: 0 }, // Combined score for ranking
   summary: { type: String, default: '' },
-  tags: { type: [String], default: [] },
   category: { type: String, default: 'Other' },
   keywords: { type: [String], default: [] }, // For similarity search
   intensity: { type: String, enum: ["Low", "Medium", "High"], default: "Medium" },
@@ -48,7 +46,6 @@ const PainPointSchema = new mongoose.Schema({
     ref: "User",
   },
   createdAt: { type: Date, default: Date.now },
-  comments: { type: [CommentSchema], default: [] },
 }, { 
   timestamps: true,
   collection: 'painpoints'

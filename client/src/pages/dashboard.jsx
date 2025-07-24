@@ -182,49 +182,73 @@ const DashboardPage = () => {
   }, [currentPage, allIdeas, itemsPerPage]);
 
   const handleToggleFavorite = async (ideaId) => {
-    // Create a new array with the updated favorite status
-    const updatedIdeas = ideas.map((idea) =>
-      idea._id === ideaId ? { ...idea, isFavorited: !idea.isFavorited } : idea
+    // Optimistically update both ideas and allIdeas state for immediate UI feedback
+    setIdeas(prevIdeas => 
+      prevIdeas.map(idea => 
+        idea._id === ideaId 
+          ? { ...idea, isFavorited: !idea.isFavorited } 
+          : idea
+      )
+    );
+  
+    // Also update allIdeas to maintain consistency
+    setAllIdeas(prevAllIdeas => 
+      prevAllIdeas.map(idea => 
+        idea._id === ideaId 
+          ? { ...idea, isFavorited: !idea.isFavorited } 
+          : idea
+      )
     );
 
-    // Save the previous state in case we need to revert
-    const prevIdeas = [...ideas];
+    // Update favoriteIds state
+    setFavoriteIds(prev => {
+      const isCurrentlyFavorited = prev.includes(ideaId);
+      return isCurrentlyFavorited
+        ? prev.filter(id => id !== ideaId)
+        : [...prev, ideaId];
+    });
 
-    // Update the local state immediately for instant UI feedback
-    setIdeas(updatedIdeas);
-
-    // Update the favoriteIds state to keep it in sync
-    const newFavoriteStatus = !prevIdeas.find((i) => i._id === ideaId)
-      ?.isFavorited;
-    setFavoriteIds((prev) =>
-      newFavoriteStatus ? [...prev, ideaId] : prev.filter((id) => id !== ideaId)
-    );
-
+    const isFavoriting = !favoriteIds.includes(ideaId);
+  
     try {
-      // Make the API call to update the favorite status
-      if (newFavoriteStatus) {
+      if (isFavoriting) {
         await apiRequest.post(`/favorites/${ideaId}`);
       } else {
         await apiRequest.delete(`/favorites/${ideaId}`);
       }
-
-      // Refresh the ideas to ensure everything is in sync
-      await fetchIdeas();
+      
+      // Refresh the data to ensure consistency with the server
+      await fetchAllIdeas();
     } catch (error) {
       console.error("Error toggling favorite:", error);
-      // Revert to the previous state if there's an error
-      setIdeas(prevIdeas);
-
-      // Also revert the favoriteIds state
-      const prevFavoriteStatus = prevIdeas.find(
-        (i) => i._id === ideaId
-      )?.isFavorited;
-      setFavoriteIds((prev) =>
-        prevFavoriteStatus
-          ? [...prev.filter((id) => id !== ideaId), ideaId]
-          : prev.filter((id) => id !== ideaId)
+      
+      // Revert the optimistic update if there's an error
+      setIdeas(prevIdeas => 
+        prevIdeas.map(idea => 
+          idea._id === ideaId 
+            ? { ...idea, isFavorited: !isFavoriting } 
+            : idea
+        )
       );
-    }
+      
+      setAllIdeas(prevAllIdeas => 
+        prevAllIdeas.map(idea => 
+          idea._id === ideaId 
+            ? { ...idea, isFavorited: !isFavoriting } 
+            : idea
+        )
+      );
+      
+      // Revert favoriteIds state
+      setFavoriteIds(prev => 
+        isFavoriting
+          ? prev.filter(id => id !== ideaId)
+          : [...prev, ideaId]
+      );
+      
+      // Show error toast or notification
+      // toast.error("Failed to update favorite status. Please try again.");
+    }  
   };
 
   const handleRefreshIdeas = async () => {
@@ -258,13 +282,13 @@ const DashboardPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
         {/* Header */}
-        <div className="mb-12 text-center">
-          <div className="max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+        <div className="mb-6 sm:mb-8 md:mb-12 text-center">
+          <div className="max-w-3xl mx-auto px-2 sm:px-0">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Idea Dashboard
-            </h1>
+            </h2>
             <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
               Discover and organize the best ideas from Reddit communities
             </p>
@@ -272,10 +296,10 @@ const DashboardPage = () => {
         </div>
 
         {/* Search and Sort */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 lg:space-x-4">
+        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4 md:p-6 mb-4 sm:mb-6">
+          <div className="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
             {/* Category Dropdown */}
-            <div className="w-full md:w-56 mb-4 md:mb-0">
+            <div className="w-full sm:w-48 md:w-56 mb-3 sm:mb-0">
               <Select
                 value={selectedCategories[0] || ""} // fallback for single-select UI, not needed for multi-select buttons
                 onValueChange={(value) => {
@@ -307,11 +331,11 @@ const DashboardPage = () => {
               </Select>
             </div>
             {/* Search */}
-            <div className="flex-1 mb-4 md:mb-0">
+            <div className="flex-1 mb-3 sm:mb-0 mx-0 sm:mx-2">
               <div className="relative">
                 <input
                   type="text"
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full text-sm sm:text-base pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                   placeholder="Search ideas..."
                   value={searchTerm}
                   onChange={(e) => {
@@ -320,19 +344,19 @@ const DashboardPage = () => {
                   }}
                 />
                 <Search
-                  className="absolute left-3 top-2.5 text-gray-400"
-                  size={18}
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  size={16}
                 />
               </div>
             </div>
             {/* Sort */}
-            <div className="flex items-center space-x-2">
-              <span className="text-sm font-medium text-gray-700">
+            <div className="flex items-center justify-between sm:justify-start space-x-2 w-full sm:w-auto mt-2 sm:mt-0">
+              <span className="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">
                 Sort by:
               </span>
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-40">
-                  <SelectValue />
+                <SelectTrigger className="w-full sm:w-36 md:w-40 text-xs sm:text-sm">
+                  <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent className="bg-white">
                   <SelectItem value="rankScore">Most Rank Score</SelectItem>
@@ -345,8 +369,8 @@ const DashboardPage = () => {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="space-y-4">
+        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4 md:p-6 mb-4 sm:mb-6">
+          <div className="space-y-3 sm:space-y-4">
             {/* Tag Filters */}
             {/* <div className="flex items-start space-x-2">
                 <div className="space-y-3">
@@ -383,16 +407,16 @@ const DashboardPage = () => {
             </div> */}
 
             {/* Category Filters */}
-            <div className="flex items-start space-x-2 mt-4">
-              <span className="text-sm font-medium text-gray-700 mt-1">
+            <div className="flex flex-col sm:flex-row sm:items-start space-y-2 sm:space-y-0 sm:space-x-2 mt-3 sm:mt-4">
+              <span className="text-xs sm:text-sm font-medium text-gray-700 mt-1 whitespace-nowrap">
                 Popular Categories:
               </span>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {categories.slice(0, 12).map((cat) => (
                   <button
                     key={cat.name}
                     onClick={() => handleCategoryToggle(cat.name)}
-                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                    className={`px-2.5 sm:px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                       selectedCategories.includes(cat.name)
                         ? "bg-green-100 text-green-700 border border-green-200"
                         : "bg-gray-100 text-gray-600 hover:bg-gray-200 border border-transparent"
@@ -468,7 +492,7 @@ const DashboardPage = () => {
         </div>
 
         {/* Results Count */}
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6 px-1">
           {isLoading ? (
             <div className="flex items-center space-x-2">
               <RefreshCw className="h-4 w-4 animate-spin text-gray-500" />
@@ -491,22 +515,22 @@ const DashboardPage = () => {
         </div>
 
         {/* Ideas Table */}
-        <Card className="bg-white rounded-xl shadow-sm border border-gray-200">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg font-semibold text-gray-900">
+        <Card className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <CardHeader className="pb-3 px-3 sm:px-6 pt-4 sm:pt-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0">
+              <CardTitle className="text-base sm:text-lg font-semibold text-gray-900">
                 Business Ideas ({currentIdeas.length})
               </CardTitle>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center justify-end sm:justify-start space-x-2">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleRefreshIdeas}
                   disabled={isLoading}
-                  className="border-gray-300"
+                  className="border-gray-300 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
                 >
                   <RefreshCw
-                    className={`h-4 w-4 mr-2 ${
+                    className={`h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 ${
                       isLoading ? "animate-spin" : ""
                     }`}
                   />
@@ -516,41 +540,96 @@ const DashboardPage = () => {
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="overflow-hidden">
-              <Table>
-                <TableHeader className="bg-gray-50">
+            <div className="overflow-x-auto">
+              <Table className="min-w-full">
+                <TableHeader className="bg-gray-50 hidden sm:table-header-group">
                   <TableRow className="border-b border-gray-200">
-                    <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12"></TableHead>
-                    <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/5">
+                    <TableHead className="px-2 sm:px-3 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10 sm:w-12"></TableHead>
+                    <TableHead className="px-2 sm:px-7 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-auto sm:w-2/5">
                       Business Idea
                     </TableHead>
-                    <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">
+                    <TableHead className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell w-1/8">
                       Source
                     </TableHead>
-                    <TableHead className="px-12 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">
+                    <TableHead className="px-2 sm:px-9 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell w-1/8">
                       Category
                     </TableHead>
-                    <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12">
-                      Score
+                    <TableHead className="px-2 sm:px-5 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16 sm:w-20 md:w-24">
+                      <span className="hidden sm:inline">Score</span>
+                      <span className="sm:hidden">Score & Date</span>
                     </TableHead>
-                    <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">
+                    <TableHead className="hidden lg:table-cell px-2 sm:px-12 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">
                       Date
                     </TableHead>
-                    <TableHead className="px-12 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">
+                    <TableHead className="px-2 sm:px-12 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell w-1/8">
                       Status
                     </TableHead>
-                    <TableHead className="px-10 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">
+                    <TableHead className="px-2 sm:px-10 py-2 sm:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-16 sm:w-20">
                       Actions
                     </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody className="bg-white">
+                <TableBody className="bg-white divide-y divide-gray-100">
                   {currentIdeas.map((idea) => (
                     <TableRow
                       key={idea._id}
-                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                      className="block sm:table-row hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
                     >
-                      <TableCell className="px-2 py-4 whitespace-nowrap">
+                      {/* Mobile Header */}
+                      <div className="sm:hidden px-4 py-2 bg-gray-50 flex justify-between items-center border-b border-gray-100">
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleToggleFavorite(idea._id);
+                            }}
+                            className="p-1 rounded-full hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                            title={
+                              idea.isFavorited
+                                ? "Remove from favorites"
+                                : "Add to favorites"
+                            }
+                          >
+                            <svg
+                              className={`h-5 w-5 ${
+                                idea.isFavorited
+                                  ? "text-yellow-400 fill-current"
+                                  : "text-gray-300 hover:text-yellow-400"
+                              }`}
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill={idea.isFavorited ? "currentColor" : "none"}
+                              stroke="currentColor"
+                              strokeWidth="2"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                              />
+                            </svg>
+                          </button>
+                          <span className="text-sm font-medium text-gray-500">
+                            {idea.platform || "reddit"}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Badge className="bg-green-50 text-green-700 border border-green-100 text-xs font-medium">
+                            {idea.status}
+                          </Badge>
+                          <Link to={`/idea/${idea._id}`}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 h-8 px-2"
+                            >
+                              <ExternalLink className="h-3.5 w-3.5" />
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
+                      <TableCell className="hidden sm:table-cell px-3 sm:px-4 py-3 whitespace-nowrap text-sm text-gray-900">
                         <button
                           onClick={(e) => {
                             e.preventDefault();
@@ -584,10 +663,11 @@ const DashboardPage = () => {
                           </svg>
                         </button>
                       </TableCell>
-                      <TableCell className="px-6 py-4 whitespace-normal text-sm text-gray-900 max-w-md">
+                      <TableCell className="block sm:table-cell px-4 sm:px-6 py-3 whitespace-normal text-sm text-gray-900 max-w-md">
+                        <div className="sm:hidden text-xs font-medium text-gray-500 mb-1">Idea</div>
                         <Link
                           to={`/idea/${idea._id}`}
-                          className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                          className="text-blue-600 hover:text-blue-800 hover:underline font-medium block mb-2 sm:mb-0"
                         >
                           {idea.title || idea.summary}
                         </Link>
@@ -598,7 +678,8 @@ const DashboardPage = () => {
                         )}
                       </TableCell>
 
-                      <TableCell className="px-4 py-4 whitespace-nowrap">
+                      <TableCell className="hidden md:table-cell px-3 sm:px-4 py-3 whitespace-nowrap text-sm">
+                        <div className="sm:hidden text-xs font-medium text-gray-500 mb-1">Source</div>
                         <div className="flex items-center">
                           <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors">
                             {idea.platform || "reddit"}
@@ -606,7 +687,8 @@ const DashboardPage = () => {
                         </div>
                       </TableCell>
 
-                      <TableCell className="px-4 py-4 whitespace-nowrap">
+                      <TableCell className="hidden lg:table-cell px-3 sm:px-4 py-3 whitespace-nowrap text-sm">
+                        <div className="sm:hidden text-xs font-medium text-gray-500 mb-1">Category</div>
                         <Badge
                           variant="outline"
                           className={`${getCategoryColor(
@@ -617,40 +699,52 @@ const DashboardPage = () => {
                         </Badge>
                       </TableCell>
 
-                      <TableCell className="px-4 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <span className="px-2 py-1 bg-blue-50 text-blue-700 text-sm font-medium rounded">
-                            {idea.rankScore?.toFixed(2) || "N/A"}
-                          </span>
+                      <TableCell className="px-3 sm:px-4 py-3 whitespace-nowrap">
+                        <div className="flex flex-col sm:block">
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs sm:text-sm font-medium rounded">
+                              {idea.rankScore?.toFixed(2) || "N/A"}
+                            </span>
+                            <span className="sm:hidden text-xs text-gray-500 flex items-center">
+                              <Calendar className="h-3 w-3 mr-1 text-gray-400" />
+                              {new Date(idea.postDate).toLocaleDateString("en-US", {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                              })}
+                            </span>
+                          </div>
                         </div>
                       </TableCell>
 
-                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <TableCell className="hidden lg:table-cell px-3 sm:px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                         <div className="flex items-center">
                           <Calendar className="h-4 w-4 mr-1.5 text-gray-400" />
                           {new Date(idea.postDate).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
                           })}
                         </div>
                       </TableCell>
 
-                      <TableCell className="px-4 py-4 whitespace-nowrap">
+                      <TableCell className="hidden md:table-cell px-3 sm:px-4 py-3 whitespace-nowrap text-sm">
+                        <div className="sm:hidden text-xs font-medium text-gray-500 mb-1">Status</div>
                         <Badge className="bg-green-50 text-green-700 border border-green-100 text-xs font-medium">
                           {idea.status}
                         </Badge>
                       </TableCell>
 
-                      <TableCell className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <TableCell className="hidden sm:table-cell px-3 sm:px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="sm:hidden text-xs font-medium text-gray-500 mb-1">Actions</div>
                         <Link to={`/idea/${idea._id}`}>
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                            className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 h-8 sm:h-9 px-2 sm:px-3"
                           >
-                            <ExternalLink className="h-4 w-4 mr-1.5" />
-                            View
+                            <ExternalLink className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
+                            <span className="hidden sm:inline">View</span>
                           </Button>
                         </Link>
                       </TableCell>
@@ -673,99 +767,108 @@ const DashboardPage = () => {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-center space-x-1.5 mt-8">
-            <button
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 flex items-center disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-200"
-            >
-              <svg
-                className="w-4 h-4 mr-1.5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
+          <div className="mt-6 sm:mt-8">
+            <div className="flex items-center justify-between sm:justify-center space-x-1">
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-2 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 flex items-center disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-200"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-              Previous
-            </button>
+                <svg
+                  className="w-4 h-4 mr-1 sm:mr-1.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+                <span className="hidden sm:inline">Previous</span>
+                <span className="sm:hidden">Prev</span>
+              </button>
 
-            <div className="flex items-center space-x-1.5">
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                // Show first page, last page, current page, and pages around current
-                let pageNum;
-                if (totalPages <= 5) {
-                  pageNum = i + 1;
-                } else if (currentPage <= 3) {
-                  pageNum = i + 1;
-                } else if (currentPage >= totalPages - 2) {
-                  pageNum = totalPages - 4 + i;
-                } else {
-                  pageNum = currentPage - 2 + i;
-                }
+              <div className="flex items-center space-x-1 overflow-x-auto py-2 px-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  // Show first page, last page, current page, and pages around current
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
 
-                return (
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`min-w-[32px] h-8 sm:min-w-[40px] sm:h-10 flex items-center justify-center text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 ${
+                        currentPage === pageNum
+                          ? "bg-gradient-to-br from-purple-600 to-blue-600 text-white shadow-md shadow-purple-100 transform scale-105"
+                          : "text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-purple-700"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+
+                {totalPages > 5 && currentPage < totalPages - 2 && (
+                  <span className="px-1 sm:px-2 text-gray-400 text-xs sm:text-sm">
+                    ...
+                  </span>
+                )}
+
+                {totalPages > 5 && currentPage < totalPages - 2 && (
                   <button
-                    key={pageNum}
-                    onClick={() => setCurrentPage(pageNum)}
-                    className={`w-10 h-10 flex items-center justify-center text-sm font-medium rounded-lg transition-all duration-200 ${
-                      currentPage === pageNum
+                    onClick={() => setCurrentPage(totalPages)}
+                    className={`min-w-[32px] h-8 sm:min-w-[40px] sm:h-10 flex items-center justify-center text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 ${
+                      currentPage === totalPages
                         ? "bg-gradient-to-br from-purple-600 to-blue-600 text-white shadow-md shadow-purple-100 transform scale-105"
                         : "text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-purple-700"
                     }`}
                   >
-                    {pageNum}
+                    {totalPages}
                   </button>
-                );
-              })}
+                )}
+              </div>
 
-              {totalPages > 5 && currentPage < totalPages - 2 && (
-                <span className="px-2 text-gray-400">...</span>
-              )}
-
-              {totalPages > 5 && currentPage < totalPages - 2 && (
-                <button
-                  onClick={() => setCurrentPage(totalPages)}
-                  className={`w-10 h-10 flex items-center justify-center text-sm font-medium rounded-lg transition-all duration-200 ${
-                    currentPage === totalPages
-                      ? "bg-gradient-to-br from-purple-600 to-blue-600 text-white shadow-md shadow-purple-100 transform scale-105"
-                      : "text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-purple-700"
-                  }`}
-                >
-                  {totalPages}
-                </button>
-              )}
-            </div>
-
-            <button
-              onClick={() =>
-                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-              }
-              disabled={currentPage === totalPages}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 flex items-center disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-200"
-            >
-              Next
-              <svg
-                className="w-4 h-4 ml-1.5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
+              <button
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                disabled={currentPage === totalPages}
+                className="px-3 py-2 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 flex items-center disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-200"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
+                <span className="sm:hidden">Next</span>
+                <span className="hidden sm:inline">Next</span>
+                <svg
+                  className="w-4 h-4 ml-1 sm:ml-1.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div className="mt-2 text-center text-xs text-gray-500">
+              Page {currentPage} of {totalPages}
+            </div>
           </div>
         )}
       </div>

@@ -7,6 +7,7 @@ subreddit: { type: String }, // For Reddit
 author: { type: String },
 title: { type: String }, // Reddit post title
 content: { type: String }, // Reddit selftext or tweet text
+permalink: { type: String },
 comments: [{
 author: String,
 text: String,

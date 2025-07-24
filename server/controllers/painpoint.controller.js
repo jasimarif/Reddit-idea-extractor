@@ -35,7 +35,7 @@ const analyzePainPoints = async (req, res) => {
       },
       meta: {
         timestamp: new Date().toISOString(),
-        analysisEngine: 'openai-gpt'
+        analysisEngine: 'openai-gpt-4 assistant',
       }
     });
   } catch (error) {

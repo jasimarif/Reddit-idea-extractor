@@ -129,7 +129,7 @@ async function storeThread(post, comments) {
       author: post.author,
       title: post.title,
       content: post.selftext || '',
-      url: `https://reddit.com${post.permalink}`,
+      permalink: post.permalink,
       comments: comments.map((c) => ({
         author: c.author || 'anonymous',
         text: c.text || '',

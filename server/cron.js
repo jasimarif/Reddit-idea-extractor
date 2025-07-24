@@ -1,5 +1,4 @@
 const cron = require("node-cron");
-const ideaService = require("./services/idea.service");
 const painpointService = require("./services/painpoint.service");
 const marketGapService = require("./services/marketGap.service");
 
@@ -14,46 +13,46 @@ const startCronJobs = () => {
   const Thread = require("./models/Threads");
 
   cron.schedule(
-    "55 18 * * *",
+    "58 21 * * *",
     async () => {
       console.log("Running daily Reddit idea fetch...");
       const subredditList = [
         "startups",
         "Entrepreneur",
         "smallbusiness",
-        "freelance",
-        "consulting",
-        "overemployed",
+        // "freelance",
+        // "consulting",
+        // "overemployed",
         "jobs",
-        "resumes",
+        // "resumes",
         "careerguidance",
-        "Health",
-        "mentalhealth",
-        "Anxiety",
-        "depression",
-        "Fitness",
-        "loseit",
-        "ADHD",
-        "StopSmoking",
-        "eczema",
-        "personalfinance",
-        "relationships",
-        "relationship_advice",
-        "parenting",
-        "custody",
-        "coparenting",
-        "divorce",
-        "blendedfamilies",
-        "breakups",
-        "productivity",
-        "digitalnomad",
-        "indiebiz",
-        "SaaS",
-        "solopreneurs",
-        "WorkReform",
-        "financialindependence",
+        // "Health",
+        // "mentalhealth",
+        // "Anxiety",
+        // "depression",
+        // "Fitness",
+        // "loseit",
+        // "ADHD",
+        // "StopSmoking",
+        // "eczema",
+        // "personalfinance",
+        // "relationships",
+        // "relationship_advice",
+        // "parenting",
+        // "custody",
+        // "coparenting",
+        // "divorce",
+        // "blendedfamilies",
+        // "breakups",
+        // "productivity",
+        // "digitalnomad",
+        // "indiebiz",
+        // "SaaS",
+        // "solopreneurs",
+        // "WorkReform",
+        // "financialindependence",
         "sideproject",
-        "makers",
+        // "makers",
         "nocode",
       ];
 
@@ -64,7 +63,7 @@ const startCronJobs = () => {
         for (const subreddit of subredditList) {
           console.log(`\n=== Fetching from r/${subreddit} ===`);
           try {
-            const posts = await fetchTopPosts(subreddit, 3);
+            const posts = await fetchTopPosts(subreddit, 6);
             console.log(`Found ${posts.length} posts in r/${subreddit}`);
 
             for (const post of posts) {

@@ -1,5 +1,4 @@
 const BusinessIdea = require('../models/BusinessIdea');
-const { generateBusinessIdeas: generateIdeasWithAI } = require('./openAI.service');
 const langchain = require('./langchain.service');
 const { buildBusinessIdeaPrompt } = require('./promptUtils');
 
@@ -15,22 +14,24 @@ async function generateBusinessIdeas(painPoints) {
     // Format pain points with enhanced context
     const formattedPainPoints = painPoints.map(pp => ({
       title: pp.title || 'Untitled Pain Point',
-      description: pp.analysis?.problem || pp.description || '',
+      description: pp.summary,
       category: pp.category || 'General',
-      subCategory: pp.subCategory || '',
       intensity: pp.intensity || 'Medium',
       urgency: pp.urgency || 'Medium',
+      url: pp.url || '',
+      rankScore: pp.rankScore || 0,
+      businessPotential: pp.businessPotential || 'Medium',
+      quotes: Array.isArray(pp.quotes) ? pp.quotes : [],
       keywords: Array.isArray(pp.keywords) ? pp.keywords : [],
-      targetAudience: Array.isArray(pp.targetAudience) ? pp.targetAudience : [],
-      existingSolutions: Array.isArray(pp.existingSolutions) ? pp.existingSolutions : []
     }));
     
     console.log('Formatted pain points for AI:', JSON.stringify(formattedPainPoints, null, 2));
     
     try {
       const agent = await langchain.getMarketGapAgent();
-      const prompt = buildBusinessIdeaPrompt(formattedPainPoints);
+      const prompt = (formattedPainPoints);
       const response = await agent.invoke({ input: prompt });
+      console.log('OpenAI response:', JSON.stringify(response, null, 2));
       let aiIdeas;
       try {
         const responseContent = response.response || response.text || response;
@@ -109,11 +110,6 @@ async function generateBusinessIdeas(painPoints) {
             return fallback.map((item, idx) => `${item} (${ideaIdx + 1})`);
           }
 
-          const defaultRevenueStreams = ["Subscription fees", "Ad revenue"];
-          const defaultImplementationSteps = ["Develop MVP", "Launch marketing campaign"];
-          const defaultPotentialChallenges = ["Market competition", "User adoption hurdles"];
-          const defaultSuccessMetrics = ["Monthly active users", "Revenue growth"];
-
           // Always fill differentiator and useCase with unique fallback if missing
           const differentiator = aiIdea.differentiator && aiIdea.differentiator.trim()
             ? aiIdea.differentiator.trim()
@@ -128,32 +124,25 @@ async function generateBusinessIdeas(painPoints) {
           const rankingReason = aiIdea.rankingReason || (aiIdea.description ? `Generated for idea: ${aiIdea.ideaName || "Idea"}` : "");
 
           // Remove empty/placeholder fields
-          const cleanArray = (arr) => Array.isArray(arr) ? arr.filter(x => x && typeof x === 'string' && !x.startsWith('Feature')) : [];
+          const cleanArray = (arr) => Array.isArray(arr) ? arr.filter(x => x && typeof x === 'string') : [];
 
           const ideaData = {
             // Required fields with non-empty defaults
             ideaName: String(aiIdea.ideaName || `Business Idea ${i + 1}`).trim(),
             description,
-            tagline: String(aiIdea.tagline || '').trim(),
             problemStatement,
             solutionOverview: String(aiIdea.solutionOverview || description || 'No solution overview provided').trim(),
-            uniqueValueProposition: String(aiIdea.uniqueValueProposition || 'No unique value proposition provided').trim(),
+            uniqueValueProposition: cleanArray(aiIdea.uniqueValueProposition || aiIdea.valueProposition || []),
             keyFeatures: cleanArray(aiIdea.keyFeatures),
-            differentiators: Array.isArray(aiIdea.differentiators) ? aiIdea.differentiators : [],
             targetAudience,
             businessModel,
-            marketCategory: String(aiIdea.marketCategory || 'Other').trim(),
+            marketCategory: String(aiIdea.marketCategory),
             revenueStreams: cleanArray(aiIdea.revenueStreams),
             mvpFeatures: Array.isArray(aiIdea.mvpFeatures) ? aiIdea.mvpFeatures : [],
             implementationSteps: cleanArray(aiIdea.implementationSteps),
-            risks: Array.isArray(aiIdea.risks) ? aiIdea.risks : [],
             technicalFeasibility: typeof aiIdea.technicalFeasibility === 'object' && aiIdea.technicalFeasibility ? aiIdea.technicalFeasibility : {},
             marketFeasibility: typeof aiIdea.marketFeasibility === 'object' && aiIdea.marketFeasibility ? aiIdea.marketFeasibility : {},
-            financialFeasibility: typeof aiIdea.financialFeasibility === 'object' && aiIdea.financialFeasibility ? aiIdea.financialFeasibility : {},
-            framework: String(aiIdea.framework || 'general').trim().toLowerCase(),
-            frameworkSpecific: typeof aiIdea.frameworkSpecific === 'object' && aiIdea.frameworkSpecific ? aiIdea.frameworkSpecific : {},
             potentialChallenges: cleanArray(aiIdea.potentialChallenges),
-            bestInWorldPotential: String(aiIdea.bestInWorldPotential || '').trim(),
             successMetrics: cleanArray(aiIdea.successMetrics),
             painPointIds: painPoints
               .filter(pp => pp && pp._id && typeof pp._id === 'object' && pp._id.toString)
@@ -162,13 +151,11 @@ async function generateBusinessIdeas(painPoints) {
             source: 'ai-generated',
             potentialScore: Number(aiIdea.potentialScore) || 0,
             feasibilityScore: Number(aiIdea.feasibilityScore) || 0,
-            uniquenessScore: Number(aiIdea.uniquenessScore) || 0,
             createdAt: new Date(),
             updatedAt: new Date(),
-            differentiator,
+            differentiators: aiIdea.differentiators || differentiator || differentiators,
             useCase,
             keywords,
-            score,
             rankingReason
           };
           
