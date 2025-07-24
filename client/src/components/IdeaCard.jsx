@@ -66,7 +66,7 @@ const IdeaCard = ({ idea, onToggleFavorite }) => {
           {idea.summary}
         </p>
 
-        <div className="flex flex-wrap gap-1 mb-3 sm:mb-4">
+        {/* <div className="flex flex-wrap gap-1 mb-3 sm:mb-4">
           {idea.tags.slice(0, 3).map((tag, index) => (
             <span
               key={index}
@@ -80,7 +80,7 @@ const IdeaCard = ({ idea, onToggleFavorite }) => {
               +{idea.tags.length - 3}
             </span>
           )}
-        </div>
+        </div> */}
 
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2 sm:space-x-4 text-xs sm:text-sm text-gray-500">
