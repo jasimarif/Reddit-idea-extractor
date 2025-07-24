@@ -519,20 +519,32 @@ const IdeaDetailPage = () => {
                       )}
 
                       {/* Implementation & Challenges */}
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="bg-indigo-50 p-2 rounded">
-                          <h4 className="text-[10px] font-semibold text-foreground">Implementation Steps</h4>
-                          <p className="text-muted-foreground text-xs line-clamp-2">
-                            {businessIdea.implementationSteps?.[0] || "N/A"}
-                          </p>
+                      {businessIdea.implementationSteps?.length > 0 && (
+                        <div className="bg-amber-50 p-3 rounded-lg">
+                          <h4 className="text-xs font-semibold text-foreground mb-1">Implementation Steps</h4>
+                          <ul className="list-disc pl-5 space-y-1">
+                            {businessIdea.implementationSteps.slice(0, 3).map((step, idx) => (
+                              <li key={idx} className="text-left text-muted-foreground text-xs">
+                                {step}
+                              </li>
+                            ))}
+                          </ul>
                         </div>
-                        <div className="bg-rose-50 p-2 rounded">
-                          <h4 className="text-[10px] font-semibold text-foreground">Potential Challenges</h4>
-                          <p className="text-muted-foreground text-xs line-clamp-2">
-                            {businessIdea.potentialChallenges?.[0] || "N/A"}
-                          </p>
+                      )}
+
+                      {businessIdea.potentialChallenges?.length > 0 && (
+                        <div className="bg-amber-50 p-3 rounded-lg">
+                          <h4 className="text-xs font-semibold text-foreground mb-1">Potential Challenges</h4>
+                          <ul className="list-disc pl-5 space-y-1">
+                            {businessIdea.potentialChallenges.slice(0, 3).map((feature, idx) => (
+                              <li key={idx} className="text-left text-muted-foreground text-xs">
+                                {feature}
+                              </li>
+                            ))}
+                          </ul>
                         </div>
-                      </div>
+                      )}
+
 
                       {/* Use Case */}
                       <div className="space-y-2">

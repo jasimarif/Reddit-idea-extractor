@@ -35,7 +35,7 @@ const getOrCreateAgent = async (type, getAssistantFn) => {
       baseURL: 'https://api.openai.com/v1',
     },
     temperature: type === 'marketGap' ? 0.7 : 0.3, // Different temperature based on agent type
-    maxTokens: 2000,
+    maxTokens: 3000,
   });
 
   // Create and cache the agent

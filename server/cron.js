@@ -13,7 +13,7 @@ const startCronJobs = () => {
   const Thread = require("./models/Threads");
 
   cron.schedule(
-    "58 21 * * *",
+    "19 22 * * *",
     async () => {
       console.log("Running daily Reddit idea fetch...");
       const subredditList = [
@@ -21,7 +21,7 @@ const startCronJobs = () => {
         "Entrepreneur",
         "smallbusiness",
         // "freelance",
-        // "consulting",
+        "consulting",
         // "overemployed",
         "jobs",
         // "resumes",
@@ -50,7 +50,7 @@ const startCronJobs = () => {
         // "SaaS",
         // "solopreneurs",
         // "WorkReform",
-        // "financialindependence",
+        "financialindependence",
         "sideproject",
         // "makers",
         "nocode",
