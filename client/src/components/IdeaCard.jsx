@@ -32,7 +32,7 @@ const IdeaCard = ({ idea, onToggleFavorite }) => {
         <div className="flex items-start justify-between mb-3 sm:mb-4">
           <div className="flex items-center space-x-1.5 sm:space-x-2">
             <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${'bg-green-100 text-green-800'}`}>
-              r/{idea.category}
+              r/{idea.subreddit}
             </span>
             {/* {(isRecent() || idea.isNew) && (
               <Badge variant="default" className="bg-blue-100 text-blue-800 text-xs">

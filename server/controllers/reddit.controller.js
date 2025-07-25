@@ -26,22 +26,34 @@ async function getRedditData(req, res) {
     const result = [];
 
     for (const post of posts) {
-      await delay(1200);
+      try {
+        // Only process posts that have LLM classification and are marked as pain points
+        if (post.llmClassification?.isPainPoint) {
+          await delay(1200);
+          
+          const comments = await fetchComments(post.id);
+          await storeThread(post, comments);
 
-      const comments = await fetchComments(post.id);
-
-      await storeThread(post, comments);
-
-      result.push({
-        id: post.id,
-        postTitle: post.title,
-        selftext: post.selftext,
-        permalink: post.permalink,
-        author: post.author,
-        upvotes: post.upvotes,
-        commentCount: post.commentCount,
-        comments,
-      });
+          result.push({
+            id: post.id,
+            postTitle: post.title,
+            selftext: post.selftext,
+            permalink: post.permalink,
+            subreddit: post.subreddit,
+            author: post.author,
+            upvotes: post.upvotes,
+            commentCount: post.commentCount,
+            comments,
+            llmClassification: post.llmClassification // Include classification info in the response
+          });
+        } else {
+          console.log(`Skipping post (not a pain point): ${post.title.substring(0, 50)}...`);
+        }
+      } catch (error) {
+        console.error(`Error processing post ${post.id}:`, error.message);
+        // Continue with the next post even if one fails
+        continue;
+      }
     }
 
     res.json({ posts: result });

@@ -387,7 +387,7 @@ const IdeaDetailPage = () => {
                     <div className="w-1.5 h-1.5 bg-primary rounded-full mr-2"></div>
                     Source Community
                   </h3>
-                  <p className="text-muted-foreground text-sm text-left ml-4">r/{idea.category}</p>
+                  <p className="text-muted-foreground text-sm text-left ml-4">r/{idea.subreddit}</p>
                 </div>
               </div>
 

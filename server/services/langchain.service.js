@@ -50,6 +50,11 @@ const getOrCreateAgent = async (type, getAssistantFn) => {
   return agent;
 }; 
 
+// --- Reddit Opportunity Screener Agent ---
+async function getRedditOpportunityScreenerAgent() {
+  return getOrCreateAgent('opportunityScreener', getOrCreateRedditOpportunityScreenerAssistant);
+}
+
 // --- PainPoint Agent ---
 async function getPainPointAgent() {
   return getOrCreateAgent('painPoint', getOrCreatePainPointAssistant);
