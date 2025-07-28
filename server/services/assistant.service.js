@@ -3,7 +3,6 @@ const fs = require("fs").promises;
 const path = require("path");
 require("dotenv").config();
 
-
 if (!process.env.OPENAI_API_KEY) {
   throw new Error("OPENAI_API_KEY environment variable is required");
 }
@@ -15,7 +14,8 @@ const CONFIG_FILE = path.join(process.cwd(), "openai.config.json");
 const assistantConfigs = {
   painPoint: {
     name: "Pain Point Analyzer Assistant",
-    description: "Specialized assistant for extracting and analyzing pain points from social media content",
+    description:
+      "Specialized assistant for extracting and analyzing pain points from social media content",
     model: "gpt-4",
     instructions: `RRESPOND ONLY WITH VALID JSON. DO NOT INCLUDE ANY EXPLANATIONS, MARKDOWN, OR COMMENTARY.
     I'm analyzing Reddit conversations to identify common pain points and problems within a specific market. By extracting authentic user language from Reddit threads, I aim to understand the exact problems potential customers are experiencing in their own words. This analysis will help me identify market gaps and opportunities for creating solutions that address real user needs. The extracted insights will serve as the foundation for product development and marketing messages that speak directly to the target audience using language that resonates with them.
@@ -105,52 +105,80 @@ One-off lifestyle complaints without repeatability
     
     ---
     `,
-    tools: [{
-      type: "function",
-      function: {
-        name: "extract_pain_points",
-        description: "Extract structured pain points from social media content",
-        parameters: {
-          type: "object",
-          properties: {
-            pain_points: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  title: { type: "string" },
-                  summary: { type: "string" },
-                  description: { type: "string" },
-                  category: {
-                    type: "string",
-                    enum: ["Health", "Wealth", "Relationships", "Technology", "Education", "Entertainment", "Other"]
+    tools: [
+      {
+        type: "function",
+        function: {
+          name: "extract_pain_points",
+          description:
+            "Extract structured pain points from social media content",
+          parameters: {
+            type: "object",
+            properties: {
+              pain_points: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    title: { type: "string" },
+                    summary: { type: "string" },
+                    description: { type: "string" },
+                    category: {
+                      type: "string",
+                      enum: [
+                        "Health",
+                        "Wealth",
+                        "Relationships",
+                        "Technology",
+                        "Education",
+                        "Entertainment",
+                        "Other",
+                      ],
+                    },
+                    intensity: {
+                      type: "string",
+                      enum: ["Low", "Medium", "High"],
+                    },
+                    urgency: {
+                      type: "string",
+                      enum: ["Low", "Medium", "High"],
+                    },
+                    quotes: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          text: { type: "string" },
+                          author: { type: "string" },
+                          source: { type: "string" },
+                        },
+                      },
+                    },
+                    keywords: {
+                      type: "array",
+                      items: { type: "string" },
+                    },
                   },
-                  intensity: { type: "string", enum: ["Low", "Medium", "High"] },
-                  urgency: { type: "string", enum: ["Low", "Medium", "High"] },
-                  quotes: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        text: { type: "string" },
-                        author: { type: "string" },
-                        source: { type: "string" }
-                      }
-                    }
-                  },
-                  keywords: {
-                    type: "array",
-                    items: { type: "string" }
-                  }
+                  required: [
+                    "title",
+                    "summary",
+                    "category",
+                    "intensity",
+                    "description",
+                    "quotes",
+                    "keywords",
+                    "businessPotential",
+                    "urgency",
+                    "subreddit",
+                  ],
                 },
-                required: ["title", "summary", "category", "intensity", "description", "quotes", "keywords", "businessPotential", "urgency", "subreddit"]
-              }
-            }
+              },
+            },
+            required: ["pain_points"],
           },
-          required: ["pain_points"]
-        }
-      }
-    }]
+        },
+      },
+    ],
   },
   marketGap: {
     name: "Market Gap Generator Assistant",
@@ -283,39 +311,57 @@ If Not Viable:
   - Incorporate user quotes and keywords from the pain point in the idea's description or problem statement.
 
   `,
-    tools: [{
-      type: "function",
-      function: {
-        name: "generate_business_ideas",
-        description: "Generate structured startup ideas from pain points",
-        parameters: {
-          type: "object",
-          properties: {
-            ideas: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  title: { type: "string" },
-                  audience: { type: "string" },
-                  pain_point: { type: "string" },
-                  market_demand: { type: "string" },
-                  business_model: { type: "string" },
-                  competitor_gap: { type: "string" }
+    tools: [
+      {
+        type: "function",
+        function: {
+          name: "generate_business_ideas",
+          description: "Generate structured startup ideas from pain points",
+          parameters: {
+            type: "object",
+            properties: {
+              ideas: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    title: { type: "string" },
+                    audience: { type: "string" },
+                    pain_point: { type: "string" },
+                    market_demand: { type: "string" },
+                    business_model: { type: "string" },
+                    competitor_gap: { type: "string" },
+                  },
+                  required: [
+                    "title",
+                    "audience",
+                    "pain_point",
+                    "business_model",
+                    "solution_concepts",
+                    "key_features",
+                    "primary_value_proposition",
+                    "potential_business_model",
+                    "how_it_specifically_addresses_identified_pain_points",
+                    "opportunity_assessment",
+                    "market_size_and_growth_potential",
+                    "competitive_advantage_sustainability",
+                    "implementation_feasibility",
+                    "potential_for_category_dominance",
+                  ],
                 },
-                required: ["title", "audience", "pain_point", "business_model", "solution_concepts", "key_features", "primary_value_proposition", "potential_business_model", "how_it_specifically_addresses_identified_pain_points", "opportunity_assessment", "market_size_and_growth_potential", "competitive_advantage_sustainability", "implementation_feasibility", "potential_for_category_dominance"]
-              }
-            }
+              },
+            },
+            required: ["ideas"],
           },
-          required: ["ideas"]
-        }
-      }
-    }]
+        },
+      },
+    ],
   },
 
   opportunityScreener: {
     name: "Reddit Opportunity Screener Assistant",
-    description: "Assistant for screening Reddit threads for business opportunities",
+    description:
+      "Assistant for screening Reddit threads for business opportunities",
     model: "gpt-4",
     instructions: `Role: Reddit Opportunity Screener
       You are a Reddit analyst. Your job is to read Reddit posts and select only those that describe clear, repeated pain points or inefficiencies that could be solved by a product or service.
@@ -328,26 +374,142 @@ If Not Viable:
       They are personal with no scalable implications.
       The problem is already saturated with common solutions unless a new angle is apparent.
       Return a list of selected posts with a short justification for each (e.g., “This post describes a recurring problem for SaaS founders collecting credentials from clients”).`,
-    tools: []
+    tools: [],
   },
 
   landingPage: {
     name: "Landing Page Generator Assistant",
-    description: "Assistant for generating landing page copy from business ideas",
+    description:
+      "Assistant for generating landing page copy from business ideas",
     model: "gpt-4",
-    instructions: `You are a startup copywriter. Write compelling landing page content using the Before-After-Bridge (BAB) formula.
-        Input: One business idea.
+    instructions: `Next AI Prompt: Generate a Lovable Prompt for a Landing Page
+Your new mission
+From all the information in the conversation above, your new mission is to generate the best possible Lovable.dev prompt for creating a high-converting landing page.
 
-        Output:
-        {
-        "headline": "...",
-        "before": "...",
-        "after": "...",
-        "bridge": "...",
-        "call_to_action": "..."
-        }`,
-    tools: []
-  }
+This landing page must perfectly reflect the customer's pain points, language, and motivations, using the Before-After-Bridge (BAB) copywriting framework. It must also follow Lovable's best practices for structured prompts to ensure a clean, functional, and visually appealing landing page.
+
+Your role is both an expert copywriter and a Lovable.dev landing page creation expert.
+
+
+Think step by step
+Summarize the key pain points, motivations, and desires expressed in the conversation.
+Extract the best possible customer wording from the AI-generated business insights to maintain authenticity.
+Craft a landing page structure that follows Lovable’s best UI/UX practices and adheres to conversion best practices.
+Generate the perfect Lovable.dev prompt, ensuring the AI produces not only great copy but also an effective design.
+
+
+Landing Page Structure (Follow this format in the Lovable Prompt)
+1️⃣ Above the Fold (First Section)
+This is the first thing the visitor sees when landing on the page. It must be immediately clear what the product is, who it’s for, and why it matters.
+
+Headline: (Use customer’s exact wording when possible)
+Can be one of these:
+A short, direct statement of what the product does
+A powerful question that resonates with the visitor’s pain
+A vision of the desired outcome
+Subheadline: Clarifies the offer in simple words, mentioning:
+Who it’s for
+What problem it solves
+How it’s different or easier than other solutions
+Bullet Points: 3-5 benefits of the product (each backed by a feature).
+Call to Action (CTA): Simple, action-driven button text.
+
+
+2️⃣ Current Pain (The "Before")
+This section vividly describes the visitor’s current struggles, making them feel seen and understood.
+
+Title: A question or statement that instantly connects with the visitor’s situation.
+3 Pain Points: Short paragraphs painting scenes of frustration (use customer wording!).
+Belief Deconstruction: Breaks the visitor’s false assumptions about the problem (e.g., why past solutions haven’t worked).
+
+
+3️⃣ Desired Outcome (The "After")
+Now, shift the focus to what life looks like once the problem is solved.
+
+Title: A call to imagine their transformed life.
+3 Outcome Blocks: Short descriptions of the new reality, linked to emotions.
+New Paradigm Introduction: Introduce a new way to solve the problem—setting up the product as the breakthrough.
+
+
+4️⃣ Introducing the Product
+Now, finally introduce the offer.
+
+Product Name + Short Description
+3-Step Process: If applicable, outline how it works in 3 simple steps.
+Message from the Founder: A personal statement to humanize the product.
+Final CTA Block: Last push to get the visitor to take action (with urgency).
+
+
+Lovable.dev Best Practices (Incorporate These in the Lovable Prompt!)
+Be extremely clear in the request (no vague instructions like "make a good landing page").
+Specify structure upfront (above-the-fold, pain points, solution, CTA, etc.).
+Ensure strong CTA placement (e.g., after key sections).
+Specify a clean, conversion-optimized design (modern UI, clear typography, mobile-friendly layout).
+Use Lovable’s integrations wisely (e.g., include a contact form, email collection, Stripe for payments if relevant).
+
+
+Now, Generate the Lovable.dev Prompt
+Now, based on all the insights gathered, write a Lovable.dev prompt that will generate a full landing page that follows the structure above, using the customer’s own words wherever possible.
+
+The Lovable prompt must:
+
+Clearly instruct Lovable to create a landing page.
+Include all the required sections and design instructions.
+Use the customer’s own wording for headlines, pain points, and outcomes.
+Ensure mobile responsiveness and a professional aesthetic.
+
+Output:
+A full Lovable.dev prompt that the user can copy and paste into Lovable to generate a fully functional, high-converting landing page.
+
+
+Final Step
+Once the Lovable.dev prompt is generated, review it to ensure:
+✅ It includes clear instructions for layout & design.
+✅ It follows conversion copywriting principles.
+✅ It uses real customer insights from the previous conversation.
+✅ It’s structured for Lovable to execute flawlessly.
+
+Now, generate the best possible Lovable.dev prompt! 🚀
+`,
+    tools: [
+      {
+        type: "function",
+        function: {
+          name: "saveLandingPage",
+          description:
+            "Save the generated landing page prompt and metadata to the LandingPages collection in the database.",
+          parameters: {
+            type: "object",
+            properties: {
+              businessId: {
+                type: "string",
+                description:
+                  "The ID of the business idea this landing page is for.",
+              },
+              lovablePrompt: {
+                type: "string",
+                description:
+                  "The full Lovable.dev landing page prompt generated from the business idea.",
+              },
+              summary: {
+                type: "string",
+                description: "Short summary or title of the landing page.",
+              },
+              keywords: {
+                type: "array",
+                items: {
+                  type: "string",
+                },
+                description:
+                  "List of relevant keywords or tags extracted from the landing page prompt.",
+              },
+            },
+            required: ["businessId", "lovablePrompt"],
+          },
+        },
+      },
+    ],
+  },
 };
 
 const cache = {};
@@ -355,37 +517,38 @@ const cache = {};
 // Initialize all assistants when the service starts
 async function initializeAssistants() {
   try {
-    
     // Initialize all assistants in parallel
     // await Promise.all([
-    //   getOrCreateAssistant('painPoint').catch(err => 
+    //   getOrCreateAssistant('painPoint').catch(err =>
     //     console.error('Failed to initialize painPoint assistant:', )
     //   ),
-    //   getOrCreateAssistant('marketGap').catch(err => 
+    //   getOrCreateAssistant('marketGap').catch(err =>
     //     console.error('Failed to initialize marketGap assistant:', )
     //   ),
-    //   getOrCreateAssistant('landingPage').catch(err => 
+    //   getOrCreateAssistant('landingPage').catch(err =>
     //     console.error('Failed to initialize landingPage assistant:', )
     //   )
     // ]);
-    
-    console.log('All assistants initialized successfully');
+
+    console.log("All assistants initialized successfully");
   } catch (error) {
-    console.error('Error initializing assistants:', error);
+    console.error("Error initializing assistants:", error);
   }
 }
 
 // Initialize assistants on first use
 let isInitialized = false;
-const initializationPromise = initializeAssistants().then(() => {
-  isInitialized = true;
-  console.log('Assistant service initialized successfully');
-  return true;
-}).catch(err => {
-  console.error('Initialization failed:', err);
-  isInitialized = false;
-  throw err;
-});
+const initializationPromise = initializeAssistants()
+  .then(() => {
+    isInitialized = true;
+    console.log("Assistant service initialized successfully");
+    return true;
+  })
+  .catch((err) => {
+    console.error("Initialization failed:", err);
+    isInitialized = false;
+    throw err;
+  });
 
 // Export a function to check initialization status
 const ensureInitialized = async () => {
@@ -400,7 +563,7 @@ async function loadConfig() {
     const data = await fs.readFile(CONFIG_FILE, "utf8");
     return JSON.parse(data);
   } catch {
-      console.log('No existing config found, creating new one');
+    console.log("No existing config found, creating new one");
     return {};
   }
 }
@@ -409,17 +572,16 @@ async function saveConfig(config) {
   try {
     await fs.writeFile(CONFIG_FILE, JSON.stringify(config, null, 2));
   } catch (error) {
-    console.error('Failed to save config:', error);
+    console.error("Failed to save config:", error);
     throw error;
   }
 }
-
 
 async function getOrCreateAssistant(type) {
   console.log(`Getting or creating assistant of type: ${type}`);
   // Ensure we're initialized
   await ensureInitialized();
-  
+
   // Return from cache if available
   if (cache[type] && cache[type].id) {
     console.log(`Returning cached assistant: ${cache[type].id}`);
@@ -433,44 +595,50 @@ async function getOrCreateAssistant(type) {
     // Try to retrieve existing assistant if ID is available
     if (existingId) {
       try {
-       console.log(`Attempting to retrieve existing assistant: ${existingId}`);
+        console.log(`Attempting to retrieve existing assistant: ${existingId}`);
         const assistant = await openai.beta.assistants.retrieve(existingId);
 
-      if (assistant && assistant.id) {
-          console.log(`Successfully retrieved existing assistant: ${assistant.id}`);
+        if (assistant && assistant.id) {
+          console.log(
+            `Successfully retrieved existing assistant: ${assistant.id}`
+          );
           cache[type] = assistant;
           return assistant;
         }
       } catch (retrieveError) {
-        console.log(`Failed to retrieve existing assistant ${existingId}:`, retrieveError.message);
+        console.log(
+          `Failed to retrieve existing assistant ${existingId}:`,
+          retrieveError.message
+        );
         // Continue to create a new assistant
       }
     }
 
     // Create new assistant if none exists
-      console.log(`Creating new ${type} assistant...`);
-    
+    console.log(`Creating new ${type} assistant...`);
+
     if (!assistantConfigs[type]) {
       throw new Error(`No configuration found for assistant type: ${type}`);
     }
-    
-    const assistant = await openai.beta.assistants.create(assistantConfigs[type]);
 
-     if (!assistant || !assistant.id) {
+    const assistant = await openai.beta.assistants.create(
+      assistantConfigs[type]
+    );
+
+    if (!assistant || !assistant.id) {
       throw new Error(`Failed to create assistant - no ID returned`);
     }
-    
+
     console.log(`Successfully created new assistant: ${assistant.id}`);
-    
+
     // Update config with new assistant ID
     config[`${type}AssistantId`] = assistant.id;
     config.lastUpdated = new Date().toISOString();
     await saveConfig(config);
-    
+
     cache[type] = assistant;
     return assistant;
-  } catch (error) {
-  }
+  } catch (error) {}
 }
 
 async function updateAssistant(type, updates) {
@@ -495,8 +663,7 @@ async function deleteAssistantByType(type) {
       await saveConfig(config);
       delete cache[type];
     }
-  } catch (error) {
-  }
+  } catch (error) {}
 }
 
 /**
@@ -507,8 +674,8 @@ async function deleteAllAssistants() {
   try {
     await ensureInitialized();
     const config = await loadConfig();
-    const assistantTypes = ['painPoint', 'marketGap', 'landingPage'];
-    
+    const assistantTypes = ["painPoint", "marketGap", "landingPage"];
+
     // Delete all assistants from OpenAI
     const deletePromises = assistantTypes.map(async (type) => {
       const assistantId = config[`${type}AssistantId`];
@@ -522,21 +689,21 @@ async function deleteAllAssistants() {
     });
 
     await Promise.all(deletePromises);
-    
+
     // Clear the configuration
     const newConfig = { lastCleared: new Date().toISOString() };
     await saveConfig(newConfig);
-    
+
     // Clear the cache
-    Object.keys(cache).forEach(key => delete cache[key]);
-    
-    return { 
-      success: true, 
-      message: 'All assistants have been deleted and configuration has been reset',
-      timestamp: newConfig.lastCleared
+    Object.keys(cache).forEach((key) => delete cache[key]);
+
+    return {
+      success: true,
+      message:
+        "All assistants have been deleted and configuration has been reset",
+      timestamp: newConfig.lastCleared,
     };
-  } catch (error) {
-  }
+  } catch (error) {}
 }
 
 module.exports = {
@@ -549,5 +716,5 @@ module.exports = {
   deleteAllAssistants,
   initializeAssistants,
   isInitialized: () => isInitialized,
-  ensureInitialized
+  ensureInitialized,
 };

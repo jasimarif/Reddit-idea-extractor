@@ -478,14 +478,6 @@ const IdeaDetailPage = () => {
                         {businessIdea.description || businessIdea.solutionOverview}
                       </p>
 
-                      {/* Problem & Solution */}
-                      {/* <div className="space-y-2">
-                        <div className="bg-blue-50 p-3 rounded-lg">
-                          <h4 className="text-xs font-semibold text-foreground mb-1">Problem</h4>
-                          <p className="text-muted-foreground text-xs">{businessIdea.problemDescription || "N/A"}</p>
-                        </div>
-                      </div> */}
-
                       {/* Key Details Grid */}
                       <div className="grid grid-cols-2 gap-2">
                         {/* Target Audience */}
@@ -544,13 +536,35 @@ const IdeaDetailPage = () => {
                           </ul>
                         </div>
                       )}
-
+                      
+                      <div className="grid grid-cols-2 gap-2">
+                        {/* Target Audience */}
+                        <div className="bg-gray-50 p-2 rounded">
+                          <h4 className="text-[10px] font-semibold text-foreground">Success Metrics</h4>
+                          <p className="text-muted-foreground text-xs">{businessIdea.successMetrics?.join(", ") || "N/A"}</p>
+                        </div>
+                        
+                        {/* Revenue Streams */}
+                        <div className="bg-green-50 p-2 rounded">
+                          <h4 className="text-[10px] font-semibold text-foreground">Unique Value Proposition</h4>
+                          <p className="text-muted-foreground text-xs">
+                            {businessIdea.uniqueValueProposition?.join(", ") || "N/A"}
+                          </p>
+                        </div>
+                      </div>
 
                       {/* Use Case */}
                       <div className="space-y-2">
                         <div className="bg-blue-50 p-3 rounded-lg">
                           <h4 className="text-xs font-semibold text-foreground mb-1">Use Case</h4>
                           <p className="text-muted-foreground text-xs">{businessIdea.useCase || "N/A"}</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="bg-blue-50 p-3 rounded-lg">
+                          <h4 className="text-xs font-semibold text-foreground mb-1">Differentiator</h4>
+                          <p className="text-muted-foreground text-xs">{businessIdea.differentiator || "N/A"}</p>
                         </div>
                       </div>
 

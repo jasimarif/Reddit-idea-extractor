@@ -11,6 +11,7 @@ const ThreadSchema = new mongoose.Schema({
   permalink: { type: String },
   upvotes: { type: Number, default: 0 },
   commentCount: { type: Number, default: 0 },
+  matchedQuery: { type: String, default: null }, // Query that matched this thread
   
   // Comments/replies
   comments: [{

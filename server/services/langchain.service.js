@@ -50,10 +50,7 @@ const getOrCreateAgent = async (type, getAssistantFn) => {
   return agent;
 }; 
 
-// --- Reddit Opportunity Screener Agent ---
-async function getRedditOpportunityScreenerAgent() {
-  return getOrCreateAgent('opportunityScreener', getOrCreateRedditOpportunityScreenerAssistant);
-}
+
 
 // --- PainPoint Agent ---
 async function getPainPointAgent() {
@@ -74,7 +71,11 @@ async function generateLovablePromptBAB({
   ctaText = '',
   targetAudience = '', 
   industry = '', 
-  uniqueValue = '' 
+  uniqueValue = '',
+  implementationSteps = [],
+  potentialChallenges = [],
+  differentiators = [],
+  successMetrics = [],
 }) {
   // Get or create the landing page agent
   const agent = await getOrCreateAgent('landingPage', getOrCreateLandingPageAssistant);
@@ -161,6 +162,11 @@ BUSINESS ANALYSIS:
 - Pain Points: ${processedPainPoints.length > 0 ? processedPainPoints.join(', ') : 'Extract from context'}
 - Desired Outcomes: ${processedOutcome.length > 0 ? processedOutcome.join(', ') : 'Generate based on solution'}
 - Unique Value: "${uniqueValue || 'Determine from description'}"
+- Implementation Steps: ${implementationSteps.length > 0 ? implementationSteps.join(', ') : 'Extract from context'}
+- Potential Challenges: ${potentialChallenges.length > 0 ? potentialChallenges.join(', ') : 'Extract from context'}
+- Differentiators: ${differentiators.length > 0 ? differentiators.join(', ') : 'Extract from context'}
+- Success Metrics: ${successMetrics.length > 0 ? successMetrics.join(', ') : 'Extract from context'}
+- Target Audience: "${targetAudience || 'Extract from description'}"
 
 CRITICAL INSTRUCTIONS:
 1. Generate a COMPLETE Lovable.dev prompt (not a template)
@@ -285,7 +291,32 @@ IMPORTANT:
     lovablePrompt = `Create a modern, high-converting landing page for "${title}" using React and Tailwind CSS.\n\n` + lovablePrompt;
   }
   
-  return lovablePrompt;
+  // Extract the founder message from the generated content
+  let extractedFounderMessage = '';
+  const founderMessageMatch = lovablePrompt.match(/Founder Message: "([^"]+)"/i) || 
+                            lovablePrompt.match(/Founder Message: ([^\n]+)/i);
+  
+  if (founderMessageMatch && founderMessageMatch[1]) {
+    extractedFounderMessage = founderMessageMatch[1].trim();
+  }
+  
+  // Extract the CTA text from the generated content
+  let extractedCtaText = '';
+  const ctaMatch = lovablePrompt.match(/Primary CTA: "([^"]+)"/i) || 
+                  lovablePrompt.match(/CTA: "([^"]+)"/i) ||
+                  lovablePrompt.match(/Primary CTA: ([^\n]+)/i);
+  
+  if (ctaMatch && ctaMatch[1]) {
+    extractedCtaText = ctaMatch[1].trim();
+  }
+  
+  return {
+    prompt: lovablePrompt,
+    generatedValues: {
+      founderMessage: extractedFounderMessage || chainInput.founderMessage,
+      ctaText: extractedCtaText || chainInput.ctaText
+    }
+  };
 }
 
 // Enhanced function to parse the response and extract structured data for MongoDB

@@ -14,7 +14,9 @@
     "@anthropic-ai/sdk": "^0.56.0",
     "@langchain/anthropic": "^0.3.24",
     "@langchain/openai": "^0.6.2",
-    "axios": "^1.10.0",
+    "@octokit/auth-app": "^8.0.2",
+    "@octokit/rest": "^22.0.0",
+    "axios": "^1.11.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -29,6 +31,7 @@
     "openai": "^5.8.3",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
+    "uuid": "^11.1.0",
     "validator": "^13.15.15"
   },
   "devDependencies": {
