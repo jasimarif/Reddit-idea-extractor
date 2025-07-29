@@ -13,6 +13,7 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import UserProfilePage from "./pages/UserProfilePage.jsx";
 import FavoritesPage from "./pages/FavoratesPage.jsx";
 import IdeaDetailPage from "./pages/IdeaDetailPage.jsx";
+import LandingPageViewer from "./pages/landingPage.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import GoogleCallback from "./pages/googleCallback.jsx";
 
@@ -42,11 +43,20 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+                
                 <Route
                   path="/idea/:id"
                   element={
                     <ProtectedRoute>
                       <IdeaDetailPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/landingPage/:id"
+                  element={
+                    <ProtectedRoute>
+                      <LandingPageViewer />
                     </ProtectedRoute>
                   }
                 />
