@@ -39,6 +39,6 @@ app.use("/api/ideas", ideaRoutes);
 app.use("/api/favorites", favoriteRoutes);
 app.use("/api/painpoints", painpointRoutes);
 app.use("/api/marketgaps", marketGapRoutes);
-app.use("/api/landingpage", landingPageRoutes);
+app.use("/api/landingpages", landingPageRoutes);
 
 module.exports = app;

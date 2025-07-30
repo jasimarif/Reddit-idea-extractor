@@ -86,7 +86,11 @@ async function deployLandingPage(landingPageId, options = {}) {
     }
 
     // Update landing page with deployment details
-    landingPage.landingPageUrl = deploymentResult.url;
+    // Get the URL from the most likely locations in the deployment result
+    landingPage.landingPageUrl = deploymentResult.url || 
+      (deploymentResult.deployment && deploymentResult.deployment.url) ||
+      (deploymentResult.landingPage && deploymentResult.landingPage.landingPageUrl);
+    
     landingPage.deploymentTarget = target;
     landingPage.deploymentStatus = 'deployed';
     landingPage.lastDeployedAt = new Date();

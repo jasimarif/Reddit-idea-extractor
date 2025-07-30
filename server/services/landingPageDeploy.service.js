@@ -692,17 +692,27 @@ class LandingPageDeployer {
 
       console.log("Deployment triggered:", deployment.data);
 
-      // 8. Save deployment URL and details to landing page
-      const deploymentUrl =
-        deployment.data.url || `${uniqueRepoName}.vercel.app`;
-      const fullDeploymentUrl = `https://${deploymentUrl}`;
+      // 8. Get the project domains to find the canonical domain
+      const domainsResponse = await axios.get(
+        `https://api.vercel.com/v9/projects/${projectId}/domains`,
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.VERCEL_TOKEN}`,
+          },
+        }
+      );
+
+      // Find the canonical domain (usually the first one in the list)
+      const canonicalDomain = domainsResponse.data?.domains?.[0]?.name || 
+                            `${uniqueRepoName}.vercel.app`;
+      const canonicalUrl = `https://${canonicalDomain}`;
 
       // Update the landing page with deployment details
       const updatedLandingPage = await LandingPage.findByIdAndUpdate(
         landingPageId,
         {
           deploymentStatus: "deployed",
-          deploymentUrl: fullDeploymentUrl,
+          landingPageUrl: canonicalUrl,
           githubRepoUrl: repo.html_url,
           vercelProjectId: projectId,
           vercelDeploymentId: deployment.data.id,
@@ -729,10 +739,11 @@ class LandingPageDeployer {
         message: "Deployment initiated successfully",
         deployment: {
           id: deployment.data.id,
-          url: fullDeploymentUrl,
+          url: canonicalUrl,
           status: "queued",
           githubRepo: repo.html_url,
           vercelProjectId: projectId,
+          domain: canonicalDomain,
         },
         landingPage: updatedLandingPage,
       };

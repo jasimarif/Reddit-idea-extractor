@@ -10,6 +10,7 @@ import {
   Zap,
   CheckCircle,
   Brain,
+  Eye,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
@@ -442,18 +443,27 @@ const IdeaDetailPage = () => {
             </div>
           ) : businessIdeas.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {businessIdeas.map((businessIdea, index) => (
+              {businessIdeas.map((businessIdea, index) => {
+                console.log('Business Idea:', businessIdea); // Debug log
+                return (
                 <div
                   key={businessIdea.id}
-                  className="bg-white rounded-2xl p-5 shadow-sm border hover:shadow-md transition-all duration-300 group"
+                  className="bg-white rounded-2xl p-5 shadow-sm border hover:shadow-md transition-all duration-300 group relative"
                 >
+                  {/* Eye icon for redirection to landing page */}
+                  <Link 
+                    to={`/landingPage/${businessIdea.id || businessIdea._id}`}
+                    className="absolute top-3 right-3 p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+                    title="View landing page"
+                  >
+                    <Eye className="h-4 w-4 text-gray-500 hover:text-gray-700" />
+                  </Link>
+                  
                   <div className="space-y-4">
                     {/* Header with ID and Scores */}
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      {/* <span className="bg-gray-100 px-2 py-0.5 rounded">ID: {businessIdea._id?.substring(0, 8)}...</span> */}
+                    <div className="flex items-center justify-between text-xs text-muted-foreground pr-8">
                       <div className="flex items-center space-x-2">
                         <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded">Score: {businessIdea.feasibilityScore || businessIdea.score || "N/A"}</span>
-                        {/* <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded">Feasibility: {businessIdea.feasibilityScore || "N/A"}</span> */}
                       </div>
                     </div>
 
@@ -590,7 +600,8 @@ const IdeaDetailPage = () => {
                     </div>
                   </div>
                 </div>
-              ))}
+              );
+              })}
             </div>
           ) : (
             <div className="bg-white rounded-2xl p-8 shadow-sm border text-center">

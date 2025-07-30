@@ -51,7 +51,7 @@ The input will be JSON with fields such as:
 - Do not remove sections unless explicitly instructed.
 - Ensure **color contrast accessibility** when applying new colors.
 - Keep all hover effects, gradients, and shadows consistent with the new scheme.
-
+- Always return fully complete code. Do not include comments or placeholders like {/* Other sections continue here ... */}. Every section must be rendered in full without omissions.
   
   ## Base Code Template
   import { useState } from "react";
@@ -62,7 +62,6 @@ export default function TransitionGuardianLanding() {
 
   const handleWaitlistSubmit = async (e) => {
     e.preventDefault();
-
     try {
       await fetch("https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec", {
         method: "POST",
@@ -77,227 +76,156 @@ export default function TransitionGuardianLanding() {
   };
 
   return (
-    <div className="font-sans text-gray-800 bg-white">
+    <div className="font-sans text-gray-800 bg-white text-sm sm:text-base">
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-blue-50 to-green-50 p-8 text-center md:text-left md:flex md:items-center md:justify-between">
-        <div className="max-w-xl">
-          <h1 className="text-3xl md:text-5xl font-bold text-blue-900 mb-4">
-            Transform Custody Transitions from Tearful Breakdowns to Peaceful Goodbyes
-          </h1>
-          <p className="text-lg text-gray-700 mb-6">
-            For separated parents whose children struggle with household transitions, TransitionGuardian provides structured tools to reduce anxiety and create predictable, child-centered handoffs—without requiring perfect co-parenting relationships.
-          </p>
-          <ul className="list-disc pl-5 text-gray-700 mb-6 space-y-2">
-            <li>Child-friendly countdown tools that prepare kids emotionally for transitions</li>
-            <li>Structured handoff protocols that minimize parent conflict during exchanges</li>
-            <li>Emotional check-in system designed by child psychologists</li>
-            <li>Documentation that helps identify and address transition patterns</li>
-          </ul>
-          <div className="space-x-4">
-            <button className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-2xl shadow">
-              Start Peaceful Transitions
-            </button>
-            <a href="#how-it-works" className="text-blue-600 font-medium hover:underline">See How It Works</a>
-          </div>
-
-          {/* Like & Join Waiting List */}
-          <div className="mt-8 bg-white border rounded-2xl p-4 shadow max-w-md">
-            <p className="text-gray-700 mb-2">Like what you see? Join our waiting list to get early updates:</p>
-            <form className="flex flex-col sm:flex-row gap-3" onSubmit={handleWaitlistSubmit}>
-              <input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="flex-1 border border-gray-300 rounded-xl p-2 focus:outline-none focus:border-green-500"
-                required
-              />
-              <button
-                type="submit"
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl shadow"
-              >
-                Join Waitlist
-              </button>
-            </form>
-            {status === "success" && <p className="text-green-600 mt-2">Thanks for joining!</p>}
-            {status === "error" && <p className="text-red-600 mt-2">Error joining. Please try again.</p>}
-          </div>
+          <section className="bg-gradient-to-b from-blue-50 to-green-50 p-6 sm:p-8 text-center">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-4">
+        <h1 className="text-2xl sm:text-4xl font-bold text-blue-900">
+          Transform Custody Transitions from Tearful Breakdowns to Peaceful Goodbyes
+        </h1>
+        <p className="text-gray-700">
+          For separated parents whose children struggle with household transitions, TransitionGuardian provides structured tools to reduce anxiety and create predictable, child-centered handoffs—without requiring perfect co-parenting relationships.
+        </p>
+        <ul className="list-disc pl-5 text-gray-700 space-y-1 text-left sm:text-center sm:inline-block">
+          <li>Child-friendly countdown tools that prepare kids emotionally for transitions</li>
+          <li>Structured handoff protocols that minimize parent conflict during exchanges</li>
+          <li>Emotional check-in system designed by child psychologists</li>
+          <li>Documentation that helps identify and address transition patterns</li>
+        </ul>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-center">
+          <button className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-xl shadow">
+            Start Peaceful Transitions
+          </button>
+          <a href="#how-it-works" className="text-blue-600 font-medium hover:underline">
+            See How It Works
+          </a>
         </div>
-      </section>
+        <div className="mt-6 bg-white border rounded-2xl p-4 shadow mx-auto">
+          <p className="text-gray-700 mb-2">
+            Like what you see? Join our waiting list to get early updates:
+          </p>
+          <form className="flex flex-col sm:flex-row gap-3" onSubmit={handleWaitlistSubmit}>
+            <input
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="flex-1 border border-gray-300 rounded-xl p-2 focus:outline-none focus:border-green-500"
+              required
+            />
+            <button
+              type="submit"
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl shadow"
+            >
+              Join Waitlist
+            </button>
+          </form>
+          {status === "success" && <p className="text-green-600 mt-2">Thanks for joining!</p>}
+          {status === "error" && <p className="text-red-600 mt-2">Error joining. Please try again.</p>}
+        </div>
+      </div>
+    </section>
 
       {/* Pain Section */}
-      <section className="py-16 bg-white" id="pain">
-        <div className="max-w-5xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold text-blue-900 mb-8">When Transition Day Becomes Everyone's Nightmare</h2>
-          <div className="space-y-6 text-left">
-            <blockquote className="border-l-4 border-blue-300 pl-4 italic text-gray-700">
-              “What hurts the most is how much my daughter dreads going there... Watching your child sob is heartbreaking.”
-            </blockquote>
-            <blockquote className="border-l-4 border-blue-300 pl-4 italic text-gray-700">
-              “Every exchange with my ex becomes a potential argument... Simple handoffs turn into tense standoffs.”
-            </blockquote>
-            <blockquote className="border-l-4 border-blue-300 pl-4 italic text-gray-700">
-              “My son never knows what to expect between our different routines... This unpredictability leaves him anxious.”
-            </blockquote>
-            <p className="text-gray-700 mt-6">
-              Many parents believe these painful transitions are just an unavoidable part of divorce—something children must 'get used to.' Others think only 'perfect' co-parents can create smooth transitions. Both assumptions leave children struggling unnecessarily.
-            </p>
+      <section className="py-12 sm:py-16 bg-white" id="pain">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-blue-900">When Transition Day Becomes Everyone's Nightmare</h2>
+          <div className="space-y-4 text-left">
+            <blockquote className="border-l-4 border-blue-300 pl-4 italic text-gray-700">“What hurts the most is how much my daughter dreads going there... Watching your child sob is heartbreaking.”</blockquote>
+            <blockquote className="border-l-4 border-blue-300 pl-4 italic text-gray-700">“Every exchange with my ex becomes a potential argument... Simple handoffs turn into tense standoffs.”</blockquote>
+            <blockquote className="border-l-4 border-blue-300 pl-4 italic text-gray-700">“My son never knows what to expect between our different routines... This unpredictability leaves him anxious.”</blockquote>
+            <p className="text-gray-700">Many parents believe these painful transitions are just an unavoidable part of divorce—something children must 'get used to.' Others think only 'perfect' co-parents can create smooth transitions. Both assumptions leave children struggling unnecessarily.</p>
           </div>
         </div>
       </section>
 
-      {/* Desired Outcome Section */}
-      <section className="py-16 bg-blue-50">
-        <div className="max-w-5xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold text-green-800 mb-8">Imagine Transition Day Becoming Just Another Part of Your Child's Routine</h2>
-          <div className="grid md:grid-cols-3 gap-6 text-left">
-            <div>
-              <h3 className="font-semibold text-lg mb-2">Emotional Security</h3>
-              <p>Your child approaches transition day with confidence instead of dread, equipped with tools to express feelings.</p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg mb-2">Structured Handoffs</h3>
-              <p>Exchanges become smooth, brief, and focused entirely on your child's wellbeing with clear handoff structure.</p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg mb-2">Consistent Support</h3>
-              <p>Familiar routines and check-ins bridge the gap between homes, reducing anxiety and helping your child adjust quickly.</p>
-            </div>
+      {/* Desired Outcome */}
+      <section className="py-12 sm:py-16 bg-blue-50">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-green-800">Imagine Transition Day Becoming Just Another Part of Your Child's Routine</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
+            <div><h3 className="font-semibold mb-1">Emotional Security</h3><p>Your child approaches transition day with confidence instead of dread.</p></div>
+            <div><h3 className="font-semibold mb-1">Structured Handoffs</h3><p>Exchanges become smooth, brief, and focused on your child's wellbeing.</p></div>
+            <div><h3 className="font-semibold mb-1">Consistent Support</h3><p>Familiar routines and check-ins help your child adjust quickly.</p></div>
           </div>
-          <p className="text-gray-700 mt-6">
-            What if transitions could be transformed from the most stressful part of co-parenting to a process that helps your child build resilience? You don’t need perfect co-parenting—just the right tools.
-          </p>
+          <p className="text-gray-700">What if transitions could become a process that helps your child build resilience? You don’t need perfect co-parenting—just the right tools.</p>
         </div>
       </section>
 
-      {/* Product Introduction */}
-      <section className="py-16 bg-white" id="how-it-works">
-        <div className="max-w-5xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold text-blue-900 mb-8">Introducing TransitionGuardian: The Child-Centered Custody Transition Tool</h2>
-          <p className="text-gray-700 mb-12">TransitionGuardian is designed by child psychologists and family therapists to make transitions between households less traumatic. Here’s how it works:</p>
-
-          <div className="grid md:grid-cols-3 gap-6 text-left mb-12">
-            <div>
-              <h3 className="font-semibold text-lg mb-2">1. Prepare</h3>
-              <p>Interactive countdown activities prepare your child emotionally while guiding parents to support them.</p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg mb-2">2. Transition</h3>
-              <p>Structured handoff checklists create consistency every time, regardless of which parent handles the exchange.</p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg mb-2">3. Adjust</h3>
-              <p>Post-transition check-ins help your child settle while providing insights on emotional patterns over time.</p>
-            </div>
+      {/* Product */}
+      <section className="py-12 sm:py-16 bg-white" id="how-it-works">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-blue-900">Introducing TransitionGuardian</h2>
+          <p className="text-gray-700">Designed by child psychologists and family therapists to make custody transitions less traumatic.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
+            <div><h3 className="font-semibold">1. Prepare</h3><p>Countdown activities prepare your child emotionally.</p></div>
+            <div><h3 className="font-semibold">2. Transition</h3><p>Checklists create consistency at handoff.</p></div>
+            <div><h3 className="font-semibold">3. Adjust</h3><p>Post-transition check-ins help your child settle.</p></div>
           </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="p-4 bg-blue-50 rounded-2xl shadow">Child-friendly countdown</div>
-            <div className="p-4 bg-blue-50 rounded-2xl shadow">Emotional state tracking</div>
-            <div className="p-4 bg-blue-50 rounded-2xl shadow">Standardized handoff protocols</div>
-            <div className="p-4 bg-blue-50 rounded-2xl shadow">Age-appropriate expression tools</div>
-            <div className="p-4 bg-blue-50 rounded-2xl shadow">Parent communication filters</div>
-            <div className="p-4 bg-blue-50 rounded-2xl shadow">Progress tracking dashboard</div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div className="p-3 bg-blue-50 rounded-xl shadow">Countdown Tools</div>
+            <div className="p-3 bg-blue-50 rounded-xl shadow">Emotional Tracking</div>
+            <div className="p-3 bg-blue-50 rounded-xl shadow">Handoff Protocols</div>
+            <div className="p-3 bg-blue-50 rounded-xl shadow">Expression Tools</div>
+            <div className="p-3 bg-blue-50 rounded-xl shadow">Communication Filters</div>
+            <div className="p-3 bg-blue-50 rounded-xl shadow">Progress Dashboard</div>
           </div>
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="py-16 bg-green-50">
-        <div className="max-w-5xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold text-green-800 mb-8">Parents and Children Experiencing Smoother Transitions</h2>
-          <div className="grid md:grid-cols-3 gap-8 text-left">
-            <div className="bg-white p-6 rounded-2xl shadow">
-              <p className="italic mb-4">“TransitionGuardian transformed our handoffs. My daughter now waves goodbye with a smile.”</p>
-              <p className="text-sm text-gray-600">— Sarah, single mom of 7-year-old</p>
-            </div>
-            <div className="bg-white p-6 rounded-2xl shadow">
-              <p className="italic mb-4">“We were high-conflict, but this app gave us structure and reduced arguments in front of the kids.”</p>
-              <p className="text-sm text-gray-600">— David, dad of two</p>
-            </div>
-            <div className="bg-white p-6 rounded-2xl shadow">
-              <p className="italic mb-4">“As a blended family, the countdown tool helped all kids feel prepared for transitions.”</p>
-              <p className="text-sm text-gray-600">— Maria & Jake, blended family parents</p>
-            </div>
+      {/* Testimonials */}
+      <section className="py-12 sm:py-16 bg-green-50">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-green-800">Parents and Children Experiencing Smoother Transitions</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
+            <div className="bg-white p-4 rounded-xl shadow"><p className="italic mb-2">“TransitionGuardian transformed our handoffs.”</p><p className="text-sm text-gray-600">— Sarah</p></div>
+            <div className="bg-white p-4 rounded-xl shadow"><p className="italic mb-2">“This app gave us structure and reduced arguments.”</p><p className="text-sm text-gray-600">— David</p></div>
+            <div className="bg-white p-4 rounded-xl shadow"><p className="italic mb-2">“Countdown tool helped all kids feel prepared.”</p><p className="text-sm text-gray-600">— Maria & Jake</p></div>
           </div>
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section className="py-16 bg-white" id="pricing">
-        <div className="max-w-5xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold text-blue-900 mb-8">Start Creating Smoother Transitions Today</h2>
-          <p className="mb-6 text-gray-700">14-day free trial. Choose a plan that works for your family:</p>
-
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
-            <div className="p-6 border rounded-2xl">
-              <h3 className="font-bold text-xl mb-2">Basic Plan</h3>
-              <p>Core transition tools and tracking</p>
-            </div>
-            <div className="p-6 border rounded-2xl">
-              <h3 className="font-bold text-xl mb-2">Premium Plan</h3>
-              <p>Advanced features including professional guidance</p>
-            </div>
+      {/* Pricing */}
+      <section className="py-12 sm:py-16 bg-white" id="pricing">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-blue-900">Start Creating Smoother Transitions Today</h2>
+          <p className="text-gray-700">14-day free trial. Choose a plan:</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="p-4 border rounded-xl"><h3 className="font-bold">Basic Plan</h3><p>Core transition tools and tracking</p></div>
+            <div className="p-4 border rounded-xl"><h3 className="font-bold">Premium Plan</h3><p>Advanced features + guidance</p></div>
           </div>
-
-          <p className="text-sm text-gray-600 mb-6">Both co-parents can use the same account at a discount.</p>
-
-          <button className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-2xl shadow">
-            Start Your Free Trial
-          </button>
+          <p className="text-sm text-gray-600">Both co-parents can use same account at a discount.</p>
+          <button className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-xl shadow">Start Your Free Trial</button>
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="py-16 bg-blue-50" id="faq">
-        <div className="max-w-5xl mx-auto px-6">
-          <h2 className="text-3xl font-bold text-green-800 mb-8 text-center">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <details className="bg-white p-4 rounded-2xl shadow">
-              <summary className="font-medium">Do both parents need to use the app?</summary>
-              <p className="mt-2 text-gray-700">No, even one parent can create more predictable transitions. However, features work best when both parents participate.</p>
-            </details>
-            <details className="bg-white p-4 rounded-2xl shadow">
-              <summary className="font-medium">Is my family's data private?</summary>
-              <p className="mt-2 text-gray-700">Yes, we use encrypted storage and never share personal information.</p>
-            </details>
-            <details className="bg-white p-4 rounded-2xl shadow">
-              <summary className="font-medium">What ages is TransitionGuardian best for?</summary>
-              <p className="mt-2 text-gray-700">We offer tools for children ages 3-17, tailored to different developmental stages.</p>
-            </details>
-            <details className="bg-white p-4 rounded-2xl shadow">
-              <summary className="font-medium">Can I cancel anytime?</summary>
-              <p className="mt-2 text-gray-700">Yes, there are no long-term commitments. Cancel anytime during your free trial or subscription.</p>
-            </details>
-            <details className="bg-white p-4 rounded-2xl shadow">
-              <summary className="font-medium">Does this replace therapy?</summary>
-              <p className="mt-2 text-gray-700">No, it’s a supportive tool, not a replacement for therapy. We encourage professional guidance when needed.</p>
-            </details>
-          </div>
+      {/* FAQ */}
+      <section className="py-12 sm:py-16 bg-blue-50" id="faq">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-4">
+          <h2 className="text-2xl sm:text-3xl font-bold text-green-800 text-center">Frequently Asked Questions</h2>
+          <details className="bg-white p-4 rounded-xl shadow"><summary className="font-medium">Do both parents need the app?</summary><p className="mt-2 text-gray-700">No, but it works best when both do.</p></details>
+          <details className="bg-white p-4 rounded-xl shadow"><summary className="font-medium">Is our data private?</summary><p className="mt-2 text-gray-700">Yes, encrypted and never shared.</p></details>
+          <details className="bg-white p-4 rounded-xl shadow"><summary className="font-medium">What ages is it best for?</summary><p className="mt-2 text-gray-700">Ages 3–17, tailored by stage.</p></details>
+          <details className="bg-white p-4 rounded-xl shadow"><summary className="font-medium">Can I cancel anytime?</summary><p className="mt-2 text-gray-700">Yes, cancel anytime.</p></details>
+          <details className="bg-white p-4 rounded-xl shadow"><summary className="font-medium">Does this replace therapy?</summary><p className="mt-2 text-gray-700">No, it complements therapy—not a substitute.</p></details>
         </div>
       </section>
 
-      {/* Final CTA Section */}
-      <section className="py-16 bg-green-50 text-center">
-        <h2 className="text-3xl font-bold text-green-800 mb-4">Give Your Child the Gift of Peaceful Transitions</h2>
-        <p className="mb-6 text-gray-700 max-w-2xl mx-auto">
-          Every difficult transition impacts your child's sense of security. TransitionGuardian helps you create a bridge between homes that supports their emotional wellbeing.
-        </p>
-        <p className="text-red-600 mb-6 font-medium">Start before your next custody exchange and see the difference immediately.</p>
-        <div className="space-x-4">
-          <button className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-2xl shadow">
-            Begin Your Free Trial
-          </button>
-          <button className="border border-green-500 text-green-500 py-3 px-6 rounded-2xl">
-            Schedule a Demo
-          </button>
+      {/* Final CTA */}
+      <section className="py-12 sm:py-16 bg-green-50 text-center space-y-4">
+        <h2 className="text-2xl sm:text-3xl font-bold text-green-800">Give Your Child the Gift of Peaceful Transitions</h2>
+        <p className="text-gray-700 max-w-2xl mx-auto">TransitionGuardian helps build a bridge of emotional security between homes.</p>
+        <p className="text-red-600 font-medium">Start before your next custody exchange.</p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <button className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-xl shadow">Begin Free Trial</button>
+          <button className="border border-green-500 text-green-500 py-2 px-4 rounded-xl">Schedule a Demo</button>
         </div>
-        <p className="text-gray-500 text-sm mt-4">14-day free trial, cancel anytime. We're confident you'll see a difference from the very first transition.</p>
+        <p className="text-gray-500 text-xs">14-day free trial, cancel anytime. See the difference from day one.</p>
       </section>
 
       {/* Footer */}
-      <footer className="bg-white border-t py-8 text-center text-sm text-gray-600">
-        <nav className="mb-4 space-x-4">
+      <footer className="bg-white border-t py-6 text-center text-xs text-gray-600 space-y-2">
+        <nav className="space-x-2">
           <a href="#pain">Pain</a>
           <a href="#how-it-works">How It Works</a>
           <a href="#pricing">Pricing</a>
@@ -309,9 +237,10 @@ export default function TransitionGuardianLanding() {
     </div>
   );
 }
+
   
   ## Output
-  Return the **complete modified React component** as a single file, ready for production use.`
+  Return the **complete modified React component** as a single file, ready for production use.`,
   },
 
   painPoint: {
@@ -822,15 +751,15 @@ async function initializeAssistants() {
   try {
     // Initialize all assistants in parallel
     // await Promise.all([
-      //   getOrCreateAssistant('painPoint').catch(err =>
-      //     console.error('Failed to initialize painPoint assistant:', )
-      //   ),
-      //   getOrCreateAssistant('marketGap').catch(err =>
-      //     console.error('Failed to initialize marketGap assistant:', )
-      //   ),
-      //   getOrCreateAssistant('landingPage').catch(err =>
-      //     console.error('Failed to initialize landingPage assistant:', )
-      //   ),
+    //   getOrCreateAssistant('painPoint').catch(err =>
+    //     console.error('Failed to initialize painPoint assistant:', )
+    //   ),
+    //   getOrCreateAssistant('marketGap').catch(err =>
+    //     console.error('Failed to initialize marketGap assistant:', )
+    //   ),
+    //   getOrCreateAssistant('landingPage').catch(err =>
+    //     console.error('Failed to initialize landingPage assistant:', )
+    //   ),
     //   getOrCreateAssistant("pageCraft").catch((err) =>
     //     console.error("Failed to initialize pageCraft assistant:", err)
     //   ),

@@ -53,7 +53,7 @@ function App() {
                   }
                 />
                 <Route
-                  path="/landingPage/:id"
+                  path="/landingPage/:businessIdeaId"
                   element={
                     <ProtectedRoute>
                       <LandingPageViewer />
