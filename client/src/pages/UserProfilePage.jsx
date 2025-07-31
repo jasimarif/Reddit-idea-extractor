@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import apiRequest from "../lib/apiRequest";
-import { toast } from "sonner";
+// Toast import removed as we're using inline messages
 
 const UserProfilePage = () => {
   const { user, logout, setUser } = useAuth();
@@ -27,6 +27,9 @@ const UserProfilePage = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [profileMessage, setProfileMessage] = useState({ text: '', type: '' });
+  const [passwordMessage, setPasswordMessage] = useState({ text: '', type: '' });
+  const [deleteMessage, setDeleteMessage] = useState({ text: '', type: '' });
 
   const getUserInitials = (name) => {
     return name
@@ -54,7 +57,7 @@ const UserProfilePage = () => {
         }
       } catch (error) {
         console.error("Failed to fetch user data:", error);
-        toast.error(error.response?.data?.message || "Failed to load profile");
+        setProfileMessage({ text: error.response?.data?.message || "Failed to load profile", type: 'error' });
       } finally {
         setIsLoading(false);
       }
@@ -117,14 +120,14 @@ const UserProfilePage = () => {
           updatedAt: new Date().toISOString(),
         }));
 
-        toast.success("Profile updated successfully!");
+        setProfileMessage({ text: "Profile updated successfully!", type: 'success' });
         setIsEditing(false);
       } else {
         throw new Error("Failed to update profile");
       }
     } catch (error) {
       console.error("Update profile error:", error);
-      toast.error(error.response?.data?.message || "Failed to update profile");
+      setProfileMessage({ text: error.response?.data?.message || "Failed to update profile", type: 'error' });
     }
   };
 
@@ -145,13 +148,15 @@ const UserProfilePage = () => {
   const handlePasswordChange = async (e) => {
     e.preventDefault();
 
+    setPasswordMessage({ text: '', type: '' });
+    
     if (newPassword !== confirmPassword) {
-      toast.error("New passwords don't match!");
+      setPasswordMessage({ text: "New passwords don't match!", type: 'error' });
       return;
     }
 
     if (newPassword.length < 8) {
-      toast.error("Password must be at least 8 characters long");
+      setPasswordMessage({ text: "Password must be at least 8 characters long", type: 'error' });
       return;
     }
 
@@ -163,15 +168,12 @@ const UserProfilePage = () => {
 
       if (response.data?.success) {
         // Show success message
-        toast.success("Password updated successfully!");
-
+        setPasswordMessage({ text: "Password updated successfully!", type: 'success' });
+        
         // Clear the form
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
-
-        // Log any potential issues with the toast
-        console.log("Password updated successfully, showing toast");
       } else {
         throw new Error("Failed to update password");
       }
@@ -182,7 +184,7 @@ const UserProfilePage = () => {
         error.response?.data?.message ||
         error.message ||
         "Failed to update password. Please try again.";
-      toast.error(errorMessage);
+      setPasswordMessage({ text: errorMessage, type: 'error' });
     }
   };
 
@@ -195,14 +197,15 @@ const UserProfilePage = () => {
       try {
         const response = await apiRequest.delete("/auth/me");
         if (response.data?.success) {
-          toast.success("Account deleted successfully");
+          setDeleteMessage({ text: "Account deleted successfully", type: 'success' });
           await logout();
         }
       } catch (error) {
         console.error("Account deletion error:", error);
-        toast.error(
-          error.response?.data?.message || "Failed to delete account"
-        );
+        setDeleteMessage({ 
+          text: error.response?.data?.message || "Failed to delete account", 
+          type: 'error' 
+        });
       }
     }
   };
@@ -251,7 +254,7 @@ const UserProfilePage = () => {
 
         <div className="space-y-5">
           {/* Profile Section */}
-          <Card className="rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <Card className="rounded-xl bg-white shadow-sm border border-gray-100 overflow-hidden">
             <CardHeader className="p-4 sm:p-6 pb-0 sm:pb-0">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <CardTitle className="text-lg">Profile Information</CardTitle>
@@ -298,6 +301,11 @@ const UserProfilePage = () => {
                   </Avatar>
                 </div>
                 <div className="flex-1 w-full space-y-3 sm:space-y-4">
+                  {profileMessage.text && (
+                    <div className={`text-sm mb-2 p-2 rounded-md ${profileMessage.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                      {profileMessage.text}
+                    </div>
+                  )}
                   <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">
                       <User className="h-3.5 w-3.5 inline mr-1.5 -mt-0.5" />
@@ -351,7 +359,7 @@ const UserProfilePage = () => {
           </Card>
 
           {/* Security Section */}
-          <Card className="rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <Card className="rounded-xl bg-white shadow-sm border border-gray-100 overflow-hidden">
             <CardHeader className="p-4 sm:p-6 pb-0 sm:pb-0">
               <CardTitle className="text-lg">Security</CardTitle>
             </CardHeader>
@@ -401,13 +409,20 @@ const UserProfilePage = () => {
                       required
                     />
                   </div>
-                  <Button 
-                    type="submit" 
-                    size="sm"
-                    className="w-full sm:w-auto mt-1"
-                  >
-                    Update Password
-                  </Button>
+                  <div className="space-y-2">
+                    <Button 
+                      type="submit" 
+                      size="sm"
+                      className="w-full sm:w-auto mt-1"
+                    >
+                      Update Password
+                    </Button>
+                    {passwordMessage.text && (
+                      <div className={`text-sm ${passwordMessage.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                        {passwordMessage.text}
+                      </div>
+                    )}
+                  </div>
                 </form>
               </div>
 
@@ -422,6 +437,11 @@ const UserProfilePage = () => {
                   <p className="text-xs text-gray-600 mb-3">
                     Permanently delete your account and all associated data. This action cannot be undone.
                   </p>
+                  {deleteMessage.text && (
+                    <div className={`text-xs mb-3 p-2 rounded-md ${deleteMessage.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                      {deleteMessage.text}
+                    </div>
+                  )}
                   <Button
                     variant="destructive"
                     size="sm"
