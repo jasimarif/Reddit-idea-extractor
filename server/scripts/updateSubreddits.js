@@ -9,10 +9,7 @@ const Thread = require('../models/Threads');
 // Function to connect to MongoDB
 async function connectDB(mongoUri) {
   try {
-    await mongoose.connect(mongoUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(mongoUri);
     console.log('MongoDB connected successfully');
     return true;
   } catch (error) {
