@@ -6,7 +6,8 @@ import {
   ResizableHandle,
 } from "../components/ui/resizable";
 import { Button } from "../components/ui/button";
-import { ArrowLeft, ExternalLink, Calendar, AlertCircle } from "lucide-react";
+import { ExternalLink, Calendar, AlertCircle } from "lucide-react";
+import BackButton from "../components/BackButton";
 import apiRequest from "../lib/apiRequest";
 
 const IdeaViewerPage = () => {
@@ -91,12 +92,7 @@ const IdeaViewerPage = () => {
             The startup idea you're looking for doesn't exist or may have been
             removed.
           </p>
-          <Link to="/dashboard">
-            <Button variant="outline" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
-            </Button>
-          </Link>
+          <BackButton>Back</BackButton>
         </div>
       </div>
     );
@@ -108,13 +104,9 @@ const IdeaViewerPage = () => {
       <header className="sticky top-0 z-50 backdrop-blur-sm">
         <div className="w-full max-w-[1800px] mx-auto px-4 py-1.5">
           <div className="flex items-center justify-between">
-            <Link
-              to="/dashboard"
-              className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span className="text-sm font-medium">Back to Dashboard</span>
-            </Link>
+            <BackButton className="text-gray-600 hover:text-gray-800 text-sm font-medium">
+              Back
+            </BackButton>
             <Button variant="outline" size="sm" asChild className="h-7">
               <a
                 href={idea.landingPageUrl}

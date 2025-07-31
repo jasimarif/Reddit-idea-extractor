@@ -4,6 +4,7 @@ import { ArrowLeft, Target, Clock, Lightbulb, Brain, Eye } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import apiRequest from "../lib/apiRequest";
+import BackButton from "../components/BackButton";
 
 const getCategoryColor = (category) => {
   if (!category) return "bg-muted text-muted-foreground";
@@ -239,12 +240,9 @@ const IdeaDetailPage = () => {
           <p className="text-gray-600 mb-6">
             The idea you're looking for doesn't exist.
           </p>
-          <Link
-            to="/dashboard"
-            className="px-6 py-2 text-lg font-semibold !text-white bg-gradient-to-r from-purple-600 to-blue-600 rounded-full hover:from-purple-700 hover:to-blue-700 transition-all duration-300 inline-block"
-          >
-            Back to Ideas
-          </Link>
+          <BackButton className="text-gray-600 hover:text-gray-800 text-sm font-medium">
+            Back
+          </BackButton>
         </div>
       </div>
     );
@@ -276,12 +274,9 @@ const IdeaDetailPage = () => {
           <p className="text-sm text-muted-foreground mb-4">
             Current ID: {id || "No ID provided"}
           </p>
-          <Link to="/dashboard">
-            <Button className="px-6 py-2">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Ideas
-            </Button>
-          </Link>
+          <BackButton className="text-gray-600 hover:text-gray-800 text-sm font-medium">
+            Back
+          </BackButton>
         </div>
       </div>
     );
@@ -292,13 +287,9 @@ const IdeaDetailPage = () => {
       {/* Header */}
       <div className="px-4 py-3">
         <div className="max-w-7xl mx-auto">
-          <Link
-            to="/dashboard"
-            className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors w-fit"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span>Back to Ideas</span>
-          </Link>
+          <BackButton className="text-gray-600 hover:text-gray-800 text-sm font-medium">
+            Back
+          </BackButton>
         </div>
       </div>
 
@@ -377,14 +368,14 @@ const IdeaDetailPage = () => {
                     Source Community
                   </h3>
                   <div className="text-left">
-                  <a
-                    href={idea.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-4 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors hover:underline"
-                  >
-                    r/{idea.subreddit}
-                  </a>
+                    <a
+                      href={idea.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors hover:underline"
+                    >
+                      r/{idea.subreddit}
+                    </a>
                   </div>
                 </div>
               </div>
