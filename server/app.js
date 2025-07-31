@@ -12,9 +12,15 @@ const marketGapRoutes = require("./routes/marketGap.route");
 const landingPageRoutes = require("./routes/landingPage.route");
 const cookieParser = require("cookie-parser");
 const passport = require("passport");
+const { initializeRedis } = require("./utils/redisClient");
 require("./config/passport");
 
 const app = express();
+
+// Initialize Redis client
+initializeRedis().catch(err => {
+  console.error(`Failed to initialize Redis: ${err.message}`);
+});
 
 app.use(express.json());
 

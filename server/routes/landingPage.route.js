@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const { protect } = require('../middlewares/auth.middleware');
+const { cacheRoute } = require('../middlewares/cacheMiddleware');
 const { 
   generateLandingPageHandler,
   getLandingPageByBusinessIdeaIdHandler,
@@ -7,17 +9,12 @@ const {
   generateAndDeployLandingPageHandler 
 } = require('../controllers/landingPage.controller');
 
-// POST /api/generate-landing-page
-router.post('/generate-landing-page', generateLandingPageHandler);
+// Cache landing page for 1 hour (3600 seconds) as they don't change often
+router.get('/landing-page/:businessIdeaId', cacheRoute(3600, 'landingpage:'), getLandingPageByBusinessIdeaIdHandler);
 
-// POST /api/deploy-landing-page/:landingPageId
-router.post('/deploy-landing-page/:landingPageId', deployLandingPageHandler);
+// No cache for write operations
+router.post('/generate-landing-page', protect, generateLandingPageHandler);
+router.post('/deploy-landing-page/:landingPageId', protect, deployLandingPageHandler);
+router.post('/generate-and-deploy-landing-page/:businessIdeaId', protect, generateAndDeployLandingPageHandler);
 
-// POST /api/generate-and-deploy-landing-page/:businessIdeaId
-router.post('/generate-and-deploy-landing-page/:businessIdeaId', generateAndDeployLandingPageHandler);
-
-// GET /api/landing-page/:businessIdeaId
-router.get('/landing-page/:businessIdeaId', getLandingPageByBusinessIdeaIdHandler);
-
-
-module.exports = router; 
+module.exports = router;
