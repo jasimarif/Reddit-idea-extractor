@@ -52,32 +52,96 @@ The input will be JSON with fields such as:
 - Ensure **color contrast accessibility** when applying new colors.
 - Keep all hover effects, gradients, and shadows consistent with the new scheme.
 - Always return fully complete code. Do not include comments or placeholders like {/* Other sections continue here ... */}. Every section must be rendered in full without omissions.
-  
-  ## Base Code Template
-  import { useState } from "react";
+
+## Base Code Template
+
+import { useState } from "react";
 
 export default function TransitionGuardianLanding() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState(null);
+  const [navOpen, setNavOpen] = useState(false);
 
   const handleWaitlistSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await fetch("https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email })
-      });
+  e.preventDefault();
+  setStatus("loading");
+
+  const scriptUrl = "https://script.google.com/macros/s/AKfycbyJ3UlCeAjrAWB03AQBxkjMI-vZgpfj1D6v2Z6YUd2ylAy4c-RM583I09Z-xLrPI7RwbA/exec";
+
+  try {
+    const response = await fetch(
+      scriptUrl + "?email=" + encodeURIComponent(email) + "&source=Transition Guardian",
+      { method: "GET" }
+    );
+
+    const result = await response.json();
+
+    if (result.success) {
       setStatus("success");
-      setEmail("");
-    } catch (error) {
+      setEmail(""); // Clear input
+    } else {
+      console.error("Server error:", result.error);
       setStatus("error");
     }
-  };
+  } catch (error) {
+    console.error("Network error:", error);
+    setStatus("error");
+  }
+};
 
   return (
     <div className="font-sans text-gray-800 bg-white text-sm sm:text-base">
-      {/* Hero Section */}
+      
+      {/* Navbar */}
+      <header className="bg-white/95 backdrop-blur sticky top-0 z-50 shadow-sm">
+  <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+    {/* Logo/Brand */}
+    <div className="text-xl sm:text-2xl font-bold text-green-700 tracking-tight">
+      Transition Guardian 
+      
+    </div>
+
+    {/* Desktop Nav */}
+    <nav className="hidden sm:flex gap-6 text-sm font-medium text-gray-700">
+      <a href="#pain" className="hover:text-green-700 transition-colors">Pain</a>
+      <a href="#how-it-works" className="hover:text-green-700 transition-colors">How It Works</a>
+      <a href="#pricing" className="hover:text-green-700 transition-colors">Pricing</a>
+      <a href="#faq" className="hover:text-green-700 transition-colors">FAQ</a>
+    </nav>
+
+    {/* Mobile Toggle */}
+    <button
+      className="sm:hidden text-gray-600 focus:outline-none"
+      onClick={() => setNavOpen(!navOpen)}
+    >
+      <svg
+        className="w-6 h-6"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        {navOpen ? (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        ) : (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+        )}
+      </svg>
+    </button>
+  </div>
+
+  {/* Mobile Nav Links */}
+  {navOpen && (
+    <nav className="sm:hidden px-6 pb-4 pt-2 space-y-3 text-sm font-medium text-gray-700 bg-white shadow-inner rounded-b-xl border-t">
+      <a href="#pain" className="block hover:text-green-700" onClick={() => setNavOpen(false)}>Pain</a>
+      <a href="#how-it-works" className="block hover:text-green-700" onClick={() => setNavOpen(false)}>How It Works</a>
+      <a href="#pricing" className="block hover:text-green-700" onClick={() => setNavOpen(false)}>Pricing</a>
+      <a href="#faq" className="block hover:text-green-700" onClick={() => setNavOpen(false)}>FAQ</a>
+    </nav>
+  )}
+</header>
+
+{/* Hero Section */}
           <section className="bg-gradient-to-b from-blue-50 to-green-50 p-6 sm:p-8 text-center">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-4">
         <h1 className="text-2xl sm:text-4xl font-bold text-blue-900">
@@ -86,7 +150,7 @@ export default function TransitionGuardianLanding() {
         <p className="text-gray-700">
           For separated parents whose children struggle with household transitions, TransitionGuardian provides structured tools to reduce anxiety and create predictable, child-centered handoffs—without requiring perfect co-parenting relationships.
         </p>
-        <ul className="list-disc pl-5 text-gray-700 space-y-1 text-left sm:text-center sm:inline-block">
+        <ul className="list-disc pl-5 text-gray-700 space-y-1 text-left sm:inline-block">
           <li>Child-friendly countdown tools that prepare kids emotionally for transitions</li>
           <li>Structured handoff protocols that minimize parent conflict during exchanges</li>
           <li>Emotional check-in system designed by child psychologists</li>
@@ -120,6 +184,7 @@ export default function TransitionGuardianLanding() {
               Join Waitlist
             </button>
           </form>
+          {status === "loading" && (<p className="text-blue-600 mt-2 animate-pulse">Saving your response…</p>)}
           {status === "success" && <p className="text-green-600 mt-2">Thanks for joining!</p>}
           {status === "error" && <p className="text-red-600 mt-2">Error joining. Please try again.</p>}
         </div>
@@ -237,6 +302,7 @@ export default function TransitionGuardianLanding() {
     </div>
   );
 }
+
 
   
   ## Output

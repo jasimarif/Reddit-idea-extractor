@@ -91,7 +91,7 @@ const IdeaViewerPage = () => {
             The startup idea you're looking for doesn't exist or may have been
             removed.
           </p>
-          <Link to="/">
+          <Link to="/dashboard">
             <Button variant="outline" size="sm">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Dashboard
