@@ -171,7 +171,7 @@ const IdeaViewerPage = () => {
           </div>
           <div className="flex-1 min-h-[50vh] bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hide-scrollbar">
             <LandingPageViewer
-              deploymentUrl={idea.landingPageUrl}
+              landingPageUrl={idea.landingPageUrl}
               title={idea.headline}
             />
           </div>

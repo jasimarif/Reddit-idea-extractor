@@ -149,6 +149,12 @@ const DashboardPage = () => {
           (a, b) => new Date(a.postDate || 0) - new Date(b.postDate || 0)
         );
       }
+      else if (sortBy === "Potential") {
+        const potentialOrder = { 'High': 3, 'Medium': 2, 'Low': 1, 'None': 0 };
+        fetchedIdeas = [...fetchedIdeas].sort(
+          (a, b) => (potentialOrder[b.businessPotential] || 0) - (potentialOrder[a.businessPotential] || 0)
+        );
+      }
 
       setAllIdeas(fetchedIdeas);
       setTotalIdeas(fetchedIdeas.length);
@@ -359,9 +365,10 @@ const DashboardPage = () => {
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent className="bg-white">
-                  <SelectItem value="rankScore">Most Rank Score</SelectItem>
                   <SelectItem value="newest">Newest</SelectItem>
+                  <SelectItem value="rankScore">Most Rank Score</SelectItem>
                   <SelectItem value="oldest">Oldest</SelectItem>
+                  <SelectItem value="Potential">Most Business Potential</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -551,10 +558,10 @@ const DashboardPage = () => {
                     <TableHead className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell w-1/8">
                       Source
                     </TableHead>
-                    <TableHead className="px-2 sm:px-9 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell w-1/8">
+                    <TableHead className="px-2 sm:px-10 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell w-1/8">
                       Category
                     </TableHead>
-                    <TableHead className="px-2 sm:px-5 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16 sm:w-20 md:w-24">
+                    <TableHead className="px-2 sm:px-7 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16 sm:w-20 md:w-24">
                       <span className="hidden sm:inline">Score</span>
                       <span className="sm:hidden">Score & Date</span>
                     </TableHead>
@@ -562,7 +569,7 @@ const DashboardPage = () => {
                       Date
                     </TableHead>
                     <TableHead className="px-2 sm:px-12 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell w-1/8">
-                      Status
+                      Potential
                     </TableHead>
                     <TableHead className="px-2 sm:px-10 py-2 sm:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-16 sm:w-20">
                       Actions
@@ -611,12 +618,19 @@ const DashboardPage = () => {
                             </svg>
                           </button>
                           <span className="text-sm font-medium text-gray-500">
+                          <a 
+                            href={idea.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors hover:underline"
+                          >
                             {idea.platform || "reddit"}
+                          </a>
                           </span>
                         </div>
                         <div className="flex items-center space-x-2">
                           <Badge className="bg-green-50 text-green-700 border border-green-100 text-xs font-medium">
-                            {idea.status}
+                            {idea.businessPotential}
                           </Badge>
                           <Link to={`/idea/${idea._id}`}>
                             <Button
@@ -681,9 +695,14 @@ const DashboardPage = () => {
                       <TableCell className="hidden md:table-cell px-3 sm:px-4 py-3 whitespace-nowrap text-sm">
                         <div className="sm:hidden text-xs font-medium text-gray-500 mb-1">Source</div>
                         <div className="flex items-center">
-                          <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors">
+                          <a 
+                            href={idea.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors hover:underline"
+                          >
                             {idea.platform || "reddit"}
-                          </span>
+                          </a>
                         </div>
                       </TableCell>
 
@@ -731,7 +750,7 @@ const DashboardPage = () => {
                       <TableCell className="hidden md:table-cell px-3 sm:px-4 py-3 whitespace-nowrap text-sm">
                         <div className="sm:hidden text-xs font-medium text-gray-500 mb-1">Status</div>
                         <Badge className="bg-green-50 text-green-700 border border-green-100 text-xs font-medium">
-                          {idea.status}
+                          {idea.businessPotential}
                         </Badge>
                       </TableCell>
 

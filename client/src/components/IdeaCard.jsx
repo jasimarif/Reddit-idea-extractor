@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Heart, Eye } from 'lucide-react';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { Heart, Eye } from "lucide-react";
 
 const IdeaCard = ({ idea, onToggleFavorite }) => {
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const handleShare = (type) => {
-    if (type === 'link') {
+    if (type === "link") {
       const url = `${window.location.origin}/idea/${idea.id}`;
       navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } else {
-      window.open(idea.originalUrl, '_blank');
+      window.open(idea.originalUrl, "_blank");
     }
     setShowShareMenu(false);
   };
@@ -31,9 +31,17 @@ const IdeaCard = ({ idea, onToggleFavorite }) => {
       <div className="p-4 sm:p-6">
         <div className="flex items-start justify-between mb-3 sm:mb-4">
           <div className="flex items-center space-x-1.5 sm:space-x-2">
-            <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${'bg-green-100 text-green-800'}`}>
-              r/{idea.subreddit}
+            <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[5px] sm:text-xs font-medium ">
+              <a
+                href={idea.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-2 py-1 rounded-full text-xs sm:text-sm font-medium text-green-800 hover:bg-green-200 hover:underline hover:brightness-110 transition-all duration-200 ease-in-out"
+              >
+                r/{idea.subreddit}
+              </a>
             </span>
+
             {/* {(isRecent() || idea.isNew) && (
               <Badge variant="default" className="bg-blue-100 text-blue-800 text-xs">
                 {idea.isNew ? 'New' : 'Recent'}
@@ -45,15 +53,19 @@ const IdeaCard = ({ idea, onToggleFavorite }) => {
             {/* Favorite Button */}
             <button
               onClick={() => onToggleFavorite(idea.id)}
-              title={idea.isFavorited ? 'Unfavorite' : 'Favorite'}
+              title={idea.isFavorited ? "Unfavorite" : "Favorite"}
               className={`p-1.5 sm:p-2 rounded-full transition-colors ${
                 idea.isFavorited
-                  ? 'text-red-500 hover:text-red-600 bg-red-50'
-                  : 'text-gray-400 hover:text-red-500 hover:bg-red-50'
+                  ? "text-red-500 hover:text-red-600 bg-red-50"
+                  : "text-gray-400 hover:text-red-500 hover:bg-red-50"
               }`}
             >
-              <Heart className={`h-4 w-4 sm:h-5 sm:w-5${idea.isFavorited ? ' fill-current' : ''}`} 
-                fill={idea.isFavorited ? 'currentColor' : 'none'} />
+              <Heart
+                className={`h-4 w-4 sm:h-5 sm:w-5${
+                  idea.isFavorited ? " fill-current" : ""
+                }`}
+                fill={idea.isFavorited ? "currentColor" : "none"}
+              />
             </button>
           </div>
         </div>

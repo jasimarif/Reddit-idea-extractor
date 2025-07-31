@@ -1,20 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import {
-  ArrowLeft,
-  Target,
-  Clock,
-  Star,
-  Lightbulb,
-  Users,
-  Zap,
-  CheckCircle,
-  Brain,
-  Eye,
-} from "lucide-react";
+import { ArrowLeft, Target, Clock, Lightbulb, Brain, Eye } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
-import { Check, Copy } from "lucide-react";
 import apiRequest from "../lib/apiRequest";
 
 const getCategoryColor = (category) => {
@@ -122,8 +110,6 @@ const IdeaDetailPage = () => {
 
     fetchIdea();
   }, [id]);
-
-
 
   // Fetch business ideas when the idea is loaded
   useEffect(() => {
@@ -336,7 +322,9 @@ const IdeaDetailPage = () => {
                   </h2>
                   <div className="flex items-center gap-2 mb-3 flex-wrap">
                     <Badge
-                      className={`${getCategoryColor(idea.category)} px-2 py-1 text-xs`}
+                      className={`${getCategoryColor(
+                        idea.category
+                      )} px-2 py-1 text-xs`}
                       variant="outline"
                     >
                       {idea.category}
@@ -388,7 +376,16 @@ const IdeaDetailPage = () => {
                     <div className="w-1.5 h-1.5 bg-primary rounded-full mr-2"></div>
                     Source Community
                   </h3>
-                  <p className="text-muted-foreground text-sm text-left ml-4">r/{idea.subreddit}</p>
+                  <div className="text-left">
+                  <a
+                    href={idea.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors hover:underline"
+                  >
+                    r/{idea.subreddit}
+                  </a>
+                  </div>
                 </div>
               </div>
 
@@ -401,7 +398,7 @@ const IdeaDetailPage = () => {
                     day: "numeric",
                   })}
                 </span>
-                
+
                 <Badge
                   variant={idea.potentialSolvability ? "default" : "outline"}
                   className="px-2 py-1 text-xs"
@@ -419,7 +416,9 @@ const IdeaDetailPage = () => {
             <div className="w-8 h-8 bg-gradient-to-br from-accent/20 to-accent/10 rounded-lg flex items-center justify-center">
               <Lightbulb className="h-5 w-5 text-accent-foreground" />
             </div>
-            <h2 className="text-2xl font-bold text-foreground">Business Solutions</h2>
+            <h2 className="text-2xl font-bold text-foreground">
+              Business Solutions
+            </h2>
           </div>
 
           {isGeneratingIdeas ? (
@@ -444,163 +443,217 @@ const IdeaDetailPage = () => {
           ) : businessIdeas.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {businessIdeas.map((businessIdea, index) => {
-                console.log('Business Idea:', businessIdea); // Debug log
+                console.log("Business Idea:", businessIdea); // Debug log
                 return (
-                <div
-                  key={businessIdea.id}
-                  className="bg-white rounded-2xl p-5 shadow-sm border hover:shadow-md transition-all duration-300 group relative"
-                >
-                  {/* Eye icon for redirection to landing page */}
-                  <Link 
-                    to={`/landingPage/${businessIdea.id || businessIdea._id}`}
-                    className="absolute top-3 right-3 p-1.5 rounded-full hover:bg-gray-100 transition-colors"
-                    title="View landing page"
+                  <div
+                    key={businessIdea.id}
+                    className="bg-white rounded-2xl p-5 shadow-sm border hover:shadow-md transition-all duration-300 group relative"
                   >
-                    <Eye className="h-4 w-4 text-gray-500 hover:text-gray-700" />
-                  </Link>
-                  
-                  <div className="space-y-4">
-                    {/* Header with ID and Scores */}
-                    <div className="flex items-center justify-between text-xs text-muted-foreground pr-8">
-                      <div className="flex items-center space-x-2">
-                        <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded">Score: {businessIdea.feasibilityScore || businessIdea.score || "N/A"}</span>
+                    {/* Eye icon for redirection to landing page */}
+                    <Link
+                      to={`/landingPage/${businessIdea.id || businessIdea._id}`}
+                      className="absolute top-3 right-3 p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+                      title="View landing page"
+                    >
+                      <Eye className="h-4 w-4 text-gray-500 hover:text-gray-700" />
+                    </Link>
+
+                    <div className="space-y-4">
+                      {/* Header with ID and Scores */}
+                      <div className="flex items-center justify-between text-xs text-muted-foreground pr-8">
+                        <div className="flex items-center space-x-2">
+                          <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded">
+                            Score:{" "}
+                            {businessIdea.feasibilityScore ||
+                              businessIdea.score ||
+                              "N/A"}
+                          </span>
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Main Content */}
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="text-lg font-bold text-foreground mb-1">
-                            {businessIdea.ideaName || businessIdea.title}
-                          </h3>
-                          <div className="flex items-center space-x-2">
-                            <Badge variant="outline" className="text-xs">
-                              {businessIdea.businessModel || "SaaS"}
-                            </Badge>
-
+                      {/* Main Content */}
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h3 className="text-lg font-bold text-foreground mb-1">
+                              {businessIdea.ideaName || businessIdea.title}
+                            </h3>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="outline" className="text-xs">
+                                {businessIdea.businessModel || "SaaS"}
+                              </Badge>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      {/* Description */}
-                      <p className="text-muted-foreground text-sm">
-                        {businessIdea.description || businessIdea.solutionOverview}
-                      </p>
+                        {/* Description */}
+                        <p className="text-muted-foreground text-sm">
+                          {businessIdea.description ||
+                            businessIdea.solutionOverview}
+                        </p>
 
-                      {/* Key Details Grid */}
-                      <div className="grid grid-cols-2 gap-2">
-                        {/* Target Audience */}
-                        <div className="bg-gray-50 p-2 rounded">
-                          <h4 className="text-[10px] font-semibold text-foreground">Target Audience</h4>
-                          <p className="text-muted-foreground text-xs">{businessIdea.targetAudience || "N/A"}</p>
+                        {/* Key Details Grid */}
+                        <div className="grid grid-cols-2 gap-2">
+                          {/* Target Audience */}
+                          <div className="bg-gray-50 p-2 rounded">
+                            <h4 className="text-[10px] font-semibold text-foreground">
+                              Target Audience
+                            </h4>
+                            <p className="text-muted-foreground text-xs">
+                              {businessIdea.targetAudience || "N/A"}
+                            </p>
+                          </div>
+
+                          {/* Revenue Streams */}
+                          <div className="bg-green-50 p-2 rounded">
+                            <h4 className="text-[10px] font-semibold text-foreground">
+                              Revenue Streams
+                            </h4>
+                            <p className="text-muted-foreground text-xs">
+                              {businessIdea.revenueStreams?.join(", ") || "N/A"}
+                            </p>
+                          </div>
                         </div>
-                        
-                        {/* Revenue Streams */}
-                        <div className="bg-green-50 p-2 rounded">
-                          <h4 className="text-[10px] font-semibold text-foreground">Revenue Streams</h4>
-                          <p className="text-muted-foreground text-xs">
-                            {businessIdea.revenueStreams?.join(", ") || "N/A"}
-                          </p>
-                        </div>
-                      </div>
 
-                     
-                      {/* Key Features */}
-                      {businessIdea.keyFeatures?.length > 0 && (
-                        <div className="bg-amber-50 p-3 rounded-lg">
-                          <h4 className="text-xs font-semibold text-foreground mb-1">Key Features</h4>
-                          <ul className="list-disc pl-5 space-y-1">
-                            {businessIdea.keyFeatures.slice(0, 3).map((feature, idx) => (
-                              <li key={idx} className="text-left text-muted-foreground text-xs">
-                                {feature}
-                              </li>
+                        {/* Key Features */}
+                        {businessIdea.keyFeatures?.length > 0 && (
+                          <div className="bg-amber-50 p-3 rounded-lg">
+                            <h4 className="text-xs font-semibold text-foreground mb-1">
+                              Key Features
+                            </h4>
+                            <ul className="list-disc pl-5 space-y-1">
+                              {businessIdea.keyFeatures
+                                .slice(0, 3)
+                                .map((feature, idx) => (
+                                  <li
+                                    key={idx}
+                                    className="text-left text-muted-foreground text-xs"
+                                  >
+                                    {feature}
+                                  </li>
+                                ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Implementation & Challenges */}
+                        {businessIdea.implementationSteps?.length > 0 && (
+                          <div className="bg-amber-50 p-3 rounded-lg">
+                            <h4 className="text-xs font-semibold text-foreground mb-1">
+                              Implementation Steps
+                            </h4>
+                            <ul className="list-disc pl-5 space-y-1">
+                              {businessIdea.implementationSteps
+                                .slice(0, 3)
+                                .map((step, idx) => (
+                                  <li
+                                    key={idx}
+                                    className="text-left text-muted-foreground text-xs"
+                                  >
+                                    {step}
+                                  </li>
+                                ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {businessIdea.potentialChallenges?.length > 0 && (
+                          <div className="bg-amber-50 p-3 rounded-lg">
+                            <h4 className="text-xs font-semibold text-foreground mb-1">
+                              Potential Challenges
+                            </h4>
+                            <ul className="list-disc pl-5 space-y-1">
+                              {businessIdea.potentialChallenges
+                                .slice(0, 3)
+                                .map((feature, idx) => (
+                                  <li
+                                    key={idx}
+                                    className="text-left text-muted-foreground text-xs"
+                                  >
+                                    {feature}
+                                  </li>
+                                ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        <div className="grid grid-cols-2 gap-2">
+                          {/* Target Audience */}
+                          <div className="bg-gray-50 p-2 rounded">
+                            <h4 className="text-[10px] font-semibold text-foreground">
+                              Success Metrics
+                            </h4>
+                            <p className="text-muted-foreground text-xs">
+                              {businessIdea.successMetrics?.join(", ") || "N/A"}
+                            </p>
+                          </div>
+
+                          {/* Revenue Streams */}
+                          <div className="bg-green-50 p-2 rounded">
+                            <h4 className="text-[10px] font-semibold text-foreground">
+                              Unique Value Proposition
+                            </h4>
+                            <p className="text-muted-foreground text-xs">
+                              {businessIdea.uniqueValueProposition?.join(
+                                ", "
+                              ) || "N/A"}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Use Case */}
+                        <div className="space-y-2">
+                          <div className="bg-blue-50 p-3 rounded-lg">
+                            <h4 className="text-xs font-semibold text-foreground mb-1">
+                              Use Case
+                            </h4>
+                            <p className="text-muted-foreground text-xs">
+                              {businessIdea.useCase || "N/A"}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="bg-blue-50 p-3 rounded-lg">
+                            <h4 className="text-xs font-semibold text-foreground mb-1">
+                              Differentiator
+                            </h4>
+                            <p className="text-muted-foreground text-xs">
+                              {businessIdea.differentiator || "N/A"}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Keywords and Metadata */}
+                        <div className="flex flex-wrap gap-1 pt-1">
+                          {businessIdea.keywords
+                            ?.slice(0, 3)
+                            .map((keyword, idx) => (
+                              <span
+                                key={idx}
+                                className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full"
+                              >
+                                {keyword}
+                              </span>
                             ))}
-                          </ul>
-                        </div>
-                      )}
-
-                      {/* Implementation & Challenges */}
-                      {businessIdea.implementationSteps?.length > 0 && (
-                        <div className="bg-amber-50 p-3 rounded-lg">
-                          <h4 className="text-xs font-semibold text-foreground mb-1">Implementation Steps</h4>
-                          <ul className="list-disc pl-5 space-y-1">
-                            {businessIdea.implementationSteps.slice(0, 3).map((step, idx) => (
-                              <li key={idx} className="text-left text-muted-foreground text-xs">
-                                {step}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-
-                      {businessIdea.potentialChallenges?.length > 0 && (
-                        <div className="bg-amber-50 p-3 rounded-lg">
-                          <h4 className="text-xs font-semibold text-foreground mb-1">Potential Challenges</h4>
-                          <ul className="list-disc pl-5 space-y-1">
-                            {businessIdea.potentialChallenges.slice(0, 3).map((feature, idx) => (
-                              <li key={idx} className="text-left text-muted-foreground text-xs">
-                                {feature}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      
-                      <div className="grid grid-cols-2 gap-2">
-                        {/* Target Audience */}
-                        <div className="bg-gray-50 p-2 rounded">
-                          <h4 className="text-[10px] font-semibold text-foreground">Success Metrics</h4>
-                          <p className="text-muted-foreground text-xs">{businessIdea.successMetrics?.join(", ") || "N/A"}</p>
-                        </div>
-                        
-                        {/* Revenue Streams */}
-                        <div className="bg-green-50 p-2 rounded">
-                          <h4 className="text-[10px] font-semibold text-foreground">Unique Value Proposition</h4>
-                          <p className="text-muted-foreground text-xs">
-                            {businessIdea.uniqueValueProposition?.join(", ") || "N/A"}
-                          </p>
                         </div>
                       </div>
 
-                      {/* Use Case */}
-                      <div className="space-y-2">
-                        <div className="bg-blue-50 p-3 rounded-lg">
-                          <h4 className="text-xs font-semibold text-foreground mb-1">Use Case</h4>
-                          <p className="text-muted-foreground text-xs">{businessIdea.useCase || "N/A"}</p>
+                      {/* Footer */}
+                      <div className="flex items-center justify-between pt-2 border-t text-[11px] text-muted-foreground">
+                        <div className="flex items-center space-x-2">
+                          {/* <span>Source: {businessIdea.source || "ai-generated"}</span> */}
+                          {/* <span>{businessIdea.status}</span> */}
                         </div>
+                        <span>
+                          {new Date(
+                            businessIdea.updatedAt || businessIdea.createdAt
+                          ).toLocaleDateString()}
+                        </span>
                       </div>
-
-                      <div className="space-y-2">
-                        <div className="bg-blue-50 p-3 rounded-lg">
-                          <h4 className="text-xs font-semibold text-foreground mb-1">Differentiator</h4>
-                          <p className="text-muted-foreground text-xs">{businessIdea.differentiator || "N/A"}</p>
-                        </div>
-                      </div>
-
-                      {/* Keywords and Metadata */}
-                      <div className="flex flex-wrap gap-1 pt-1">
-                        {businessIdea.keywords?.slice(0, 3).map((keyword, idx) => (
-                          <span key={idx} className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                            {keyword}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Footer */}
-                    <div className="flex items-center justify-between pt-2 border-t text-[11px] text-muted-foreground">
-                      <div className="flex items-center space-x-2">
-                        {/* <span>Source: {businessIdea.source || "ai-generated"}</span> */}
-                        {/* <span>{businessIdea.status}</span> */}
-                      </div>
-                      <span>
-                        {new Date(businessIdea.updatedAt || businessIdea.createdAt).toLocaleDateString()}
-                      </span>
                     </div>
                   </div>
-                </div>
-              );
+                );
               })}
             </div>
           ) : (
