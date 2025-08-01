@@ -219,8 +219,11 @@ export const AuthProvider = ({ children }) => {
   const resetPassword = async (email) => {
     try {
       setIsLoading(true);
+      const frontendUrl = import.meta.env.VITE_FRONTEND_URL || window.location.origin;
+      const redirectUrl = new URL(`/reset-password?type=recovery&email=${encodeURIComponent(email)}`, frontendUrl);
+      
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password?type=recovery&email=${encodeURIComponent(email)}`
+        redirectTo: redirectUrl.toString()
       });
       
       if (error) throw error;
@@ -256,10 +259,9 @@ export const AuthProvider = ({ children }) => {
     try {
       setIsLoading(true);
       
-      // Get the current URL to handle the redirect back after OAuth
-      const currentUrl = window.location.origin;
-      const redirectUrl = new URL(currentUrl);
-      redirectUrl.pathname = '/dashboard';
+      // Use environment variable with fallback to current origin for local development
+      const frontendUrl = import.meta.env.VITE_FRONTEND_URL || window.location.origin;
+      const redirectUrl = new URL('/dashboard', frontendUrl);
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -269,7 +271,6 @@ export const AuthProvider = ({ children }) => {
             access_type: 'offline',
             prompt: 'consent',
           },
-          // Let Supabase handle the entire OAuth flow
           skipBrowserRedirect: false,
         },
       });
