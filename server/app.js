@@ -26,10 +26,30 @@ app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
 
+// Configure CORS with multiple allowed origins
+const allowedOrigins = [
+  'http://localhost:5173',  // Local development
+  'https://reddit-idea-extractor-frontend.onrender.com',  // Production frontend
+  'https://reddit-idea-extractor-backend.onrender.com'   // Production backend (for direct API access if needed)
+];
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      // Check if the origin is in the allowed list
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Content-Range', 'X-Content-Range']
   })
 );
 
