@@ -260,7 +260,10 @@ export const AuthProvider = ({ children }) => {
       setIsLoading(true);
       
       // Use environment variable with fallback to current origin for local development
-      const frontendUrl = import.meta.env.VITE_FRONTEND_URL || window.location.origin;
+      let frontendUrl = import.meta.env.VITE_FRONTEND_URL || window.location.origin;
+      // Replace 'backend' with 'frontend' in the URL if it exists
+      frontendUrl = frontendUrl.replace('backend', 'frontend');
+      
       const redirectUrl = new URL('/dashboard', frontendUrl);
       
       const { error } = await supabase.auth.signInWithOAuth({
