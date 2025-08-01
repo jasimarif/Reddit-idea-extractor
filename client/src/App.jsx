@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import LoginPage from "./pages/login.jsx";
 import SignupPage from "./pages/signup.jsx";
+import ResetPasswordPage from "./pages/reset-password.jsx";
+import OAuthTestPage from "./pages/oauth-test.jsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import HomePage from "./pages/homepage.jsx";
 import Navbar from "./components/Navbar.jsx";
@@ -16,7 +18,7 @@ import IdeaDetailPage from "./pages/IdeaDetailPage.jsx";
 import LandingPageViewer from "./pages/landingPage.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import GoogleCallback from "./pages/googleCallback.jsx";
-
+import VerifyEmailPage from "./pages/verify-email.jsx";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +36,9 @@ function App() {
                 <Route path="/google/callback" element={<GoogleCallback />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignupPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/oauth-test" element={<OAuthTestPage />} />
+                <Route path="/verify-email" element={<VerifyEmailPage />} />
 
                 <Route
                   path="/dashboard"

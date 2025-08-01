@@ -1,24 +1,50 @@
 const User = require("../models/User");
 const validator = require("validator");
+const { createClient } = require('@supabase/supabase-js');
 
-async function registerUser({ name, email, password }) {
-  if (
-    !validator.isEmail(email) ||
-    !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.(com|net|org|edu|gov|io|co\.uk)$/i.test(
-      email
-    )
-  ) {
-    throw new Error(
-      "Please enter a valid email address (e.g. user@gmail.com)."
-    );
+// Initialize Supabase client
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+);
+
+async function registerUser({ name, email, password, supabaseUserId }) {
+  // Validate email format
+  if (!validator.isEmail(email)) {
+    throw new Error("Please enter a valid email address.");
   }
-  if (!validator.isStrongPassword(password))
-    throw new Error("Password is not strong enough");
 
-  const existingUser = await User.findOne({ email });
-  if (existingUser) throw new Error("User already exists with this email");
+  // Check if user already exists in our database
+  const existingUser = await User.findOne({ 
+    $or: [
+      { email },
+      { supabaseUserId }
+    ] 
+  });
+  
+  if (existingUser) {
+    // If user exists with same email but different supabaseUserId, it's an error
+    if (existingUser.email === email) {
+      throw new Error("User already exists with this email");
+    }
+    // If user exists with same supabaseUserId but different email, update the email
+    if (existingUser.supabaseUserId === supabaseUserId) {
+      existingUser.email = email;
+      existingUser.name = name;
+      await existingUser.save();
+      return existingUser;
+    }
+  }
 
-  const user = await User.create({ name, email, password });
+  // Create new user in our database
+  const user = await User.create({ 
+    name, 
+    email, 
+    password: password || undefined, // Password is optional for OAuth users
+    supabaseUserId,
+    emailVerified: false // Will be updated after email verification
+  });
+  
   return user;
 }
 

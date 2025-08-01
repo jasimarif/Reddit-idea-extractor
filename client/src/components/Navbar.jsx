@@ -13,11 +13,22 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const Navbar = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileView, setIsMobileView] = useState(window.innerWidth < 640);
+  
+  // Don't show user menu during auth-related flows
+  const isAuthPage = [
+    '/reset-password',
+    '/forgot-password',
+    '/login',
+    '/signup',
+    '/verify-email'
+  ].includes(location.pathname);
+  
+  const shouldShowUserMenu = user && !isAuthPage;
 
   useEffect(() => {
     const handleResize = () => {
@@ -86,7 +97,7 @@ const getUserInitials = (name) => {
           </div>
 
           <div className={`${isMobileView && !isMobileMenuOpen ? 'hidden' : ''} flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto py-2 sm:py-0`}>
-            {user ? (
+            {shouldShowUserMenu ? (
               <>
                 <Link
                   to="/dashboard"

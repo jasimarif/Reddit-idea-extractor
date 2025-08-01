@@ -2,6 +2,11 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
 const userSchema = new mongoose.Schema({
+  supabaseUserId: {
+    type: String,
+    unique: true,
+    sparse: true,
+  },
   name: {
     type: String,
     required: [true, "Name is required"],
@@ -22,7 +27,8 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: function () {
-      return !this.googleId;
+      // Password is only required for non-OAuth users
+      return !this.googleId && !this.supabaseUserId;
     },
     select: false,
   },
@@ -31,7 +37,19 @@ const userSchema = new mongoose.Schema({
     unique: true,
     sparse: true,
   },
+  avatar: {
+    type: String,
+    default: '',
+  },
+  emailVerified: {
+    type: Boolean,
+    default: false,
+  },
   createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  lastLogin: {
     type: Date,
     default: Date.now,
   },

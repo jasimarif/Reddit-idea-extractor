@@ -38,22 +38,22 @@ const DashboardPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
   const [favoriteIds, setFavoriteIds] = useState([]);
-  const [allTags, setAllTags] = useState([]);
+  // const [allTags, setAllTags] = useState([]);
   const [categories, setCategories] = useState([]);
 
-  // Tags state and fetch logic
-  useEffect(() => {
-    const fetchTags = async () => {
-      try {
-        const response = await apiRequest.get("/ideas/tags");
-        setAllTags(response.data?.data || []);
-      } catch (error) {
-        console.error("Failed to fetch tags:", error);
-        setAllTags([]);
-      }
-    };
-    fetchTags();
-  }, []);
+  // // Tags state and fetch logic
+  // useEffect(() => {
+  //   const fetchTags = async () => {
+  //     try {
+  //       const response = await apiRequest.get("/ideas/tags");
+  //       setAllTags(response.data?.data || []);
+  //     } catch (error) {
+  //       console.error("Failed to fetch tags:", error);
+  //       setAllTags([]);
+  //     }
+  //   };
+  //   fetchTags();
+  // }, []);
 
   // Categories state and fetch logic
   useEffect(() => {

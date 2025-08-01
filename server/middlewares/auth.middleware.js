@@ -1,18 +1,30 @@
 const jwt = require('jsonwebtoken');
+const { createClient } = require('@supabase/supabase-js');
 const User = require('../models/User');
+
+// Initialize Supabase client
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
+);
 
 const protect = async (req, res, next) => {
   try {
     let token;
 
-    // Check for token in cookies
-    if (req.cookies && req.cookies.jwt) {
-      token = req.cookies.jwt;
-    }
-
-    // Check for token in Authorization header
-    if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    // Check for token in Authorization header (Supabase sends it as 'Bearer <token>')
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
       token = req.headers.authorization.split(' ')[1];
+    }
+    // Fallback to cookies if needed
+    else if (req.cookies && req.cookies['sb-access-token']) {
+      token = req.cookies['sb-access-token'];
     }
 
     if (!token) {
@@ -22,26 +34,43 @@ const protect = async (req, res, next) => {
       });
     }
 
-    // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Verify token with Supabase
+    const { data: { user: supabaseUser }, error } = await supabase.auth.getUser(token);
     
-    // Get user from database
-    const user = await User.findById(decoded.id).select('-password');
-    
-    if (!user) {
+    if (error || !supabaseUser) {
+      console.error('Supabase auth error:', error);
       return res.status(401).json({
         success: false,
-        message: 'Token is valid but user not found'
+        message: 'Invalid or expired token',
+        error: error?.message
       });
     }
 
-    req.user = user;
+    // Get user from your database using Supabase user ID
+    const user = await User.findOne({ supabaseUserId: supabaseUser.id }).select('-password');
+    
+    if (!user) {
+      // Optionally create user if they don't exist in your database yet
+      const newUser = new User({
+        supabaseUserId: supabaseUser.id,
+        email: supabaseUser.email,
+        name: supabaseUser.user_metadata?.full_name || supabaseUser.email.split('@')[0],
+        // Add other user fields as needed
+      });
+      
+      const savedUser = await newUser.save();
+      req.user = savedUser;
+    } else {
+      req.user = user;
+    }
+    
     next();
   } catch (error) {
     console.error('Auth middleware error:', error);
     return res.status(401).json({
       success: false,
-      message: 'Invalid token'
+      message: 'Authentication failed',
+      error: error.message
     });
   }
 };

@@ -1,30 +1,67 @@
-import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { Brain, Mail, Lock, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import React, { useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import {
+  Brain,
+  Mail,
+  Lock,
+  AlertCircle,
+  Eye,
+  EyeOff,
+  Loader2,
+} from "lucide-react";
+import { FcGoogle } from "react-icons/fc";
 
 const LoginPage = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [error, setError] = useState('');
-  const { login, isLoading } = useAuth();
+  const [error, setError] = useState("");
+  const { login, isLoading, signInWithGoogle, resetPassword } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = location.state?.from?.pathname || '/dashboard';
+  const from = location.state?.from?.pathname || "/dashboard";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    
+    setError("");
+
     try {
       await login(email, password, rememberMe);
       navigate(from, { replace: true });
     } catch (err) {
-      console.error('Login error:', err);
-      setError(err.message || 'Invalid email or password');
+      console.error("Login error:", err);
+      setError(err.message || "Invalid email or password");
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError("");
+    try {
+      // This will trigger the OAuth flow and redirect to Google
+      await signInWithGoogle();
+      // No need to navigate here as Supabase will handle the redirect
+    } catch (err) {
+      console.error("Google login error:", err);
+      setError(err.message || "Failed to sign in with Google");
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError("Please enter your email address first");
+      return;
+    }
+
+    setError("");
+    try {
+      await resetPassword(email);
+      setError("Password reset email sent. Please check your inbox.");
+    } catch (err) {
+      console.error("Forgot password error:", err);
+      setError(err.message || "Failed to send password reset email");
     }
   };
 
@@ -37,7 +74,7 @@ const LoginPage = () => {
             Welcome back
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Don't have an account?{' '}
+            Don't have an account?{" "}
             <Link
               to="/signup"
               className="font-medium text-purple-600 hover:text-purple-500 transition-colors"
@@ -48,107 +85,159 @@ const LoginPage = () => {
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl p-8">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <div className="space-y-6">
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center space-x-2">
-                <AlertCircle className="h-5 w-5 text-red-500" />
+                <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
                 <span className="text-red-700 text-sm">{error}</span>
               </div>
             )}
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email address
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              disabled={isLoading}
+              className="w-full flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-300 rounded-lg py-3 px-4 font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                <>
+                  <FcGoogle className="h-5 w-5" />
+                  Sign in with Google
+                </>
+              )}
+            </button>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">
+                  Or continue with
+                </span>
               </div>
             </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  required
-                  className="block w-full pl-10 pr-14 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    if (error) setError("");
-                  }}
-                />
-                <button
-                  type="button"
-                  tabIndex={-1}
-                  className="absolute inset-y-0 right-4 flex items-center text-gray-400 hover:text-purple-600 transition outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 shadow-none border-none active:outline-none active:ring-0 border-none"
-                  onClick={() => setShowPassword((show) => !show)}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  style={{ background: 'none', border: 'none', padding: 0 }}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  {showPassword ? <EyeOff className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
+                  Email address
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Mail className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Password
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
+                    required
+                    className="block w-full pl-10 pr-14 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (error) setError("");
+                    }}
+                  />
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    className="absolute inset-y-0 right-4 flex items-center text-gray-400 hover:text-purple-600 transition outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 shadow-none border-none active:outline-none active:ring-0 border-none"
+                    onClick={() => setShowPassword((show) => !show)}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                    style={{ background: "none", border: "none", padding: 0 }}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-6 w-6" />
+                    ) : (
+                      <Eye className="h-6 w-6" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <input
+                    id="remember-me"
+                    name="remember-me"
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                  />
+                  <label
+                    htmlFor="remember-me"
+                    className="ml-2 block text-sm text-gray-700"
+                  >
+                    Remember me
+                  </label>
+                </div>
+
+                <div className="text-sm">
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    className="font-medium text-purple-600 hover:text-purple-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={isLoading}
+                  >
+                    Forgot your password?
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105"
+                >
+                  {isLoading ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  ) : (
+                    "Sign in"
+                  )}
                 </button>
               </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                  Remember me
-                </label>
-              </div>
-
-              <div className="text-sm">
-                <a href="#" className="font-medium text-purple-600 hover:text-purple-500 transition-colors">
-                  Forgot your password?
-                </a>
-              </div>
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105"
-              >
-                {isLoading ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                ) : (
-                  'Sign in'
-                )}
-              </button>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       </div>
     </div>

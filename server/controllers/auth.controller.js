@@ -8,16 +8,43 @@ const User = require("../models/User");
 
 const signUp = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, supabaseUserId } = req.body;
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ success: false, message: error.message });
+    if (!name || !email) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Name and email are required' 
+      });
     }
 
-    const user = await registerUser({ name, email, password });
-    sendTokenResponse(user, 201, res);
+    // For email/password signup, we should have a password
+    if (!supabaseUserId && !password) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Password is required for email signup' 
+      });
+    }
+
+    // Register user in our database
+    const user = await registerUser({ 
+      name, 
+      email, 
+      password,
+      supabaseUserId 
+    });
+
+    // Don't send token yet - user needs to verify email first
+    res.status(201).json({ 
+      success: true, 
+      message: 'Registration successful. Please check your email to verify your account.',
+      requiresEmailConfirmation: true
+    });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    console.error('Signup error:', error);
+    res.status(400).json({ 
+      success: false, 
+      message: error.message || 'Registration failed. Please try again.' 
+    });
   }
 };
 

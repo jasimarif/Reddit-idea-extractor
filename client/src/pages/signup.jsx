@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { Brain, Mail, Lock, User, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Brain, Mail, Lock, User, AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
+import { FcGoogle } from 'react-icons/fc';
 
 const SignupPage = () => {
   const [name, setName] = useState("");
@@ -11,13 +12,27 @@ const SignupPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
-  const { signup, isLoading } = useAuth();
+  const [isSuccess, setIsSuccess] = useState(false);
+  const { signup, signInWithGoogle, isLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || '/dashboard';
+
+  useEffect(() => {
+    // Check for OAuth errors in the URL hash
+    const hash = window.location.hash;
+    if (hash && hash.includes('error')) {
+      const error = new URLSearchParams(hash.substring(hash.indexOf('?'))).get('error_description');
+      if (error) {
+        setError(decodeURIComponent(error));
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-
+    
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
@@ -29,13 +44,94 @@ const SignupPage = () => {
     }
 
     try {
-      await signup(email, password, name);
-      navigate("/dashboard");
+      // Reset success state before attempting signup
+      setIsSuccess(false);
+      
+      // Call the signup function from AuthContext
+      const { user, error: signupError } = await signup(email, password, name);
+      
+      if (signupError) {
+        throw signupError;
+      }
+      
+      // If we get here, signup was successful
+      setIsSuccess(true);
+      
+      // Clear the form
+      setName("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+      
+      // Clear success message after 10 seconds
+      const timer = setTimeout(() => {
+        setIsSuccess(false);
+      }, 10000);
+      
+      // Cleanup timer on component unmount
+      return () => clearTimeout(timer);
+      
     } catch (err) {
       console.error('Signup error:', err);
-      setError(err.message || "Failed to create account");
+      setError(err.message || 'Failed to create an account. Please try again.');
+      // Clear any success state if there was an error
+      setIsSuccess(false);
     }
   };
+  
+  const handleGoogleSignUp = async () => {
+    setError('');
+    try {
+      // This will trigger the OAuth flow and redirect to Google
+      await signInWithGoogle();
+      // No need to navigate here as Supabase will handle the redirect
+    } catch (err) {
+      console.error('Google sign up error:', err);
+      setError(err.message || 'Failed to sign up with Google');
+    }
+  };
+
+  if (isSuccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8 text-center">
+          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100">
+            <Mail className="h-8 w-8 text-green-600" />
+          </div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Check Your Email
+          </h2>
+          <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <p className="text-gray-600 mb-6">
+              We've sent a verification link to <span className="font-medium">{email}</span>.
+              Please check your inbox and click the link to verify your email address.
+            </p>
+            
+            <div className="mt-6 bg-blue-50 p-4 rounded-md">
+              <p className="text-sm text-blue-700">
+                <strong>Didn't receive the email?</strong> Check your spam folder or{' '}
+                <button 
+                  onClick={() => window.location.reload()} 
+                  className="text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  click here to resend
+                </button>
+              </p>
+            </div>
+            
+            <div className="mt-6">
+              <button
+                onClick={() => navigate('/login')}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+              >
+                Back to Login
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -57,13 +153,79 @@ const SignupPage = () => {
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl p-8">
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center space-x-2">
-                <AlertCircle className="h-5 w-5 text-red-500" />
-                <span className="text-red-700 text-sm">{error}</span>
+          <div className="space-y-6">
+            {isSuccess ? (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-green-800">Check your email</h3>
+                    <div className="mt-2 text-sm text-green-700">
+                      <p>We've sent a verification link to <span className="font-semibold">{email}</span>.</p>
+                      <p className="mt-1">Please check your inbox and click the link to verify your email address.</p>
+                    </div>
+                    <div className="mt-4">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          // Reset the success state
+                          setIsSuccess(false);
+                          // Optionally clear the form
+                          setName("");
+                          setEmail("");
+                          setPassword("");
+                          setConfirmPassword("");
+                        }}
+                        className="text-sm font-medium text-green-800 hover:text-green-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                      >
+                        Dismiss this message
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
-            )}
+            ) : error ? (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start space-x-2">
+                <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+                <span className="text-sm text-red-700">
+                  {error}
+                </span>
+              </div>
+            ) : null}
+            
+            <button
+              type="button"
+              onClick={handleGoogleSignUp}
+              disabled={isLoading}
+              className="w-full flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-300 rounded-lg py-3 px-4 font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating account...
+                </>
+              ) : (
+                <>
+                  <FcGoogle className="h-5 w-5" />
+                  Continue with Google
+                </>
+              )}
+            </button>
+            
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Or continue with</span>
+              </div>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="space-y-6">
 
             <div>
               <label
@@ -205,30 +367,8 @@ const SignupPage = () => {
                 )}
               </button>
             </div>
-            <div className="mt-6">
-              <p className="text-center text-sm text-gray-500 mb-4">
-                or continue with
-              </p>
-              <button
-                type="button"
-                onClick={() => {
-                  window.location.href = `${
-                    import.meta.env.VITE_API_URL
-                  }/api/auth/google`;
-                }}
-                className="w-full flex justify-center items-center space-x-3 py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white hover:bg-gray-50 transition-all"
-              >
-                <img
-                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS70VFOE_89OCH_ztJMmAt-3NPx-nwKCVGvkg&s"
-                  alt="Google"
-                  className="w-5 h-5"
-                />
-                <span className="text-sm font-medium text-gray-700">
-                  Continue with Google
-                </span>
-              </button>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       </div>
     </div>
