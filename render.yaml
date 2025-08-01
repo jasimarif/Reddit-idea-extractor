@@ -1,0 +1,18 @@
+# Render configuration for server deployment
+services:
+  - type: web
+    name: reddit-idea-extractor-server
+    env: node
+    buildCommand: cd server && npm install
+    startCommand: cd server && node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      # Add other environment variables from your .env file here
+      # - key: VARIABLE_NAME
+      #   value: your-value
+    plan: free
+    region: oregon
+    autoDeploy: true
