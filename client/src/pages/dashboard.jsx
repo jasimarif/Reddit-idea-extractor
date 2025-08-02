@@ -418,21 +418,33 @@ const DashboardPage = () => {
               <span className="text-xs sm:text-sm font-medium text-gray-700 mt-1 whitespace-nowrap">
                 Popular Categories:
               </span>
-              <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                {categories.slice(0, 12).map((cat) => (
-                  <button
-                    key={cat.name}
-                    onClick={() => handleCategoryToggle(cat.name)}
-                    className={`px-2.5 sm:px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                      selectedCategories.includes(cat.name)
-                        ? "bg-green-100 text-green-700 border border-green-200"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200 border border-transparent"
-                    }`}
-                  >
-                    {cat.name}
-                  </button>
-                ))}
-              </div>
+              {categories.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5 sm:gap-2 -mt-2">
+                  {categories.slice(0, 12).map((cat) => (
+                    <button
+                      key={cat.name}
+                      onClick={() => handleCategoryToggle(cat.name)}
+                      className={`px-2.5 sm:px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                        selectedCategories.includes(cat.name)
+                          ? "bg-green-100 text-green-700 border border-green-200"
+                          : "bg-gray-100 text-gray-600 hover:bg-gray-200 border border-transparent"
+                      }`}
+                    >
+                      {cat.name}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                  {[...Array(6)].map((_, i) => (
+                    <div 
+                      key={i} 
+                      className="h-7 bg-gray-100 rounded-full animate-pulse"
+                      style={{ width: `${Math.floor(Math.random() * 40) + 60}px` }}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Active Filters */}
@@ -528,22 +540,6 @@ const DashboardPage = () => {
               <CardTitle className="text-base sm:text-lg font-semibold text-gray-900">
                 Business Ideas ({currentIdeas.length})
               </CardTitle>
-              <div className="flex items-center justify-end sm:justify-start space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleRefreshIdeas}
-                  disabled={isLoading}
-                  className="border-gray-300 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
-                >
-                  <RefreshCw
-                    className={`h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 ${
-                      isLoading ? "animate-spin" : ""
-                    }`}
-                  />
-                  Refresh
-                </Button>
-              </div>
             </div>
           </CardHeader>
           <CardContent className="p-0">
@@ -568,7 +564,7 @@ const DashboardPage = () => {
                     <TableHead className="hidden lg:table-cell px-2 sm:px-12 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">
                       Date
                     </TableHead>
-                    <TableHead className="px-2 sm:px-12 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell w-1/8">
+                    <TableHead className="hidden md:table-cell px-2 sm:px-12 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">
                       Potential
                     </TableHead>
                     <TableHead className="px-2 sm:px-10 py-2 sm:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-16 sm:w-20">
@@ -773,14 +769,33 @@ const DashboardPage = () => {
               </Table>
             </div>
 
-            {currentIdeas.length === 0 && (
+            {isLoading ? (
+              <div className="space-y-4 p-4">
+                {[...Array(3)].map((_, index) => (
+                  <div key={index} className="animate-pulse">
+                    <div className="flex items-center space-x-4 p-4 bg-white rounded-lg border border-gray-200">
+                      <div className="flex-shrink-0 w-12 h-12 bg-gray-200 rounded-full"></div>
+                      <div className="flex-1 space-y-3">
+                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                        <div className="h-3 bg-gray-100 rounded w-1/2"></div>
+                        <div className="flex space-x-2">
+                          <div className="h-4 bg-gray-100 rounded w-16"></div>
+                          <div className="h-4 bg-gray-100 rounded w-20"></div>
+                        </div>
+                      </div>
+                      <div className="h-8 bg-gray-100 rounded w-24"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : currentIdeas.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-slate-400 mb-2">No ideas found</div>
                 <p className="text-slate-600">
                   Try adjusting your filters to see more results.
                 </p>
               </div>
-            )}
+            ) : null}
           </CardContent>
         </Card>
 

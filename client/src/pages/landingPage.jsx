@@ -69,11 +69,132 @@ const IdeaViewerPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="flex flex-col items-center space-y-2">
-          <div className="animate-spin rounded-full h-6 w-6 border-4 border-blue-500 border-t-transparent"></div>
-          <p className="text-gray-600 text-xs">Loading idea details...</p>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
+        {/* Header Skeleton */}
+        <header className="">
+          <div className="w-full max-w-[1800px] mx-auto px-4 py-1.5">
+            <div className="flex items-center justify-between">
+              <div className="h-8 w-16 bg-gray-200 rounded-md animate-pulse"></div>
+              <div className="h-7 w-24 bg-gray-200 rounded-md animate-pulse"></div>
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content Skeleton */}
+        <main className="h-[calc(100vh-40px)] p-2 max-w-[1800px] mx-auto w-full">
+          {/* Desktop Layout Skeleton */}
+          <div className="hidden lg:flex h-full rounded-lg overflow-hidden bg-white shadow-sm border border-gray-200">
+            {/* Left Panel - Idea Details Skeleton */}
+            <div className="w-1/3 border-r border-gray-200 p-4 overflow-y-auto custom-scrollbar">
+              <div className="space-y-6">
+                {/* Header Skeleton */}
+                <div className="space-y-2">
+                  <div className="h-6 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+                </div>
+
+                {/* Tags Skeleton */}
+                <div className="flex flex-wrap gap-2">
+                  <div className="h-6 bg-gray-200 rounded-full w-20 animate-pulse"></div>
+                  <div className="h-6 bg-gray-200 rounded-full w-16 animate-pulse"></div>
+                  <div className="h-6 bg-gray-200 rounded-full w-24 animate-pulse"></div>
+                </div>
+
+                {/* Pain Points Skeleton */}
+                <div className="space-y-3">
+                  <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
+                  <div className="space-y-2">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex items-start space-x-2">
+                        <div className="h-4 w-4 bg-gray-200 rounded-full mt-1 animate-pulse"></div>
+                        <div className="h-12 bg-gray-100 rounded w-full animate-pulse"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Outcome Section Skeleton */}
+                <div className="space-y-3">
+                  <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
+                  <div className="space-y-2">
+                    {[1, 2].map((i) => (
+                      <div key={i} className="flex items-start space-x-2">
+                        <div className="h-4 w-4 bg-gray-200 rounded-full mt-1 animate-pulse"></div>
+                        <div className="h-10 bg-gray-100 rounded w-full animate-pulse"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Key Benefits Skeleton */}
+                <div className="space-y-3">
+                  <div className="h-4 bg-gray-200 rounded w-24 animate-pulse"></div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="h-16 bg-gray-100 rounded-md p-2">
+                        <div className="h-3 bg-gray-200 rounded w-3/4 mb-1 animate-pulse"></div>
+                        <div className="h-2 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Panel - Preview Skeleton */}
+            <div className="flex-1 bg-gray-50 flex items-center justify-center p-8 overflow-y-auto">
+              <div className="w-full max-w-md space-y-4">
+                <div className="h-8 bg-gray-200 rounded-lg w-3/4 mx-auto animate-pulse"></div>
+                <div className="h-4 bg-gray-200 rounded w-5/6 mx-auto animate-pulse"></div>
+                <div className="h-4 bg-gray-200 rounded w-2/3 mx-auto animate-pulse"></div>
+                <div className="h-12 bg-gray-200 rounded-lg w-40 mx-auto mt-6 animate-pulse"></div>
+                <div className="h-64 bg-gray-100 rounded-lg mt-8 animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile Layout Skeleton */}
+          <div className="lg:hidden h-full flex flex-col gap-1.5">
+            {/* Idea Details Card Skeleton */}
+            <div className="flex-shrink-0 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+              <div className="space-y-4">
+                <div className="h-6 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+                <div className="flex flex-wrap gap-2">
+                  <div className="h-5 bg-gray-200 rounded-full w-16 animate-pulse"></div>
+                  <div className="h-5 bg-gray-200 rounded-full w-14 animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Preview Skeleton */}
+            <div className="flex-1 min-h-[50vh] bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+              <div className="h-6 bg-gray-200 rounded w-1/2 mb-4 animate-pulse"></div>
+              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2 animate-pulse"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2 mb-6 animate-pulse"></div>
+              <div className="h-10 bg-gray-200 rounded-lg w-32 mb-6 animate-pulse"></div>
+              <div className="h-48 bg-gray-100 rounded-lg animate-pulse"></div>
+            </div>
+          </div>
+        </main>
+
+        {/* Custom scrollbar styles for loading state */}
+        <style jsx global>{`
+          .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 2px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #cbd5e1;
+          }
+        `}</style>
       </div>
     );
   }

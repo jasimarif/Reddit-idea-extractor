@@ -224,8 +224,67 @@ const IdeaDetailPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
+        {/* Header Skeleton */}
+        <div className="px-4 py-3">
+          <div className="max-w-7xl mx-auto">
+            <div className="h-8 w-24 bg-gray-200 rounded-md animate-pulse"></div>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          {/* Pain Points Section Skeleton */}
+          <div className="mb-8">
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="w-8 h-8 bg-gray-200 rounded-lg animate-pulse"></div>
+              <div className="h-6 bg-gray-200 rounded w-48 animate-pulse"></div>
+            </div>
+
+            {/* Main Card Skeleton */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm border mb-6">
+              <div className="space-y-6">
+                {/* Title and Badges */}
+                <div className="space-y-4">
+                  <div className="h-7 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+                  <div className="flex flex-wrap gap-2">
+                    <div className="h-6 bg-gray-200 rounded-full w-20 animate-pulse"></div>
+                    <div className="h-6 bg-gray-200 rounded-full w-32 animate-pulse"></div>
+                    <div className="h-6 bg-gray-200 rounded-full w-28 animate-pulse"></div>
+                  </div>
+                </div>
+
+                {/* Problem Summary Skeleton */}
+                <div className="bg-gray-100 p-4 rounded-xl space-y-2">
+                  <div className="h-4 bg-gray-200 rounded w-32 mb-3 animate-pulse"></div>
+                  <div className="h-3 bg-gray-200 rounded w-full animate-pulse"></div>
+                  <div className="h-3 bg-gray-200 rounded w-5/6 animate-pulse"></div>
+                  <div className="h-3 bg-gray-200 rounded w-4/6 animate-pulse"></div>
+                </div>
+
+                {/* Grid Skeleton */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-gray-50 p-3 rounded-lg space-y-2">
+                    <div className="h-3 bg-gray-200 rounded w-24 animate-pulse"></div>
+                    <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded-lg space-y-2">
+                    <div className="h-3 bg-gray-200 rounded w-28 animate-pulse"></div>
+                    <div className="h-8 bg-gray-200 rounded w-24 animate-pulse"></div>
+                  </div>
+                </div>
+
+                {/* Footer Skeleton */}
+                <div className="flex items-center justify-between pt-4 border-t">
+                  <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
+                  <div className="h-6 bg-gray-200 rounded-full w-48 animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Business Ideas Section Skeleton */}
+          
+        </div>
       </div>
     );
   }
@@ -239,40 +298,6 @@ const IdeaDetailPage = () => {
           </h2>
           <p className="text-gray-600 mb-6">
             The idea you're looking for doesn't exist.
-          </p>
-          <BackButton className="text-gray-600 hover:text-gray-800 text-sm font-medium">
-            Back
-          </BackButton>
-        </div>
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-accent/5 to-secondary/10 flex items-center justify-center">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary border-t-transparent"></div>
-          <p className="text-muted-foreground">
-            Loading pain point analysis...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!idea) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-accent/5 to-secondary/10 flex items-center justify-center">
-        <div className="text-center bg-card p-8 rounded-2xl shadow-lg max-w-md w-full mx-4 border">
-          <h2 className="text-2xl font-bold text-foreground mb-2">
-            Pain Point Not Found
-          </h2>
-          <p className="text-muted-foreground mb-6">
-            The pain point you're looking for doesn't exist or ID is missing.
-          </p>
-          <p className="text-sm text-muted-foreground mb-4">
-            Current ID: {id || "No ID provided"}
           </p>
           <BackButton className="text-gray-600 hover:text-gray-800 text-sm font-medium">
             Back
@@ -413,24 +438,29 @@ const IdeaDetailPage = () => {
           </div>
 
           {isGeneratingIdeas ? (
-            <div className="bg-white rounded-2xl p-8 shadow-sm border text-center">
-              <div className="flex flex-col items-center space-y-4">
-                <div className="relative">
-                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-accent/20 border-t-accent"></div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Lightbulb className="h-5 w-5 text-accent animate-pulse" />
+            <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <div className="h-6 bg-gray-200 rounded w-48 animate-pulse"></div>
+              <div className="h-9 bg-gray-200 rounded-lg w-36 animate-pulse"></div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[...Array(3)].map((_, index) => (
+                <div key={index} className="bg-white rounded-xl p-5 shadow-sm border">
+                  <div className="space-y-4">
+                    <div className="h-5 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+                    <div className="h-3 bg-gray-200 rounded w-full animate-pulse"></div>
+                    <div className="h-3 bg-gray-200 rounded w-5/6 animate-pulse"></div>
+                    <div className="flex flex-wrap gap-2 pt-2">
+                      <div className="h-5 bg-gray-200 rounded-full w-16 animate-pulse"></div>
+                      <div className="h-5 bg-gray-200 rounded-full w-20 animate-pulse"></div>
+                    </div>
+                    <div className="h-9 bg-gray-200 rounded-lg w-full mt-4 animate-pulse"></div>
                   </div>
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-1">
-                    Generating Solutions...
-                  </h3>
-                  <p className="text-muted-foreground text-sm">
-                    Creating innovative business ideas for this pain point
-                  </p>
-                </div>
-              </div>
+              ))}
             </div>
+          </div>
           ) : businessIdeas.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {businessIdeas.map((businessIdea, index) => {

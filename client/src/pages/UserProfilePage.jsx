@@ -212,8 +212,91 @@ const UserProfilePage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 py-4 sm:py-6 px-3 sm:px-4">
+        <div className="max-w-4xl mx-auto">
+          {/* Header Skeleton */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
+            <div className="h-8 bg-gray-200 rounded w-48 animate-pulse"></div>
+            <div className="h-9 bg-gray-200 rounded-lg w-full sm:w-32 animate-pulse"></div>
+          </div>
+
+          <div className="space-y-5">
+            {/* Profile Card Skeleton */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
+                  <div className="h-6 bg-gray-200 rounded w-48 animate-pulse"></div>
+                  <div className="h-9 bg-gray-200 rounded-lg w-36 animate-pulse"></div>
+                </div>
+                
+                <div className="flex flex-col sm:flex-row items-start gap-4">
+                  {/* Avatar Skeleton */}
+                  <div className="mx-auto sm:mx-0">
+                    <div className="h-20 w-20 bg-gray-200 rounded-full animate-pulse"></div>
+                  </div>
+                  
+                  {/* Profile Info Skeleton */}
+                  <div className="flex-1 w-full space-y-4">
+                    {/* Name Field */}
+                    <div>
+                      <div className="h-4 bg-gray-200 rounded w-24 mb-1.5 animate-pulse"></div>
+                      <div className="h-5 bg-gray-200 rounded w-full max-w-xs animate-pulse"></div>
+                    </div>
+                    
+                    {/* Email Field */}
+                    <div>
+                      <div className="h-4 bg-gray-200 rounded w-24 mb-1.5 animate-pulse"></div>
+                      <div className="h-5 bg-gray-200 rounded w-full max-w-xs animate-pulse"></div>
+                    </div>
+                    
+                    {/* Member Since Field */}
+                    <div>
+                      <div className="h-4 bg-gray-200 rounded w-24 mb-1.5 animate-pulse"></div>
+                      <div className="h-5 bg-gray-200 rounded w-36 animate-pulse"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Security Card Skeleton */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="p-4 sm:p-6">
+                <div className="h-6 bg-gray-200 rounded w-48 mb-6 animate-pulse"></div>
+                
+                {/* Change Password Section */}
+                <div className="mb-6">
+                  <div className="flex items-center mb-4">
+                    <div className="h-4 w-4 bg-gray-200 rounded-full mr-2 animate-pulse"></div>
+                    <div className="h-4 bg-gray-200 rounded w-36 animate-pulse"></div>
+                  </div>
+                  
+                  <div className="space-y-3 sm:pl-6">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i}>
+                        <div className="h-3 bg-gray-200 rounded w-28 mb-1.5 animate-pulse"></div>
+                        <div className="h-9 bg-gray-100 rounded-md w-full animate-pulse"></div>
+                      </div>
+                    ))}
+                    <div className="h-9 bg-gray-200 rounded-lg w-36 mt-4 animate-pulse"></div>
+                  </div>
+                </div>
+                
+                <div className="h-px bg-gray-200 my-5"></div>
+                
+                {/* Danger Zone Skeleton */}
+                <div>
+                  <div className="h-4 bg-gray-200 rounded w-20 mb-3 animate-pulse"></div>
+                  <div className="p-3 border border-red-200 rounded-lg bg-red-50/50">
+                    <div className="h-4 bg-gray-200 rounded w-24 mb-2 animate-pulse"></div>
+                    <div className="h-3 bg-gray-200 rounded w-full max-w-md mb-3 animate-pulse"></div>
+                    <div className="h-9 bg-red-200 rounded-lg w-36 animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

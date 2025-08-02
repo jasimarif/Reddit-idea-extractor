@@ -162,9 +162,33 @@ const FavoritesPage = () => {
 
         {/* Loading State */}
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-16">
-            <Loader2 className="h-12 w-12 text-blue-500 animate-spin mb-4" />
-            <p className="text-gray-600">Loading your favorite ideas...</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {[...Array(6)].map((_, index) => (
+              <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="p-4 sm:p-6">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="h-5 bg-gray-200 rounded-full w-3/4 animate-pulse"></div>
+                    <div className="h-6 w-6 bg-gray-200 rounded-full animate-pulse"></div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
+                    <div className="h-4 bg-gray-100 rounded w-5/6 animate-pulse"></div>
+                    <div className="h-4 bg-gray-100 rounded w-2/3 animate-pulse"></div>
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <div className="h-6 bg-gray-100 rounded-full w-16 animate-pulse"></div>
+                    <div className="h-6 bg-gray-100 rounded-full w-20 animate-pulse"></div>
+                  </div>
+                  <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+                    <div className="flex items-center space-x-2">
+                      <div className="h-4 w-4 bg-gray-200 rounded-full animate-pulse"></div>
+                      <div className="h-3 bg-gray-100 rounded w-16 animate-pulse"></div>
+                    </div>
+                    <div className="h-9 bg-gray-100 rounded-lg w-24 animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : favorites.length === 0 ? (
           <div className="text-center py-16">
