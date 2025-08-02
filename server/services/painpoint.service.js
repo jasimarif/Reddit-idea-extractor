@@ -90,7 +90,7 @@ const extractPainPointsFromThread = async (thread) => {
     console.debug("Calling LangChain OpenAI agent to extract pain points...");
     console.log(`LLM request for thread ${thread._id}:`, threadContent);
     const agent = await langchain.getPainPointAgent();
-    const prompt = buildPainPointExtractionPrompt(threadContent);
+    const prompt = threadContent;
     const response = await agent.invoke({ input: prompt });
     console.log(`LLM response received for thread ${thread._id}:`, response);
     let extracted;

@@ -30,8 +30,8 @@ router.get('/pain-points/thread/:threadId', cacheRoute(300, 'painpoints:thread:'
 router.get('/pain-points/:id', cacheRoute(300, 'painpoint:'), getPainPointById);
 
 // No cache for write operations
-router.post('/analyze-pain-points', protect, analyzePainPoints);
-router.put('/pain-points/:id/status', protect, updatePainPointStatus);
-router.post('/pain-points/:id/validate', protect, validatePainPoint);
+router.post('/analyze-pain-points', analyzePainPoints);
+router.put('/pain-points/:id/status', updatePainPointStatus);
+router.post('/pain-points/:id/validate', validatePainPoint);
 
 module.exports = router;

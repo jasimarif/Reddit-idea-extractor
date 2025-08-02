@@ -1,16 +1,17 @@
 // LangChain integration using initialized assistants
-const { ChatOpenAI } = require('@langchain/openai');
-const { ConversationChain } = require('langchain/chains');
-const { BufferMemory } = require('langchain/memory');
-const { RunnableSequence } = require('@langchain/core/runnables');
-const { PromptTemplate } = require('@langchain/core/prompts');
-const { 
-  getOrCreatePainPointAssistant, 
+const { ChatOpenAI } = require("@langchain/openai");
+const { ConversationChain } = require("langchain/chains");
+const { BufferMemory } = require("langchain/memory");
+const { RunnableSequence } = require("@langchain/core/runnables");
+const { PromptTemplate } = require("@langchain/core/prompts");
+const {
+  getOrCreatePainPointAssistant,
   getOrCreateMarketGapAssistant,
   getOrCreateLandingPageAssistant,
   getOrCreatePageCraftAssistant,
-  ensureInitialized
-} = require('./assistant.service');
+  ensureInitialized,
+} = require("./assistant.service");
+const { OpenAI } = require("openai");
 
 // Cache for initialized assistants
 const agentCache = new Map();
@@ -18,125 +19,312 @@ const agentCache = new Map();
 // Helper function to create and cache an agent
 const getOrCreateAgent = async (type, getAssistantFn) => {
   const cacheKey = `${type}AssistantId`;
-  
+
   // Return cached agent if available
   if (agentCache.has(cacheKey)) {
     return agentCache.get(cacheKey);
   }
-  
+
   // Ensure assistant exists and get its details
   await ensureInitialized();
   const assistant = await getAssistantFn();
-  
+
   // Create new ChatOpenAI instance with assistant's configuration
   const openai = new ChatOpenAI({
     openAIApiKey: process.env.OPENAI_API_KEY,
     modelName: assistant.model,
     configuration: {
-      baseURL: 'https://api.openai.com/v1',
+      baseURL: "https://api.openai.com/v1",
     },
-    temperature: type === 'marketGap' ? 0.7 : 0.3, // Different temperature based on agent type
+    temperature: type === "marketGap" ? 0.7 : 0.3, // Different temperature based on agent type
     maxTokens: 3000,
   });
 
   // Create and cache the agent
   const memory = new BufferMemory();
-  const agent = new ConversationChain({ 
-    llm: openai, 
+  const agent = new ConversationChain({
+    llm: openai,
     memory,
     // Add any assistant-specific configuration here
   });
-  
+
   agentCache.set(cacheKey, agent);
   return agent;
-}; 
-
-
+};
 
 // --- PainPoint Agent ---
 async function getPainPointAgent() {
-  return getOrCreateAgent('painPoint', getOrCreatePainPointAssistant);
+  const assistantId = process.env.painPointAssistantId;
+  if (!assistantId) {
+    throw new Error("painPointAssistantId is not set in environment variables");
+  }
+
+  // Initialize OpenAI client
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+
+  // Return an object with an invoke method to match the expected interface
+  return {
+    invoke: async ({ input }) => {
+      try {
+        // Create a thread
+        const thread = await openai.beta.threads.create();
+        if (!thread || !thread.id) {
+          throw new Error('Failed to create thread: No thread ID returned');
+        }
+        console.log('Thread created with ID:', thread.id);
+
+        // Add a message to the thread with clear instructions
+        await openai.beta.threads.messages.create(thread.id, {
+          role: "user",
+          content: `Analyze this content and extract pain points in JSON format. 
+          Content to analyze: ${
+            typeof input === "string" ? input : JSON.stringify(input, null, 2)
+          }`,
+        });
+
+        // Run the assistant on the thread
+        const run = await openai.beta.threads.runs.create(thread.id, {
+          assistant_id: assistantId,
+        });
+
+        // Poll for completion with proper error handling
+        let runStatus = await openai.beta.threads.runs.retrieve(run.id, {
+          thread_id: thread.id,
+        });
+
+        console.log(`Initial run status: ${runStatus.status}`);
+        
+        let attempts = 0;
+        const maxAttempts = 120; // 120 seconds max wait time
+
+        while (runStatus.status !== "completed" && attempts < maxAttempts) {
+          // Handle failed runs with specific error messages
+          if (runStatus.status === "failed") {
+            const errorMessage = runStatus.last_error?.message || 'Unknown error';
+            
+            if (errorMessage.includes('rate_limit_exceeded') || 
+                errorMessage.includes('quota') || 
+                errorMessage.includes('billing')) {
+              console.error('OpenAI API Rate Limit or Billing Error:', errorMessage);
+              throw new Error(
+                'OpenAI API rate limit or billing issue. Please check your OpenAI account billing and quota.'
+              );
+            } else {
+              console.error('Assistant run failed with error:', errorMessage);
+              throw new Error(`Assistant run failed: ${errorMessage}`);
+            }
+          }
+
+          if (["cancelled", "expired"].includes(runStatus.status)) {
+            console.error(
+              `Run was ${runStatus.status}. Last status:`, 
+              runStatus
+            );
+            throw new Error(
+              `Assistant run was ${runStatus.status}`
+            );
+          }
+
+          // Handle requires_action status
+          if (runStatus.status === "requires_action") {
+            console.log(
+              "Assistant requires action, submitting empty tool outputs..."
+            );
+
+            if (!runStatus.required_action?.submit_tool_outputs?.tool_calls) {
+              throw new Error("Invalid required_action format from API");
+            }
+
+            // Submit empty tool outputs to continue the run
+            await openai.beta.threads.runs.submitToolOutputs(runStatus.id, {
+              thread_id: thread.id,
+              tool_outputs: runStatus.required_action.submit_tool_outputs.tool_calls.map(
+                (toolCall) => ({
+                  tool_call_id: toolCall.id,
+                  output: "{}",
+                })
+              ),
+            });
+
+            console.log(
+              "Submitted empty tool outputs, waiting for completion..."
+            );
+          }
+
+          console.log(
+            `Waiting for completion... (${
+              attempts + 1
+            }/${maxAttempts}) Current status: ${runStatus.status}`
+          );
+          await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1 second
+
+          runStatus = await openai.beta.threads.runs.retrieve(run.id, {
+            thread_id: thread.id,
+          });
+
+          // Log progress
+          if (attempts % 10 === 0) {
+            // Log every 10 seconds
+            console.log(
+              `Run progress - Status: ${runStatus.status}, Attempt: ${attempts}/${maxAttempts}`
+            );
+            if (runStatus.status === "in_progress" && runStatus.step_details) {
+              console.log("Current step:", runStatus.step_details);
+            }
+          }
+
+          attempts++;
+        }
+
+        if (attempts >= maxAttempts) {
+          console.error("Assistant run timed out. Last status:", runStatus);
+          throw new Error(
+            `Assistant run timed out after ${maxAttempts} seconds. Last status: ${runStatus.status}`
+          );
+        }
+
+        console.log("Run completed successfully. Retrieving response...");
+
+        // Get the assistant's response
+        const messages = await openai.beta.threads.messages.list(thread.id);
+        const assistantMessage = messages.data.find(
+          (m) => m.role === "assistant"
+        );
+
+        if (!assistantMessage || !assistantMessage.content?.[0]?.text?.value) {
+          throw new Error("No valid response from assistant");
+        }
+
+        const responseContent = assistantMessage.content[0].text.value;
+
+        // Try to extract JSON from the response
+        try {
+          // Try to extract JSON from markdown code blocks first
+          const jsonMatch = responseContent.match(
+            /```(?:json)?\s*([\s\S]*?)\s*```/
+          );
+          const jsonString = jsonMatch ? jsonMatch[1] : responseContent;
+
+          // Try to parse the response
+          const parsedResponse = JSON.parse(jsonString);
+
+          return {
+            response: parsedResponse,
+            threadId: thread.id,
+          };
+        } catch (parseError) {
+          console.warn(
+            "Failed to parse response as JSON, returning raw text:",
+            parseError
+          );
+          return {
+            response: responseContent,
+            threadId: thread.id,
+          };
+        }
+      } catch (error) {
+        console.error("Error in getPainPointAgent:", error);
+        throw error;
+      }
+    },
+  };
 }
 
 // --- MarketGap Agent ---
 async function getMarketGapAgent() {
-  return getOrCreateAgent('marketGap', getOrCreateMarketGapAssistant);
+  return getOrCreateAgent("marketGap", getOrCreateMarketGapAssistant);
 }
 
 // --- PageCraft Agent ---
 async function getPageCraftAgent() {
-  return getOrCreateAgent('pageCraft', getOrCreatePageCraftAssistant);
+  return getOrCreateAgent("pageCraft", getOrCreatePageCraftAssistant);
 }
 
-
-async function generateLovablePromptBAB({ 
-  title, 
-  description, 
-  painPoints = [], 
-  outcomes = [], 
-  founderMessage = '', 
-  ctaText = '',
-  targetAudience = '', 
-  industry = '', 
-  uniqueValue = '',
+async function generateLovablePromptBAB({
+  title,
+  description,
+  painPoints = [],
+  outcomes = [],
+  founderMessage = "",
+  ctaText = "",
+  targetAudience = "",
+  industry = "",
+  uniqueValue = "",
   implementationSteps = [],
   potentialChallenges = [],
   differentiators = [],
   successMetrics = [],
 }) {
   // Get or create the landing page agent
-  const agent = await getOrCreateAgent('landingPage', getOrCreateLandingPageAssistant);
-  
+  const agent = await getOrCreateAgent(
+    "landingPage",
+    getOrCreateLandingPageAssistant
+  );
+
   // Use the agent's LLM for the completion
   const openai = agent.llm;
 
   // Helper functions for intelligent analysis
   function generateSmartCTA(title, description, industry) {
     const ctaMap = {
-      'saas': 'Start Your Free Trial',
-      'service': 'Get Your Free Consultation', 
-      'product': 'Order Now - Free Shipping',
-      'course': 'Enroll Today - Limited Spots',
-      'consulting': 'Book Your Strategy Call',
-      'app': 'Download Free - Get Started',
-      'marketplace': 'Join the Platform',
-      'tool': 'Try It Free - No Credit Card',
-      'default': 'Get Started Free Today'
+      saas: "Start Your Free Trial",
+      service: "Get Your Free Consultation",
+      product: "Order Now - Free Shipping",
+      course: "Enroll Today - Limited Spots",
+      consulting: "Book Your Strategy Call",
+      app: "Download Free - Get Started",
+      marketplace: "Join the Platform",
+      tool: "Try It Free - No Credit Card",
+      default: "Get Started Free Today",
     };
-    
+
     const detectedType = detectBusinessType(description);
     return ctaMap[detectedType] || ctaMap.default;
   }
 
   function detectBusinessType(description) {
     const keywords = {
-      saas: ['software', 'platform', 'dashboard', 'tool', 'system', 'cloud'],
-      service: ['service', 'consulting', 'agency', 'done-for-you', 'management'],
-      product: ['product', 'physical', 'item', 'buy', 'purchase', 'sell'],
-      course: ['course', 'training', 'learn', 'education', 'teach', 'program'],
-      app: ['mobile', 'app', 'download', 'smartphone', 'ios', 'android'],
-      marketplace: ['marketplace', 'connect', 'network', 'community', 'collaborative'],
-      tool: ['generator', 'creator', 'builder', 'analyzer', 'optimizer']
+      saas: ["software", "platform", "dashboard", "tool", "system", "cloud"],
+      service: [
+        "service",
+        "consulting",
+        "agency",
+        "done-for-you",
+        "management",
+      ],
+      product: ["product", "physical", "item", "buy", "purchase", "sell"],
+      course: ["course", "training", "learn", "education", "teach", "program"],
+      app: ["mobile", "app", "download", "smartphone", "ios", "android"],
+      marketplace: [
+        "marketplace",
+        "connect",
+        "network",
+        "community",
+        "collaborative",
+      ],
+      tool: ["generator", "creator", "builder", "analyzer", "optimizer"],
     };
 
     const lowerDesc = description.toLowerCase();
     for (const [type, words] of Object.entries(keywords)) {
-      if (words.some(word => lowerDesc.includes(word))) {
+      if (words.some((word) => lowerDesc.includes(word))) {
         return type;
       }
     }
-    return 'default';
+    return "default";
   }
 
   function getIndustryColor(industry, businessType) {
     const colorMap = {
-      'tech': { primary: '#2563eb', cta: '#f59e0b', accent: '#10b981' },
-      'health': { primary: '#059669', cta: '#dc2626', accent: '#3b82f6' },
-      'finance': { primary: '#1e40af', cta: '#f59e0b', accent: '#059669' },
-      'education': { primary: '#7c3aed', cta: '#f59e0b', accent: '#06b6d4' },
-      'marketing': { primary: '#dc2626', cta: '#f59e0b', accent: '#8b5cf6' },
-      'saas': { primary: '#2563eb', cta: '#10b981', accent: '#f59e0b' },
-      'default': { primary: '#2563eb', cta: '#f59e0b', accent: '#10b981' }
+      tech: { primary: "#2563eb", cta: "#f59e0b", accent: "#10b981" },
+      health: { primary: "#059669", cta: "#dc2626", accent: "#3b82f6" },
+      finance: { primary: "#1e40af", cta: "#f59e0b", accent: "#059669" },
+      education: { primary: "#7c3aed", cta: "#f59e0b", accent: "#06b6d4" },
+      marketing: { primary: "#dc2626", cta: "#f59e0b", accent: "#8b5cf6" },
+      saas: { primary: "#2563eb", cta: "#10b981", accent: "#f59e0b" },
+      default: { primary: "#2563eb", cta: "#f59e0b", accent: "#10b981" },
     };
 
     return colorMap[industry] || colorMap[businessType] || colorMap.default;
@@ -144,17 +332,22 @@ async function generateLovablePromptBAB({
 
   // Enhanced pre-processing
   // Ensure painPoints is always an array
-  const processedPainPoints = Array.isArray(painPoints) 
-    ? painPoints 
-    : (typeof painPoints === 'string' ? [painPoints] : []);
+  const processedPainPoints = Array.isArray(painPoints)
+    ? painPoints
+    : typeof painPoints === "string"
+    ? [painPoints]
+    : [];
 
-    const processedOutcome = Array.isArray(outcomes) 
-    ? outcomes 
-    : (typeof outcomes === 'string' ? [outcomes] : []);
+  const processedOutcome = Array.isArray(outcomes)
+    ? outcomes
+    : typeof outcomes === "string"
+    ? [outcomes]
+    : [];
 
   const businessType = detectBusinessType(description);
   const detectedIndustry = industry || businessType;
-  const intelligentCTA = ctaText || generateSmartCTA(title, description, detectedIndustry);
+  const intelligentCTA =
+    ctaText || generateSmartCTA(title, description, detectedIndustry);
   const colors = getIndustryColor(detectedIndustry, businessType);
 
   // Main prompt template that generates the FINAL Lovable.dev prompt
@@ -163,16 +356,40 @@ async function generateLovablePromptBAB({
 BUSINESS ANALYSIS:
 - Title: "${title}"
 - Description: "${description}"
-- Target Audience: "${targetAudience || 'Extract from description'}"
+- Target Audience: "${targetAudience || "Extract from description"}"
 - Business Type: "${businessType}"
 - Industry: "${detectedIndustry}"
-- Pain Points: ${processedPainPoints.length > 0 ? processedPainPoints.join('\n  • ') : 'Extract from context'}
-- Desired Outcomes: ${processedOutcome.length > 0 ? processedOutcome.join('\n  • ') : 'Generate based on solution'}
-- Unique Value: "${uniqueValue || 'Determine from description'}"
-- Implementation Steps: ${implementationSteps.length > 0 ? implementationSteps.join('\n  • ') : 'Extract from context'}
-- Potential Challenges: ${potentialChallenges.length > 0 ? potentialChallenges.join('\n  • ') : 'Extract from context'}
-- Differentiators: ${differentiators.length > 0 ? differentiators.join('\n  • ') : 'Extract from context'}
-- Success Metrics: ${successMetrics.length > 0 ? successMetrics.join('\n  • ') : 'Extract from context'}
+- Pain Points: ${
+    processedPainPoints.length > 0
+      ? processedPainPoints.join("\n  • ")
+      : "Extract from context"
+  }
+- Desired Outcomes: ${
+    processedOutcome.length > 0
+      ? processedOutcome.join("\n  • ")
+      : "Generate based on solution"
+  }
+- Unique Value: "${uniqueValue || "Determine from description"}"
+- Implementation Steps: ${
+    implementationSteps.length > 0
+      ? implementationSteps.join("\n  • ")
+      : "Extract from context"
+  }
+- Potential Challenges: ${
+    potentialChallenges.length > 0
+      ? potentialChallenges.join("\n  • ")
+      : "Extract from context"
+  }
+- Differentiators: ${
+    differentiators.length > 0
+      ? differentiators.join("\n  • ")
+      : "Extract from context"
+  }
+- Success Metrics: ${
+    successMetrics.length > 0
+      ? successMetrics.join("\n  • ")
+      : "Extract from context"
+  }
 
 CRITICAL INSTRUCTIONS:
 1. Generate a COMPLETE, production-ready Lovable.dev prompt (not a template)
@@ -194,7 +411,9 @@ Create a modern, high-converting landing page for "${title}" using React and Tai
 **DESIGN REQUIREMENTS:**
 - Mobile-first responsive design with smooth micro-animations
 - Modern UI with glassmorphism effects and subtle gradients
-- Color scheme: Primary ${colors.primary}, CTA ${colors.cta}, Accent ${colors.accent}
+- Color scheme: Primary ${colors.primary}, CTA ${colors.cta}, Accent ${
+    colors.accent
+  }
 - Clean typography using Inter font family
 - Conversion-optimized layout with clear visual hierarchy
 - Fast-loading animations and hover effects
@@ -297,87 +516,97 @@ CRUCIAL INSTRUCTIONS:
   const prompt = new PromptTemplate({
     template,
     inputVariables: [
-      'title', 
-      'description', 
-      'painPoints', 
-      'outcomes', 
-      'founderMessage', 
-      'ctaText', 
-      'targetAudience', 
-      'industry', 
-      'uniqueValue',
-      'intelligentCTA',
-      'colors',
-      'businessType',
-      'detectedIndustry'
+      "title",
+      "description",
+      "painPoints",
+      "outcomes",
+      "founderMessage",
+      "ctaText",
+      "targetAudience",
+      "industry",
+      "uniqueValue",
+      "intelligentCTA",
+      "colors",
+      "businessType",
+      "detectedIndustry",
     ],
   });
 
   const chain = RunnableSequence.from([prompt, openai]);
-  
+
   // Prepare the input for the chain
   const chainInput = {
     title,
     description,
-    painPoints: processedPainPoints.length > 0 ? processedPainPoints.join('\n  • ') : 'Extract from context',
-    outcomes: processedOutcome.length > 0 ? processedOutcome.join('\n  • ') : 'Generate based on solution',
-    founderMessage: founderMessage || 'Generate authentic founder story',
+    painPoints:
+      processedPainPoints.length > 0
+        ? processedPainPoints.join("\n  • ")
+        : "Extract from context",
+    outcomes:
+      processedOutcome.length > 0
+        ? processedOutcome.join("\n  • ")
+        : "Generate based on solution",
+    founderMessage: founderMessage || "Generate authentic founder story",
     ctaText: intelligentCTA,
-    targetAudience: targetAudience || 'Extract from description',
+    targetAudience: targetAudience || "Extract from description",
     industry: detectedIndustry,
-    uniqueValue: uniqueValue || 'Determine from description',
+    uniqueValue: uniqueValue || "Determine from description",
     intelligentCTA,
     colors,
     businessType,
-    detectedIndustry
+    detectedIndustry,
   };
 
   // Log the input for debugging
-  console.log('Chain input:', JSON.stringify(chainInput, null, 2));
-  
+  console.log("Chain input:", JSON.stringify(chainInput, null, 2));
+
   const response = await chain.invoke(chainInput);
-  
+
   // Clean up the response to ensure it's a proper prompt
   let lovablePrompt = response.content;
-  
+
   // Remove any meta-commentary and ensure clean format
-  if (lovablePrompt.includes('```')) {
+  if (lovablePrompt.includes("```")) {
     const matches = lovablePrompt.match(/```[\s\S]*?```/);
     if (matches) {
-      lovablePrompt = matches[0].replace(/```/g, '').trim();
+      lovablePrompt = matches[0].replace(/```/g, "").trim();
     }
   }
-  
+
   // Ensure the prompt starts correctly
-  if (!lovablePrompt.startsWith('Create a modern')) {
-    lovablePrompt = `Create a modern, high-converting landing page for "${title}" using React and Tailwind CSS.\n\n` + lovablePrompt;
+  if (!lovablePrompt.startsWith("Create a modern")) {
+    lovablePrompt =
+      `Create a modern, high-converting landing page for "${title}" using React and Tailwind CSS.\n\n` +
+      lovablePrompt;
   }
-  
+
   // Extract the founder message from the generated content
-  let extractedFounderMessage = '';
-  const founderMessageMatch = lovablePrompt.match(/Founder Message: "([^"]+)"/i) || 
-                            lovablePrompt.match(/Founder Message: ([^\n]+)/i);
-  
+  let extractedFounderMessage = "";
+  const founderMessageMatch =
+    lovablePrompt.match(/Founder Message: "([^"]+)"/i) ||
+    lovablePrompt.match(/Founder Message: ([^\n]+)/i);
+
   if (founderMessageMatch && founderMessageMatch[1]) {
     extractedFounderMessage = founderMessageMatch[1].trim();
   }
-  
+
   // Extract the CTA text from the generated content
-  let extractedCtaText = '';
-  const ctaMatch = lovablePrompt.match(/Primary CTA: "([^"]+)"/i) || 
-                  lovablePrompt.match(/CTA: "([^"]+)"/i) ||
-                  lovablePrompt.match(/Primary CTA: ([^\n]+)/i);
-  
+  let extractedCtaText = "";
+  const ctaMatch =
+    lovablePrompt.match(/(?:primary\s+)?cta[:\s]*["']([^"']+)["']/i) ||
+    lovablePrompt.match(/CTA: "([^"]+)"/i) ||
+    lovablePrompt.match(/Primary CTA: ([^\n]+)/i);
+
   if (ctaMatch && ctaMatch[1]) {
     extractedCtaText = ctaMatch[1].trim();
   }
-  
+
   return {
     prompt: lovablePrompt,
     generatedValues: {
       founderMessage: extractedFounderMessage || chainInput.founderMessage,
-      ctaText: extractedCtaText || chainInput.ctaText
-    }
+      ctaText: extractedCtaText || chainInput.ctaText,
+    },
   };
 }
 
@@ -386,37 +615,70 @@ function parseLovablePromptResponse(lovablePrompt, originalData) {
   // Extract headline from the prompt
   const headlineMatch = lovablePrompt.match(/headline[:\s]*["']([^"']+)["']/i);
   const headline = headlineMatch ? headlineMatch[1] : originalData.title;
-  
+
   // Extract subheadline
-  const subheadlineMatch = lovablePrompt.match(/subheadline[:\s]*["']([^"']+)["']/i);
-  const subheadline = subheadlineMatch ? subheadlineMatch[1] : originalData.description;
-  
+  const subheadlineMatch = lovablePrompt.match(
+    /subheadline[:\s]*["']([^"']+)["']/i
+  );
+  const subheadline = subheadlineMatch
+    ? subheadlineMatch[1]
+    : originalData.description;
+
   // Extract bullet points
-  const bulletMatches = lovablePrompt.match(/bullet[s]?[:\s]*[\n\r]*((?:[\s]*[•\-\*][\s]*[^\n\r]+[\n\r]*){2,})/i);
-  const bulletPoints = bulletMatches 
-    ? bulletMatches[1].split(/[\n\r]+/).map(b => b.replace(/^[\s]*[•\-\*][\s]*/, '').trim()).filter(Boolean)
-    : originalData.outcomes || ['Enhanced productivity', 'Better results', 'Time savings'];
-  
+  const bulletMatches = lovablePrompt.match(
+    /bullet[s]?[:\s]*[\n\r]*((?:[\s]*[•\-\*][\s]*[^\n\r]+[\n\r]*){2,})/i
+  );
+  const bulletPoints = bulletMatches
+    ? bulletMatches[1]
+        .split(/[\n\r]+/)
+        .map((b) => b.replace(/^[\s]*[•\-\*][\s]*/, "").trim())
+        .filter(Boolean)
+    : originalData.outcomes || [
+        "Enhanced productivity",
+        "Better results",
+        "Time savings",
+      ];
+
   // Extract pain points
-  const painMatches = lovablePrompt.match(/pain[s]?[:\s]*[\n\r]*((?:[\s]*[•\-\*][\s]*[^\n\r]+[\n\r]*){2,})/i);
-  const painPointsSection = painMatches 
-    ? painMatches[1].split(/[\n\r]+/).map(p => p.replace(/^[\s]*[•\-\*][\s]*/, '').trim()).filter(Boolean)
-    : originalData.painPoints || ['Current struggles with existing solutions'];
-  
+  const painMatches = lovablePrompt.match(
+    /pain[s]?[:\s]*[\n\r]*((?:[\s]*[•\-\*][\s]*[^\n\r]+[\n\r]*){2,})/i
+  );
+  const painPointsSection = painMatches
+    ? painMatches[1]
+        .split(/[\n\r]+/)
+        .map((p) => p.replace(/^[\s]*[•\-\*][\s]*/, "").trim())
+        .filter(Boolean)
+    : originalData.painPoints || ["Current struggles with existing solutions"];
+
   // Extract outcomes
-  const outcomeMatches = lovablePrompt.match(/outcome[s]?[:\s]*[\n\r]*((?:[\s]*[•\-\*][\s]*[^\n\r]+[\n\r]*){2,})/i);
-  const outcomeSection = outcomeMatches 
-    ? outcomeMatches[1].split(/[\n\r]+/).map(o => o.replace(/^[\s]*[•\-\*][\s]*/, '').trim()).filter(Boolean)
+  const outcomeMatches = lovablePrompt.match(
+    /outcome[s]?[:\s]*[\n\r]*((?:[\s]*[•\-\*][\s]*[^\n\r]+[\n\r]*){2,})/i
+  );
+  const outcomeSection = outcomeMatches
+    ? outcomeMatches[1]
+        .split(/[\n\r]+/)
+        .map((o) => o.replace(/^[\s]*[•\-\*][\s]*/, "").trim())
+        .filter(Boolean)
     : bulletPoints;
-  
+
   // Extract founder message
-  const founderMatch = lovablePrompt.match(/founder[s]?\s+message[:\s]*["']([^"']+)["']/i);
-  const founderMessage = founderMatch ? founderMatch[1] : originalData.founderMessage || '';
-  
+  const founderMatch = lovablePrompt.match(
+    /founder[s]?\s+message[:\s]*["']([^"']+)["']/i
+  );
+  const founderMessage = founderMatch
+    ? founderMatch[1]
+    : originalData.founderMessage || "";
+
   // Extract CTA text
-  const ctaMatch = lovablePrompt.match(/(?:primary\s+)?cta[:\s]*["']([^"']+)["']/i);
-  const ctaText = ctaMatch ? ctaMatch[1] : originalData.ctaText || 'Get Started Free';
-  
+  const ctaMatch =
+    lovablePrompt.match(/(?:primary\s+)?cta[:\s]*["']([^"']+)["']/i) ||
+    lovablePrompt.match(/CTA: "([^"]+)"/i) ||
+    lovablePrompt.match(/Primary CTA: ([^\n]+)/i);
+
+  const ctaText = ctaMatch
+    ? ctaMatch[1]
+    : originalData.ctaText || "Get Started Free";
+
   return {
     headline,
     subheadline,
@@ -424,7 +686,7 @@ function parseLovablePromptResponse(lovablePrompt, originalData) {
     painPointsSection: painPointsSection.slice(0, 3), // Limit to 3 pain points
     outcomeSection: outcomeSection.slice(0, 3), // Limit to 3 outcomes
     founderMessage,
-    ctaText
+    ctaText,
   };
 }
 
@@ -433,5 +695,5 @@ module.exports = {
   getMarketGapAgent,
   getPageCraftAgent,
   parseLovablePromptResponse,
-  generateLovablePromptBAB  
-}; 
+  generateLovablePromptBAB,
+};

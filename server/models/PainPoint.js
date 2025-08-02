@@ -27,7 +27,7 @@ const PainPointSchema = new mongoose.Schema({
   postDate: { type: Date, default: Date.now },
   quotes: [String], // 3-5 direct user quotes
   title: { type: String, required: true, default: 'Untitled' },
-  body: { type: String, default: '' },
+  description: { type: String, default: '' },
   upvotes: { type: Number, default: 0 },
   businessPotential: { type: String, enum: ["Low", "Medium", "High"], default: "Medium" },
   rankScore: { type: Number, default: 0 }, // Combined score for ranking
