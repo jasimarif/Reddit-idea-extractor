@@ -19,6 +19,6 @@ router.get('/ideas/:id', cacheRoute(300, 'marketgap:idea:'), getBusinessIdea);
 router.get('/ideas/by-painpoint/:painPointId', cacheRoute(300, 'marketgap:by-painpoint:'), getBusinessIdeasByPainPointId);
 
 // No cache for write operations
-router.post('/generate-ideas', protect, generateIdeas);
+router.post('/generate-ideas', generateIdeas);
 
 module.exports = router;

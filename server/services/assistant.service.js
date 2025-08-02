@@ -608,6 +608,40 @@ If Not Viable:
   - Each idea must address a different pain point from the list above.
   - Incorporate user quotes and keywords from the pain point in the idea's description or problem statement.
 
+
+
+  EXAMPLE OUTPUT:
+  {
+    "businessIdeas": [
+      {
+        "ideaName": "Wellness Reminder App",
+        "description": "An app that sends personalized wellness reminders based on individual health goals and schedules. Users can set up notifications for hydration, stretching, mindfulness breaks, and nutrition tips. This addresses the pain point of forgetting to prioritize self-care in busy daily routines.",
+        "problemStatement": "I know I need to take care of my health, but I just get too busy and forget to drink water or stretch.",
+        "targetAudience": "Busy professionals and individuals with health and wellness goals",
+        "businessModel": "Freemium",
+        "revenueStreams": ["In-app purchases", "Premium subscription for advanced tracking"],
+        "keyFeatures": [
+          "Personalized reminders",
+          "Tracking and progress monitoring",
+          "Smart scheduling based on calendar"
+        ],
+        "implementationSteps": [
+          "Design UI/UX for reminder customization",
+          "Integrate with phone calendar and health APIs",
+          "Build reminder engine with personalization logic"
+        ],
+        "potentialChallenges": ["User notification fatigue", "Calendar integration complexity"],
+        "successMetrics": ["Daily active users", "Retention after 30 days", "Reminder response rate"],
+        "differentiators": "Unlike generic reminder apps, this adapts to user routines and combines wellness domains (hydration, mindfulness, nutrition)",
+        "useCase": "A remote worker gets reminders to stretch and drink water between meetings, reducing back pain and fatigue.",
+        "keywords": ["hydration", "self-care", "health tracking", "productivity"],
+        "overallScore": 8.7,
+        "feasibilityScore": 8.7,
+        "rankingReason": "Frequent pain point on Reddit, clear target market, and high engagement potential with freemium model."
+      }
+    ]
+  }
+  Return your response as a JSON object with a 'businessIdeas' array. Do not include any explanations or text outside the JSON object.
   `,
     tools: [
       {

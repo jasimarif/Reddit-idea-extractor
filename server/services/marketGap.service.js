@@ -29,7 +29,7 @@ async function generateBusinessIdeas(painPoints) {
     
     try {
       const agent = await langchain.getMarketGapAgent();
-      const prompt = buildBusinessIdeaPrompt(formattedPainPoints);
+      const prompt = formattedPainPoints;
       const response = await agent.invoke({ input: prompt });
       console.log('OpenAI response:', JSON.stringify(response, null, 2));
       let aiIdeas;

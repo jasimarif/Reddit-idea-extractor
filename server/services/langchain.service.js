@@ -5,8 +5,6 @@ const { BufferMemory } = require("langchain/memory");
 const { RunnableSequence } = require("@langchain/core/runnables");
 const { PromptTemplate } = require("@langchain/core/prompts");
 const {
-  getOrCreatePainPointAssistant,
-  getOrCreateMarketGapAssistant,
   getOrCreateLandingPageAssistant,
   getOrCreatePageCraftAssistant,
   ensureInitialized,
@@ -234,7 +232,182 @@ async function getPainPointAgent() {
 
 // --- MarketGap Agent ---
 async function getMarketGapAgent() {
-  return getOrCreateAgent("marketGap", getOrCreateMarketGapAssistant);
+  const assistantId = process.env.marketGapAssistantId;
+  if (!assistantId) {
+    throw new Error("marketGapAssistantId is not set in environment variables");
+  }
+
+  // Initialize OpenAI client
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+
+  // Return an object with an invoke method to match the expected interface
+  return {
+    invoke: async ({ input }) => {
+      try {
+        // Create a thread
+        const thread = await openai.beta.threads.create();
+        if (!thread || !thread.id) {
+          throw new Error('Failed to create thread: No thread ID returned');
+        }
+        console.log('Thread created with ID:', thread.id);
+
+        // Add a message to the thread with clear instructions
+        await openai.beta.threads.messages.create(thread.id, {
+          role: "user",
+          content: `Analyze this content and give response in JSON format. 
+          Content to analyze: ${
+            typeof input === "string" ? input : JSON.stringify(input, null, 2)
+          }`,
+        });
+
+        // Run the assistant on the thread
+        const run = await openai.beta.threads.runs.create(thread.id, {
+          assistant_id: assistantId,
+        });
+
+        // Poll for completion with proper error handling
+        let runStatus = await openai.beta.threads.runs.retrieve(run.id, {
+          thread_id: thread.id,
+        });
+
+        console.log(`Initial run status: ${runStatus.status}`);
+        
+        let attempts = 0;
+        const maxAttempts = 120; // 120 seconds max wait time
+
+        while (runStatus.status !== "completed" && attempts < maxAttempts) {
+          // Handle failed runs with specific error messages
+          if (runStatus.status === "failed") {
+            const errorMessage = runStatus.last_error?.message || 'Unknown error';
+            
+            if (errorMessage.includes('rate_limit_exceeded') || 
+                errorMessage.includes('quota') || 
+                errorMessage.includes('billing')) {
+              console.error('OpenAI API Rate Limit or Billing Error:', errorMessage);
+              throw new Error(
+                'OpenAI API rate limit or billing issue. Please check your OpenAI account billing and quota.'
+              );
+            } else {
+              console.error('Assistant run failed with error:', errorMessage);
+              throw new Error(`Assistant run failed: ${errorMessage}`);
+            }
+          }
+
+          if (["cancelled", "expired"].includes(runStatus.status)) {
+            console.error(
+              `Run was ${runStatus.status}. Last status:`, 
+              runStatus
+            );
+            throw new Error(
+              `Assistant run was ${runStatus.status}`
+            );
+          }
+
+          // Handle requires_action status
+          if (runStatus.status === "requires_action") {
+            console.log(
+              "Assistant requires action, submitting empty tool outputs..."
+            );
+
+            if (!runStatus.required_action?.submit_tool_outputs?.tool_calls) {
+              throw new Error("Invalid required_action format from API");
+            }
+
+            // Submit empty tool outputs to continue the run
+            await openai.beta.threads.runs.submitToolOutputs(runStatus.id, {
+              thread_id: thread.id,
+              tool_outputs: runStatus.required_action.submit_tool_outputs.tool_calls.map(
+                (toolCall) => ({
+                  tool_call_id: toolCall.id,
+                  output: "{}",
+                })
+              ),
+            });
+
+            console.log(
+              "Submitted empty tool outputs, waiting for completion..."
+            );
+          }
+
+          console.log(
+            `Waiting for completion... (${
+              attempts + 1
+            }/${maxAttempts}) Current status: ${runStatus.status}`
+          );
+          await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1 second
+
+          runStatus = await openai.beta.threads.runs.retrieve(run.id, {
+            thread_id: thread.id,
+          });
+
+          // Log progress
+          if (attempts % 10 === 0) {
+            // Log every 10 seconds
+            console.log(
+              `Run progress - Status: ${runStatus.status}, Attempt: ${attempts}/${maxAttempts}`
+            );
+            if (runStatus.status === "in_progress" && runStatus.step_details) {
+              console.log("Current step:", runStatus.step_details);
+            }
+          }
+
+          attempts++;
+        }
+
+        if (attempts >= maxAttempts) {
+          console.error("Assistant run timed out. Last status:", runStatus);
+          throw new Error(
+            `Assistant run timed out after ${maxAttempts} seconds. Last status: ${runStatus.status}`
+          );
+        }
+
+        console.log("Run completed successfully. Retrieving response...");
+
+        // Get the assistant's response
+        const messages = await openai.beta.threads.messages.list(thread.id);
+        const assistantMessage = messages.data.find(
+          (m) => m.role === "assistant"
+        );
+
+        if (!assistantMessage || !assistantMessage.content?.[0]?.text?.value) {
+          throw new Error("No valid response from assistant");
+        }
+
+        const responseContent = assistantMessage.content[0].text.value;
+
+        // Try to extract JSON from the response
+        try {
+          // Try to extract JSON from markdown code blocks first
+          const jsonMatch = responseContent.match(
+            /```(?:json)?\s*([\s\S]*?)\s*```/
+          );
+          const jsonString = jsonMatch ? jsonMatch[1] : responseContent;
+
+          // Try to parse the response
+          const parsedResponse = JSON.parse(jsonString);
+
+          return {
+            response: parsedResponse,
+            threadId: thread.id,
+          };
+        } catch (parseError) {
+          console.warn(
+            "Failed to parse response as JSON, returning raw text:",
+            parseError
+          );
+          return {
+            response: responseContent,
+            threadId: thread.id,
+          };
+        }
+      } catch (error) {
+        console.error("Error in getMarketGapAgent:", error);
+        throw error;
+      }
+    },
+  };
 }
 
 // --- PageCraft Agent ---

@@ -69,7 +69,7 @@ const startCronJobs = () => {
           try {
             // Fetch posts with retry logic
             const posts = await makeRequestWithRetry(
-              () => fetchTopPosts(subreddit, 6)
+              () => fetchTopPosts(subreddit, 0)
             );
             console.log(`Found ${posts.length} posts in r/${subreddit}`);
 
