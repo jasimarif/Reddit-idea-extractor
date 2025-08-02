@@ -66,14 +66,16 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center p-3 sm:p-4">
+      <div className="w-full max-w-md space-y-4 sm:space-y-5">
         <div className="text-center">
-          <Brain className="mx-auto h-12 w-12 text-purple-600" />
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">
+          <div className="mx-auto w-12 h-10 flex items-center justify-center -mt-17 mb-1">
+            <Brain className="h-9 w-9 text-purple-600" />
+          </div>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
             Welcome back
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-1 text-xs sm:text-sm text-gray-600">
             Don't have an account?{" "}
             <Link
               to="/signup"
@@ -84,8 +86,8 @@ const LoginPage = () => {
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <div className="space-y-6">
+        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-5 transition-all duration-300 hover:shadow-xl">
+          <div className="space-y-4">
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center space-x-2">
                 <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
@@ -93,47 +95,17 @@ const LoginPage = () => {
               </div>
             )}
 
-            <button
-              type="button"
-              onClick={handleGoogleLogin}
-              disabled={isLoading}
-              className="w-full flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-300 rounded-lg py-3 px-4 font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing in...
-                </>
-              ) : (
-                <>
-                  <FcGoogle className="h-5 w-5" />
-                  Sign in with Google
-                </>
-              )}
-            </button>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">
-                  Or continue with
-                </span>
-              </div>
-            </div>
-
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  className="block text-xs font-medium text-gray-600 mb-1"
                 >
                   Email address
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-gray-400" />
+                  <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                    <Mail className="h-4 w-4 text-gray-400" />
                   </div>
                   <input
                     id="email"
@@ -141,7 +113,7 @@ const LoginPage = () => {
                     type="email"
                     autoComplete="email"
                     required
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                    className="block w-full pl-8 pr-3 py-2.5 text-sm border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -152,13 +124,13 @@ const LoginPage = () => {
               <div>
                 <label
                   htmlFor="password"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  className="block text-xs font-medium text-gray-600 mb-1"
                 >
                   Password
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-gray-400" />
+                  <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                    <Lock className="h-4 w-4 text-gray-400" />
                   </div>
                   <input
                     id="password"
@@ -166,7 +138,7 @@ const LoginPage = () => {
                     type={showPassword ? "text" : "password"}
                     autoComplete="current-password"
                     required
-                    className="block w-full pl-10 pr-14 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                    className="block w-full pl-8 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => {
@@ -177,7 +149,7 @@ const LoginPage = () => {
                   <button
                     type="button"
                     tabIndex={-1}
-                    className="absolute inset-y-0 right-4 flex items-center text-gray-400 hover:text-purple-600 transition outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 shadow-none border-none active:outline-none active:ring-0 border-none"
+                    className="absolute inset-y-0 right-2 flex items-center text-gray-400 hover:text-purple-600 transition-colors duration-200 p-1 rounded-full active:bg-gray-100"
                     onClick={() => setShowPassword((show) => !show)}
                     aria-label={
                       showPassword ? "Hide password" : "Show password"
@@ -185,15 +157,15 @@ const LoginPage = () => {
                     style={{ background: "none", border: "none", padding: 0 }}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-6 w-6" />
+                      <EyeOff className="h-4 w-4" />
                     ) : (
-                      <Eye className="h-6 w-6" />
+                      <Eye className="h-4 w-4" />
                     )}
                   </button>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div className="flex items-center">
                   <input
                     id="remember-me"
@@ -201,41 +173,60 @@ const LoginPage = () => {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                    className="h-3.5 w-3.5 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
                   />
                   <label
                     htmlFor="remember-me"
-                    className="ml-2 block text-sm text-gray-700"
+                    className="ml-1.5 block text-xs text-gray-600"
                   >
                     Remember me
                   </label>
                 </div>
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
+                  className="text-xs font-medium text-purple-600 hover:text-purple-500 hover:underline transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-transparent border-none p-0 m-0"
+                  disabled={isLoading}
+                >
+                  Forgot password?
+                </button>
+              </div>
 
-                <div className="text-sm">
-                  <button
-                    type="button"
-                    onClick={handleForgotPassword}
-                    className="font-medium text-purple-600 hover:text-purple-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={isLoading}
-                  >
-                    Forgot your password?
-                  </button>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-[0.98]"
+              >
+                {isLoading ? (
+                  <div className="flex items-center">
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Signing in...
+                  </div>
+                ) : (
+                  "Sign in"
+                )}
+              </button>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-gray-500">
+                    Or sign in with
+                  </span>
                 </div>
               </div>
 
-              <div>
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105"
-                >
-                  {isLoading ? (
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  ) : (
-                    "Sign in"
-                  )}
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                disabled={isLoading}
+                className="w-full flex items-center justify-center gap-3 bg-white text-gray-700 border border-gray-300 rounded-xl py-3.5 px-4 font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-95"
+              >
+                <FcGoogle className="h-5 w-5" />
+                <span>Google</span>
+              </button>
             </form>
           </div>
         </div>

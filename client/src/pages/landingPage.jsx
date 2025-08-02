@@ -101,7 +101,7 @@ const IdeaViewerPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-sm">
+      <header className="">
         <div className="w-full max-w-[1800px] mx-auto px-4 py-1.5">
           <div className="flex items-center justify-between">
             <BackButton className="text-gray-600 hover:text-gray-800 text-sm font-medium">

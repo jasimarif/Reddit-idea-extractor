@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Brain, TrendingUp, Filter, Heart } from "lucide-react";
+import { Brain, TrendingUp, Filter, Heart, Search, Sparkles, BarChart2, Users, Zap, CheckCircle, MessageSquare, ArrowRight } from "lucide-react";
 
 const HomePage = () => {
   return (
@@ -46,43 +46,132 @@ const HomePage = () => {
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
-          <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <div className="bg-purple-100 w-12 h-12 rounded-lg flex items-center justify-center mb-6">
-              <Filter className="h-6 w-6 text-purple-600" />
+          <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
+            <div className="bg-purple-100 w-16 h-16 rounded-lg flex items-center justify-center mb-6 mx-auto">
+              <Filter className="h-8 w-8 text-purple-600" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4 text-center">
               Smart Categorization
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-center">
               Automatically organize ideas into Health, Wealth, and
               Relationships categories for easy discovery.
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <div className="bg-blue-100 w-12 h-12 rounded-lg flex items-center justify-center mb-6">
-              <TrendingUp className="h-6 w-6 text-blue-600" />
+          <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
+            <div className="bg-blue-100 w-16 h-16 rounded-lg flex items-center justify-center mb-6 mx-auto">
+              <TrendingUp className="h-8 w-8 text-blue-600" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4 text-center">
               Trending Insights
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-center">
               Get the most upvoted and discussed ideas from popular Reddit
               communities.
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <div className="bg-pink-100 w-12 h-12 rounded-lg flex items-center justify-center mb-6">
-              <Heart className="h-6 w-6 text-pink-600" />
+          <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
+            <div className="bg-pink-100 w-16 h-16 rounded-lg flex items-center justify-center mb-6 mx-auto">
+              <Heart className="h-8 w-8 text-pink-600" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4 text-center">
               Save Favorites
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-center">
               Bookmark the best ideas and build your personal collection of
               insights.
             </p>
+          </div>
+        </div>
+      </div>
+
+      {/* How It Works Section */}
+      <div className="bg-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              How It Works
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Transform Reddit discussions into valuable insights in just a few clicks
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 mb-16">
+            {[
+              {
+                icon: <Search className="h-6 w-6 text-purple-600" />,
+                title: "1. Discover",
+                description: "Explore trending discussions across Reddit communities"
+              },
+              {
+                icon: <Sparkles className="h-6 w-6 text-blue-600" />,
+                title: "2. Extract",
+                description: "Let our AI analyze and extract the most valuable insights"
+              },
+              {
+                icon: <BarChart2 className="h-6 w-6 text-pink-600" />,
+                title: "3. Analyze",
+                description: "Gain actionable intelligence from the data"
+              }
+            ].map((step, index) => (
+              <div key={index} className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100">
+                <div className="w-12 h-12 rounded-full bg-opacity-20 flex items-center justify-center mb-4 mx-auto" 
+                     style={{ backgroundColor: `${index === 0 ? 'rgba(147, 51, 234, 0.1)' : index === 1 ? 'rgba(59, 130, 246, 0.1)' : 'rgba(236, 72, 153, 0.1)'}` }}>
+                  {step.icon}
+                </div>
+                <h3 className="text-xl font-semibold text-center mb-2">{step.title}</h3>
+                <p className="text-gray-600 text-center">{step.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Success Stories */}
+      <div className="bg-white py-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              What Our Users Say
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Join thousands of users who are already discovering valuable insights
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                quote: "Found my next business idea within minutes of using this tool. The insights were incredibly valuable!",
+                author: "Alex T.",
+                role: "Entrepreneur",
+                icon: "💼"
+              },
+              {
+                quote: "As a content creator, this has become my secret weapon for finding trending topics and ideas.",
+                author: "Jamie L.",
+                role: "Content Creator",
+                icon: "✨"
+              },
+              {
+                quote: "The categorization and analysis features saved me hours of manual research. Highly recommend!",
+                author: "Taylor R.",
+                role: "Market Researcher",
+                icon: "📊"
+              }
+            ].map((testimonial, index) => (
+              <div key={index} className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100">
+                <div className="text-4xl mb-4">{testimonial.icon}</div>
+                <p className="text-gray-600 mb-6">"{testimonial.quote}"</p>
+                <div className="mt-auto">
+                  <p className="font-semibold text-gray-900">{testimonial.author}</p>
+                  <p className="text-purple-600 text-sm">{testimonial.role}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
