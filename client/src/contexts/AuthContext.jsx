@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { supabase, onAuthStateChange } from "../lib/supabaseClient";
+import posthog from 'posthog-js';
 
 const AuthContext = createContext(undefined);
 
@@ -95,6 +96,20 @@ export const AuthProvider = ({ children }) => {
         console.error('Login error:', error);
         throw new Error(error.message || 'Login failed. Please check your credentials.');
       }
+
+      // Track login success with PostHog
+    if (data?.session?.user) {
+      const user = formatUserData(data.session);
+      posthog.identify(user.id, {
+        email: user.email,
+        name: user.name,
+      });
+      posthog.capture('user_logged_in', {
+        method: 'email',
+        email: user.email,
+      });
+      setUser(user);
+    }
       
       // Set persistence based on user's remember me preference
       if (rememberMe) {
@@ -106,6 +121,10 @@ export const AuthProvider = ({ children }) => {
       
       return formatUserData(data.session);
     } catch (error) {
+      posthog.capture('login_failed', {
+        error: error.message,
+        email: email,
+      });
       console.error('Login failed:', error);
       throw new Error(error.message || 'Login failed. Please try again.');
     } finally {
@@ -153,6 +172,18 @@ export const AuthProvider = ({ children }) => {
           password
         });
       }
+
+      // Track signup with PostHog
+    if (data?.user) {
+      posthog.identify(data.user.id, {
+        email: data.user.email,
+        name: name,
+      });
+      posthog.capture('user_signed_up', {
+        email: data.user.email,
+        name: name,
+      });
+    }
       
       // Save user to your database
       try {
@@ -186,6 +217,10 @@ export const AuthProvider = ({ children }) => {
         requiresEmailConfirmation: !data.session // If no session, email needs confirmation
       };
     } catch (error) {
+      posthog.capture('signup_failed', {
+        error: error.message,
+        email: email,
+      });
       console.error('Signup failed:', error);
       throw error;
     } finally {
@@ -208,12 +243,15 @@ export const AuthProvider = ({ children }) => {
       setSession(null);
       
     } catch (error) {
+      posthog.capture('logout_failed', {
+        error: error.message,
+      });
       console.error('Logout error:', error);
       throw new Error('Failed to log out. Please try again.');
     } finally {
       setIsLoading(false);
     }
-  };
+  };  
 
   // Password reset functionality
   const resetPassword = async (email) => {
@@ -229,6 +267,10 @@ export const AuthProvider = ({ children }) => {
       if (error) throw error;
       return true;
     } catch (error) {
+      posthog.capture('password_reset_failed', {
+        error: error.message,
+        email: email,
+      });
       console.error('Password reset error:', error);
       throw new Error(error.message || 'Failed to send password reset email.');
     } finally {
@@ -247,6 +289,9 @@ export const AuthProvider = ({ children }) => {
       if (error) throw error;
       return true;
     } catch (error) {
+      posthog.capture('password_update_failed', {
+        error: error.message,
+      });
       console.error('Update password error:', error);
       throw new Error(error.message || 'Failed to update password.');
     } finally {
@@ -286,6 +331,9 @@ export const AuthProvider = ({ children }) => {
       // No need to return data or navigate here as Supabase will handle the redirect
       return;
     } catch (error) {
+      posthog.capture('google_sign_in_failed', {
+        error: error.message,
+      });
       console.error('Google sign in error:', error);
       throw new Error(error.message || 'Failed to sign in with Google. Please try again.');
     } finally {
