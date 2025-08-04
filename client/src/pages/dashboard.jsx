@@ -79,7 +79,7 @@ const DashboardPage = () => {
     const fetchFavorites = async () => {
       try {
         const response = await apiRequest.get("/favorites", {
-          params: { page: 1, limit: 1000 },
+          params: { page: 1, limit: 10 },
         });
         const ids = (response.data.data || []).map((fav) => fav._id || fav.id);
         setFavoriteIds(ids);
@@ -94,7 +94,7 @@ const DashboardPage = () => {
     setIsLoading(true);
     try {
       const favResponse = await apiRequest.get("/favorites", {
-        params: { page: 1, limit: 1000 },
+        params: { page: 1, limit: 10 },
       });
       const ids = Array.isArray(favResponse.data.data)
         ? favResponse.data.data.filter(Boolean).map((fav) => fav._id || fav.id)
@@ -105,7 +105,7 @@ const DashboardPage = () => {
       if (selectedCategories.length > 0) params.category = selectedCategories.join(",");
       if (searchTerm) params.search = searchTerm;
       if (selectedTags.length > 0) params.tags = selectedTags.join(",");
-      params.limit = 1000; // Fetch all ideas at once
+      params.limit = 10; // Fetch all ideas at once
 
       console.log("Fetching all ideas with params:", params);
       const response = await apiRequest.get("/ideas", { params });
