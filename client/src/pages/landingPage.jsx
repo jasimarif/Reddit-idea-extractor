@@ -69,7 +69,7 @@ const IdeaViewerPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
+      <div className="min-h-screen bg-[#e6ebef] pt-16 sm:pt-20 momentum-scroll">
         {/* Header Skeleton */}
         <header className="">
           <div className="w-full max-w-[1800px] mx-auto px-4 py-1.5">
@@ -201,7 +201,7 @@ const IdeaViewerPage = () => {
 
   if (!idea) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#e6ebef] pt-16 sm:pt-20 momentum-scroll flex items-center justify-center p-4">
         <div className="text-center bg-white p-6 rounded-lg shadow-lg max-w-sm w-full border border-gray-300">
           <div className="flex flex-col items-center mb-3">
             <AlertCircle className="h-6 w-6 text-red-500 mb-2" />
@@ -220,7 +220,7 @@ const IdeaViewerPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-[#e6ebef] pt-16 sm:pt-24 momentum-scroll">
       {/* Header */}
       <header className="">
         <div className="w-full max-w-[1800px] mx-auto px-4 py-1.5">

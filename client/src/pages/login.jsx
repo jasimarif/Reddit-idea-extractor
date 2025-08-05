@@ -66,11 +66,13 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center p-3 sm:p-4">
+    <div className="relative min-h-screen bg-[#e6ebef] pt-38 sm:pt-38 momentum-scroll flex items-center justify-center overflow-hidden px-4 py-8">
+
+
       <div className="w-full max-w-md space-y-4 sm:space-y-5">
         <div className="text-center">
           <div className="mx-auto w-12 h-10 flex items-center justify-center -mt-17 mb-1">
-            <Brain className="h-9 w-9 text-purple-600" />
+            <Brain className="h-9 w-9 text-w" />
           </div>
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
             Welcome back

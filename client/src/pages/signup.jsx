@@ -134,11 +134,11 @@ const SignupPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center p-2 sm:p-4">
+    <div className="min-h-screen bg-[#e6ebef] pt-38 sm:pt-38 momentum-scroll flex items-center justify-center p-2 sm:p-4">
       <div className="w-full max-w-md space-y-3 sm:space-y-4 my-auto">
         <div className="text-center">
           <div className="mx-auto w-10 h-10 flex items-center justify-center -mt-16 mb-1">
-            <Brain className="h-8 w-8 text-purple-600" />
+            <Brain className="h-8 w-8 text-gray-900" />
           </div>
           <h2 className="text-xl font-bold text-gray-900">
             Create your account

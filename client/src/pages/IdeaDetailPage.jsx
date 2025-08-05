@@ -224,7 +224,7 @@ const IdeaDetailPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
+      <div className="min-h-screen bg-[#e6ebef] pt-16 sm:pt-20 px-4 sm:px-6">
         {/* Header Skeleton */}
         <div className="px-4 py-3">
           <div className="max-w-7xl mx-auto">
@@ -291,7 +291,7 @@ const IdeaDetailPage = () => {
 
   if (!idea) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-[#e6ebef] pt-16 sm:pt-20 momentum-scroll flex items-center justify-center">
         <div className="text-center bg-white p-8 rounded-xl shadow-lg max-w-md w-full mx-4">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Idea not found
@@ -308,7 +308,7 @@ const IdeaDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-[#e6ebef] pt-16 sm:pt-20 px-4 sm:px-6">
       {/* Header */}
       <div className="px-4 py-3">
         <div className="max-w-7xl mx-auto">
@@ -678,7 +678,7 @@ const IdeaDetailPage = () => {
               })}
             </div>
           ) : (
-            <div className="bg-white rounded-2xl p-8 shadow-sm border text-center">
+            <div className="rounded-2xl p-8 shadow-sm border text-center">
               <div className="flex flex-col items-center space-y-4">
                 <div className="relative">
                   <div className="animate-spin rounded-full h-12 w-12 border-4 border-accent/20 border-t-accent"></div>
@@ -701,7 +701,7 @@ const IdeaDetailPage = () => {
       </div>
 
       {/* Enhanced Footer */}
-      <footer className="bg-white border-t border-border/50">
+      <footer className=" border-t border-border/50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 max-w-7xl mx-auto">
             {/* Brand Column - Full width on mobile, 4 columns on desktop */}

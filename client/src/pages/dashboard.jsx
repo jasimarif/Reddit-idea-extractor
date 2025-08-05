@@ -79,7 +79,7 @@ const DashboardPage = () => {
     const fetchFavorites = async () => {
       try {
         const response = await apiRequest.get("/favorites", {
-          params: { page: 1, limit: 10 },
+          params: { page: 1, limit: 1000 },
         });
         const ids = (response.data.data || []).map((fav) => fav._id || fav.id);
         setFavoriteIds(ids);
@@ -94,7 +94,7 @@ const DashboardPage = () => {
     setIsLoading(true);
     try {
       const favResponse = await apiRequest.get("/favorites", {
-        params: { page: 1, limit: 10 },
+        params: { page: 1, limit: 1000 },
       });
       const ids = Array.isArray(favResponse.data.data)
         ? favResponse.data.data.filter(Boolean).map((fav) => fav._id || fav.id)
@@ -105,7 +105,7 @@ const DashboardPage = () => {
       if (selectedCategories.length > 0) params.category = selectedCategories.join(",");
       if (searchTerm) params.search = searchTerm;
       if (selectedTags.length > 0) params.tags = selectedTags.join(",");
-      params.limit = 10; // Fetch all ideas at once
+      params.limit = 1000; // Fetch all ideas at once
 
       console.log("Fetching all ideas with params:", params);
       const response = await apiRequest.get("/ideas", { params });
@@ -115,17 +115,20 @@ const DashboardPage = () => {
         ? response.data.data.filter(Boolean)
         : [];
 
-      // Apply category filter if any categories are selected
+      // Apply category filter if any categories are selected (case-insensitive check)
       if (selectedCategories.length > 0) {
         fetchedIdeas = fetchedIdeas.filter((idea) => {
           const cat = idea.category || idea.topic;
           if (!cat) return false;
-          if (typeof cat === "string") {
-            return selectedCategories.includes(cat);
-          } else if (typeof cat === "object" && cat.name) {
-            return selectedCategories.includes(cat.name);
-          }
-          return false;
+          
+          // Get the category name in a case-insensitive way
+          const categoryName = typeof cat === "string" 
+            ? cat 
+            : (cat.name || '');
+            
+          return selectedCategories.some(
+            selectedCat => selectedCat.toLowerCase() === categoryName.toLowerCase()
+          );
         });
       }
 
@@ -269,10 +272,12 @@ const DashboardPage = () => {
   };
 
   const handleCategoryToggle = (category) => {
+    // Convert to lowercase for consistent comparison
+    const lowerCategory = category.toLowerCase();
     setSelectedCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((t) => t !== category)
-        : [...prev, category]
+      prev.some(cat => cat.toLowerCase() === lowerCategory)
+        ? prev.filter(cat => cat.toLowerCase() !== lowerCategory)
+        : [...prev, category] // Keep original case for display
     );
     setCurrentPage(1);
   };
@@ -286,56 +291,67 @@ const DashboardPage = () => {
   const totalPages = Math.max(1, Math.ceil(totalIdeas / itemsPerPage));
   const currentIdeas = ideas;
 
+  // Define the hardcoded categories
+  const sidebarCategories = categories.map(cat => cat.name);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
+    <div className="min-h-screen bg-[#e6ebef] pt-16 sm:pt-16 momentum-scroll">
+      <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 py-3 sm:py-4 md:py-5">
         {/* Header */}
-        <div className="mb-6 sm:mb-8 md:mb-12 text-center">
-          <div className="max-w-3xl mx-auto px-2 sm:px-0">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+        <div className="mb-4 sm:mb-5 md:mb-6 text-center">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Idea Dashboard
             </h2>
-            <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="mt-2 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">
               Discover and organize the best ideas from Reddit communities
             </p>
           </div>
         </div>
-
-        {/* Search and Sort */}
-        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4 md:p-6 mb-4 sm:mb-6">
-          <div className="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
-            {/* Category Dropdown */}
-            <div className="w-full sm:w-48 md:w-56 mb-3 sm:mb-0">
-              <Select
-                value={selectedCategories[0] || ""} // fallback for single-select UI, not needed for multi-select buttons
-                onValueChange={(value) => {
-                  if (value === "All") {
-                    setSelectedCategories([]);
-                  } else {
-                    setSelectedCategories([value]);
-                  }
-                  setCurrentPage(1);
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent className="bg-white">
-                  <SelectItem value="All">All Categories</SelectItem>
-                  {categories.map((cat) => (
-                    <SelectItem
-                      key={cat._id || cat.id || cat.name}
-                      value={cat.name}
+        
+        {/* Main Content Layout */}
+        <div className="flex flex-col lg:flex-row gap-3 sm:gap-4">
+          
+          {/* Sidebar */}
+          <div className="w-full lg:w-56 flex-shrink-0">
+            <div className="sticky top-4 bg-white rounded-xl p-3 sm:p-4 shadow-sm border border-gray-100">
+              <h3 className="text-base font-semibold text-gray-900 mb-2 sm:mb-3">Categories</h3>
+              <div className="space-y-1.5">
+                {sidebarCategories.map((category) => {
+                  // Check if this category is selected (case-insensitive)
+                  const isSelected = selectedCategories.some(
+                    cat => cat.toLowerCase() === category.toLowerCase()
+                  );
+                  
+                  return (
+                    <button
+                      key={category}
+                      onClick={() => handleCategoryToggle(category)}
+                      className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${
+                        isSelected
+                          ? "bg-blue-50 text-blue-700 font-medium"
+                          : "text-gray-700 hover:bg-gray-50"
+                      }`}
                     >
-                      {cat.icon && (
-                        <span style={{ marginRight: 8 }}>{cat.icon}</span>
+                      {category}
+                      {isSelected && (
+                        <span className="ml-2 text-blue-500">
+                          ✓
+                        </span>
                       )}
-                      {cat.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
+          </div>
+          
+          {/* Main Content */}
+          <div className="flex-1">
+        {/* Search and Sort */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-2 sm:p-3 mb-3 sm:mb-4">
+          <div className="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
+            {/* Category Dropdown Removed - Moved to Sidebar */}
             {/* Search */}
             <div className="flex-1 mb-3 sm:mb-0 mx-0 sm:mx-2">
               <div className="relative">
@@ -376,79 +392,12 @@ const DashboardPage = () => {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4 md:p-6 mb-4 sm:mb-6">
-          <div className="space-y-3 sm:space-y-4">
-            {/* Tag Filters */}
-            {/* <div className="flex items-start space-x-2">
-                <div className="space-y-3">
-                  <h3 className="text-sm font-medium text-gray-600">
-                    Popular Tags
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {allTags.slice(0, 12).map((tag) => (
-                      <button
-                        key={tag}
-                        onClick={() => handleTagToggle(tag)}
-                        className={`px-3 py-1.5 text-sm rounded-lg transition-all duration-200 flex items-center ${
-                          selectedTags.includes(tag)
-                            ? 'bg-gradient-to-br from-purple-600 to-blue-600 text-white shadow-md shadow-purple-100 transform scale-105'
-                            : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-purple-700 hover:shadow-sm'
-                        }`}
-                      >
-                        {tag}
-                        {selectedTags.includes(tag) && (
-                          <svg 
-                            className="w-3.5 h-3.5 ml-1.5" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            viewBox="0 0 24 24" 
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                          </svg>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-            </div> */}
-
-            {/* Category Filters */}
-            <div className="flex flex-col sm:flex-row sm:items-start space-y-2 sm:space-y-0 sm:space-x-2 mt-3 sm:mt-4">
-              <span className="text-xs sm:text-sm font-medium text-gray-700 mt-1 whitespace-nowrap">
-                Popular Categories:
-              </span>
-              {categories.length > 0 ? (
-                <div className="flex flex-wrap gap-1.5 sm:gap-2 -mt-2">
-                  {categories.slice(0, 12).map((cat) => (
-                    <button
-                      key={cat.name}
-                      onClick={() => handleCategoryToggle(cat.name)}
-                      className={`px-2.5 sm:px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                        selectedCategories.includes(cat.name)
-                          ? "bg-green-100 text-green-700 border border-green-200"
-                          : "bg-gray-100 text-gray-600 hover:bg-gray-200 border border-transparent"
-                      }`}
-                    >
-                      {cat.name}
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                  {[...Array(6)].map((_, i) => (
-                    <div 
-                      key={i} 
-                      className="h-7 bg-gray-100 rounded-full animate-pulse"
-                      style={{ width: `${Math.floor(Math.random() * 40) + 60}px` }}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
+        {/* <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4 md:p-6 mb-4 sm:mb-6">
+          <div className="space-y-3 sm:space-y-4"> */}
+            {/* Category Filters Section Removed - Moved to Sidebar */}
 
             {/* Active Filters */}
-            {(selectedTags.length > 0 ||
+            {/* {(selectedTags.length > 0 ||
               selectedCategories.length > 0 ||
               searchTerm) && (
               <div className="mt-4">
@@ -506,16 +455,26 @@ const DashboardPage = () => {
                   )}
                 </div>
               </div>
-            )}
-          </div>
-        </div>
+            )} */}
+          {/* </div>
+        </div> */}
 
         {/* Results Count */}
-        <div className="mb-4 sm:mb-6 px-1">
+        
+
+        {/* Ideas Grid */}
+        <Card className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden -mt-2">
+          <CardHeader className="pb-2 px-3 sm:px-4 pt-2 sm:pt-3 ">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-1 sm:space-y-0">
+              <CardTitle className="text-sm sm:text-base font-semibold text-gray-900">
+                Business Ideas ({currentIdeas.length})
+              </CardTitle>
+
+              <div className="mb-2 sm:mb-3 px-1 text-left">
           {isLoading ? (
-            <div className="flex items-center space-x-2">
-              <RefreshCw className="h-4 w-4 animate-spin text-gray-500" />
-              <p className="text-sm text-gray-600">Loading ideas...</p>
+            <div className="flex space-x-1.5">
+              <RefreshCw className="h-3.5 w-3.5 animate-spin text-gray-500" />
+              <p className="text-xs text-gray-600">Loading ideas...</p>
             </div>
           ) : (
             <p className="text-sm text-gray-600">
@@ -532,54 +491,48 @@ const DashboardPage = () => {
             </p>
           )}
         </div>
-
-        {/* Ideas Table */}
-        <Card className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <CardHeader className="pb-3 px-3 sm:px-6 pt-4 sm:pt-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0">
-              <CardTitle className="text-base sm:text-lg font-semibold text-gray-900">
-                Business Ideas ({currentIdeas.length})
-              </CardTitle>
             </div>
+            
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <Table className="min-w-full">
                 <TableHeader className="bg-gray-50 hidden sm:table-header-group">
-                  <TableRow className="border-b border-gray-200">
-                    <TableHead className="px-2 sm:px-3 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10 sm:w-12"></TableHead>
-                    <TableHead className="px-2 sm:px-7 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-auto sm:w-2/5">
+                  <TableRow className="border-b border-gray-200 h-8">
+                    <TableHead className="px-1.5 sm:px-2 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider w-8 sm:w-10"></TableHead>
+                    <TableHead className="px-1.5 sm:px-3 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider w-auto sm:w-2/5">
                       Business Idea
                     </TableHead>
-                    <TableHead className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell w-1/8">
+                    <TableHead className="px-1.5 sm:px-2 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell w-1/8">
                       Source
                     </TableHead>
-                    <TableHead className="px-2 sm:px-10 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell w-1/8">
+                    <TableHead className="px-1.5 sm:px-4 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell w-1/8">
                       Category
                     </TableHead>
-                    <TableHead className="px-2 sm:px-7 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16 sm:w-20 md:w-24">
+                    <TableHead className="px-1.5 sm:px-3 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider w-12 sm:w-16 md:w-20">
                       <span className="hidden sm:inline">Score</span>
                       <span className="sm:hidden">Score & Date</span>
                     </TableHead>
-                    <TableHead className="hidden lg:table-cell px-2 sm:px-12 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">
+                    <TableHead className="hidden lg:table-cell px-1.5 sm:px-4 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider w-1/8">
                       Date
                     </TableHead>
-                    <TableHead className="hidden md:table-cell px-2 sm:px-12 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">
+                    <TableHead className="hidden md:table-cell px-1.5 sm:px-4 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider w-1/8">
                       Potential
                     </TableHead>
-                    <TableHead className="px-2 sm:px-10 py-2 sm:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-16 sm:w-20">
+                    <TableHead className="hidden md:table-cell px-1.5 sm:px-4 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider w-1/8">
                       Actions
                     </TableHead>
+                    
                   </TableRow>
                 </TableHeader>
                 <TableBody className="bg-white divide-y divide-gray-100">
                   {currentIdeas.map((idea) => (
                     <TableRow
                       key={idea._id}
-                      className="block sm:table-row hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                      className="block sm:table-row hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 text-sm"
                     >
                       {/* Mobile Header */}
-                      <div className="sm:hidden px-4 py-2 bg-gray-50 flex justify-between items-center border-b border-gray-100">
+                      <div className="sm:hidden px-2 py-1.5 bg-gray-50 flex justify-between items-center border-b border-gray-100">
                         <div className="flex items-center space-x-2">
                           <button
                             onClick={(e) => {
@@ -595,7 +548,7 @@ const DashboardPage = () => {
                             }
                           >
                             <svg
-                              className={`h-5 w-5 ${
+                              className={`h-4 w-4 ${
                                 idea.isFavorited
                                   ? "text-yellow-400 fill-current"
                                   : "text-gray-300 hover:text-yellow-400"
@@ -625,16 +578,16 @@ const DashboardPage = () => {
                           </span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <Badge className="bg-green-50 text-green-700 border border-green-100 text-xs font-medium">
+                          <Badge className="bg-green-50 text-green-700 border border-green-100 text-[10px] font-medium py-0 h-5">
                             {idea.businessPotential}
                           </Badge>
                           <Link to={`/idea/${idea._id}`}>
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 h-8 px-2"
+                              className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 h-6 w-6 p-1"
                             >
-                              <ExternalLink className="h-3.5 w-3.5" />
+                              <ExternalLink className="h-3 w-3" />
                             </Button>
                           </Link>
                         </div>
@@ -646,7 +599,7 @@ const DashboardPage = () => {
                             e.stopPropagation();
                             handleToggleFavorite(idea._id);
                           }}
-                          className="p-1.5 rounded-full hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                          className="p-1 rounded-full hover:bg-gray-100 transition-colors focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-purple-400"
                           title={
                             idea.isFavorited
                               ? "Remove from favorites"
@@ -799,8 +752,11 @@ const DashboardPage = () => {
           </CardContent>
         </Card>
 
-        {/* Pagination */}
-        {totalPages > 1 && (
+            </div>
+          </div>
+          
+          {/* Pagination */}
+          {totalPages > 1 && (
           <div className="mt-6 sm:mt-8">
             <div className="flex items-center justify-between sm:justify-center space-x-1">
               <button

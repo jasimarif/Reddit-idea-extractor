@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Brain, User, LogOut, Heart, BarChart3, ChevronDown, Home, TrendingUp, Globe } from 'lucide-react';
+import { Brain, Menu, X, User, LogOut, Heart, Home, ChevronDown, Zap, DollarSign, Clock, Mail } from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,14 +14,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
-const Navbar = () => {
+const EnhancedAnimatedNavbar = () => {
   const { user, logout, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMobileView, setIsMobileView] = useState(window.innerWidth < 640);
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
   const menuRef = useRef(null);
-  
+
   // Don't show user menu during auth-related flows
   const isAuthPage = [
     '/reset-password',
@@ -31,12 +34,35 @@ const Navbar = () => {
   
   const shouldShowUserMenu = user && !isAuthPage;
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const offset = window.scrollY;
+      setScrolled(offset > 100);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobileView(mobile);
+      if (!mobile) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target) && 
           !event.target.closest('.mobile-menu-button')) {
-        setIsMobileMenuOpen(false);
+        setMobileMenuOpen(false);
       }
     };
 
@@ -46,26 +72,9 @@ const Navbar = () => {
     };
   }, []);
 
-  useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth < 640;
-      setIsMobileView(mobile);
-      if (!mobile) {
-        setIsMobileMenuOpen(false);
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
   // Prevent body scrolling when mobile menu is open
   useEffect(() => {
-    if (isMobileMenuOpen) {
+    if (mobileMenuOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'auto';
@@ -73,11 +82,23 @@ const Navbar = () => {
     return () => {
       document.body.style.overflow = 'auto';
     };
-  }, [isMobileMenuOpen]);
+  }, [mobileMenuOpen]);
+
+  const scrollToSection = (sectionId) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+    setMobileMenuOpen(false);
+  };
 
   const handleLogout = () => {
     logout();
     navigate('/');
+    setMobileMenuOpen(false);
   };
 
   const isActive = (path) => location.pathname === path;
@@ -92,174 +113,356 @@ const Navbar = () => {
       .slice(0, 2);
   };
 
-  return (
+  // Check if current page is home
+  const isHomePage = location.pathname === '/';
+
+  // Navigation items for non-authenticated users (only shown on home page)
+  const publicNavItems = isHomePage ? [
+    { label: 'Features', id: 'features', icon: Zap },
+    { label: 'Pricing', id: 'pricing', icon: DollarSign },
+    { label: 'Faqs', id: 'Faqs', icon: Clock },
+    { label: 'Reviews', id: 'contact', icon: Mail },
+  ] : [];
+
+  // Navigation items for authenticated users (always shown when logged in)
+  const authenticatedNavItems = user ? [
+    { label: 'Ideas', path: '/dashboard', icon: Home },
+    { label: 'Favorites', path: '/favorites', icon: Heart },
+  ] : [];
+
+  // Homepage navigation items (only shown on home page)
+  const homepageNavItems = isHomePage ? [
+    { label: 'Features', id: 'features', icon: Zap },
+    { label: 'Pricing', id: 'pricing', icon: DollarSign },
+    { label: 'Faqs', id: 'Faqs', icon: Clock },
+    { label: 'Reviews', id: 'contact', icon: Mail },
+  ] : [];
+    return (
     <>
       {/* Mobile menu overlay */}
-      {isMobileMenuOpen && (
+      {mobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-black/10 backdrop-blur-sm z-40 transition-opacity duration-300"
-          onClick={toggleMobileMenu}
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-opacity duration-300 md:hidden"
+          onClick={() => setMobileMenuOpen(false)}
         />
       )}
-      
-      <nav className="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between h-auto sm:h-16">
-            <div className="flex items-center justify-between py-2 sm:py-0">
+
+      {/* Desktop Navbar */}
+      <motion.nav
+        className={`fixed top-0 z-50 transition-all duration-500 ease-out hidden md:block ${
+          scrolled
+            ? 'left-1/2 w-auto mt-2 navbar-centered'
+            : 'left-0 w-full mt-0'
+        }`}
+        initial={false}
+        animate={{
+          y: scrolled ? 0 : 0,
+          x: scrolled ? '-50%' : 0,
+          left: scrolled ? '50%' : 0,
+          width: scrolled ? 'auto' : '100%',
+        }}
+        transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+      >
+        <motion.div
+          className={`${
+            scrolled
+              ? 'bg-white/95 backdrop-blur-xl rounded-full px-4 py-1.5 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-gray-200/50'
+              : 'bg-transparent px-6 py-2 border-none'
+          } transition-all duration-200 ease-out`}
+          layout
+          transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+        >
+          <div className="flex items-center justify-between min-w-0 gap-6">
+            {/* Logo */}
+            <motion.div 
+              className="flex items-center space-x-2"
+              layout
+            >
               <Link to="/" className="flex items-center space-x-2">
-                <Brain className="h-8 w-8 text-purple-600" />
-                <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                <div className={`${scrolled ? 'h-6 w-6' : 'h-7 w-7'} rounded-lg bg-gray-900 flex items-center justify-center transition-all duration-500`}>
+                  <Brain className={`${scrolled ? 'h-3 w-3' : 'h-3.5 w-3.5'} text-white`} />
+                </div>
+                <span className={`${scrolled ? 'text-sm' : 'text-base'} font-semibold bg-gray-900 bg-clip-text text-transparent transition-all duration-500 whitespace-nowrap`}>
                   Reddit Idea Extractor
                 </span>
               </Link>
-              {/* Mobile menu button */}
-              <div className="sm:hidden">
-                <button
-                  onClick={toggleMobileMenu}
-                  className="mobile-menu-button inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-purple-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500"
-                  aria-expanded="false"
-                >
-                  <span className="sr-only">Open main menu</span>
-                  {!isMobileMenuOpen ? (
-                    <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                  ) : (
-                    <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  )}
-                </button>
-              </div>
+            </motion.div>
+            
+            {/* Navigation Items */}
+            <div className="flex items-center space-x-1">
+              {shouldShowUserMenu ? (
+                // Authenticated user navigation
+                <>
+                  {authenticatedNavItems.map((item) => {
+                    const IconComponent = item.icon;
+                    return (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        className={`flex items-center space-x-1.5 px-2 py-1.5 rounded-lg text-md font-medium transition-all duration-200 ${
+                          isActive(item.path)
+                            ? 'text-gray-900'
+                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray'
+                        }`}
+                      >
+                        <IconComponent className="h-3.5 w-3.5" />
+                        <span>{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                  
+                  {/* Homepage navigation for authenticated users */}
+                  {homepageNavItems.map((item) => {
+                    const IconComponent = item.icon;
+                    return (
+                      <Link
+                        key={item.id}
+                        onClick={() => scrollToSection(item.id)}
+                        className={`flex items-center space-x-1.5 px-2 py-1.5 rounded-lg text-md font-medium transition-all duration-200 ${
+                          isActive(item.id)
+                            ? 'bg-gray-900 text-gray-900'
+                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray'
+                        }`}
+                      >
+                        <IconComponent className="h-3.5 w-3.5" />
+                        <span>{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                </>
+              ) : (
+                // Public navigation
+                <>
+                  {publicNavItems.map((item) => (
+                    <Link
+                      key={item.id}
+                      onClick={() => scrollToSection(item.id)}
+                      className={`flex items-center space-x-1.5 px-2 py-1.5 rounded-lg text-md font-medium transition-all duration-200 ${
+                        isActive(item.id)
+                          ? 'bg-gray-900 text-gray-900'
+                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray'
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </>
+              )}
             </div>
 
-            {/* Mobile Menu */}
-            <div 
-              ref={menuRef}
-              className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out z-50 ${
-                isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
-              } sm:relative sm:translate-x-0 sm:shadow-none sm:w-auto sm:flex sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4 sm:py-0 sm:px-0`}
-            >
-              <div className="flex items-center justify-between p-4 border-b border-gray-200 sm:hidden">
-                <div className="flex items-center space-x-2">
-                  <Brain className="h-8 w-8 text-purple-600" />
-                  <span className="text-lg font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                    Menu
-                  </span>
+            {/* Right side - Auth or CTA */}
+            <div className="flex items-center space-x-3">
+              {shouldShowUserMenu ? (
+                // User dropdown
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="flex items-center space-x-1.5 px-2 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50">
+                    <Avatar className={`${scrolled ? 'h-6 w-6' : 'h-7 w-7'} transition-all duration-500`}>
+                      <AvatarFallback className="bg-purple-100 text-purple-700 text-sm font-semibold">
+                        {getUserInitials(user?.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="hidden lg:inline text-xs">{user?.name}</span>
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent align="end" className="w-56 bg-white">
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{user?.name}</p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                          {user?.email}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+
+                    <DropdownMenuSeparator />
+
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile" className="flex items-center space-x-2 cursor-pointer">
+                        <User className="h-4 w-4" />
+                        <span>Profile</span>
+                      </Link>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator />
+
+                    <DropdownMenuItem
+                      onClick={handleLogout}
+                      className="flex items-center space-x-2 cursor-pointer text-red-600 focus:text-red-600"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span>Log out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                // Login/Signup buttons for non-authenticated users
+                <div className="flex items-center space-x-3">
+                  <Link
+                    to="/login"
+                    className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors px-2 py-1 rounded-md "
+                  >
+                    Login
+                  </Link>
+                  <motion.button
+                    className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all duration-500 ${
+                      scrolled
+                        ? 'bg-gradient-to-r from-gray-900 to-gray-900 text-white hover:from-gray-900 hover:to-gray-900 shadow-md'
+                        : 'bg-gradient-to-r from-gray-900 to-gray-900 text-white hover:from-gray-900 hover:to-gray-900 shadow-md'
+                    }`}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => navigate('/signup')}
+                    layout
+                  >
+                    Signup
+                  </motion.button>
                 </div>
-                <button
-                  onClick={toggleMobileMenu}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              
-              <div className="p-4 overflow-y-auto h-[calc(100%-64px)] sm:p-0 sm:overflow-visible sm:h-auto">
-                {shouldShowUserMenu ? (
-                  <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
-                    <Link
-                      to="/dashboard"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                        isActive('/dashboard')
-                          ? 'bg-purple-100 text-purple-700'
-                          : 'text-gray-700 hover:text-purple-600 hover:bg-gray-50'
-                      }`}
-                    >
-                      <Home className="h-4 w-4" />
-                      <span>Ideas</span>
-                    </Link>
-
-                    <Link
-                      to="/favorites"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                        isActive('/favorites')
-                          ? 'bg-purple-100 text-purple-700'
-                          : 'text-gray-700 hover:text-purple-600 hover:bg-gray-50'
-                      }`}
-                    >
-                      <Heart className="h-4 w-4" />
-                      <span>Favorites</span>
-                    </Link>
-                    
-                    <div className="mt-4 pt-4 border-t border-gray-200 sm:border-t-0 sm:pt-0 sm:mt-0 w-full">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50 rounded-md transition-colors w-full sm:w-auto">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback className="bg-purple-100 text-purple-700 text-xs font-semibold">
-                              {getUserInitials(user.name)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 flex items-center justify-between">
-                            <span className="text-left">{user.name}</span>
-                            <ChevronDown className="h-4 w-4 ml-2" />
-                          </div>
-                        </DropdownMenuTrigger>
-
-                        <DropdownMenuContent align="end" className="w-56 bg-white">
-                          <DropdownMenuLabel className="font-normal">
-                            <div className="flex flex-col space-y-1">
-                              <p className="text-sm font-medium leading-none">{user.name}</p>
-                              <p className="text-xs leading-none text-muted-foreground">
-                                {user.email}
-                              </p>
-                            </div>
-                          </DropdownMenuLabel>
-
-                          <DropdownMenuSeparator />
-
-                          <DropdownMenuItem asChild>
-                            <Link to="/profile" className="flex items-center space-x-2 cursor-pointer" onClick={() => setIsMobileMenuOpen(false)}>
-                              <User className="h-4 w-4" />
-                              <span>Profile</span>
-                            </Link>
-                          </DropdownMenuItem>
-
-                          <DropdownMenuSeparator />
-
-                          <DropdownMenuItem
-                            onClick={() => {
-                              handleLogout();
-                              setIsMobileMenuOpen(false);
-                            }}
-                            className="flex items-center space-x-2 cursor-pointer text-red-600 focus:text-red-600"
-                          >
-                            <LogOut className="h-4 w-4" />
-                            <span>Log out</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
-                    <Link
-                      to="/login"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-purple-600 transition-colors text-center"
-                    >
-                      Login
-                    </Link>
-                    <Link
-                      to="/signup"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="px-4 py-2 text-sm font-medium !text-white bg-gradient-to-r from-purple-600 to-blue-600 rounded-md hover:from-purple-700 hover:to-blue-700 transition-all duration-200 transform hover:scale-105 text-center"
-                    >
-                      Sign Up
-                    </Link>
-                  </div>
-                )}
-              </div>
+              )}
             </div>
           </div>
+        </motion.div>
+      </motion.nav>
+
+      {/* Mobile Navbar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 md:hidden bg-white/95 backdrop-blur-sm border-b border-gray-200/50">
+        <div className="flex items-center justify-between px-4 py-2.5">
+          <Link to="/" className="flex items-center space-x-2">
+            <div className="h-7 w-7 rounded-lg bg-gray-900 flex items-center justify-center">
+              <Brain className="h-3.5 w-3.5 text-white" />
+            </div>
+            <span className="text-base font-semibold bg-gray-900 bg-clip-text text-transparent">
+              Reddit Idea Extractor
+            </span>
+          </Link>
+
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <button className="mobile-menu-button p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <Menu className="h-5 w-5 text-gray-600" />
+              </button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-80 bg-white">
+              <div className="flex flex-col space-y-6 mt-6">
+                <div className="flex items-center space-x-2 mb-4">
+                  <div className="h-7 w-7 rounded-lg bg-gray-900 flex items-center justify-center">
+                    <Brain className="h-3.5 w-3.5 text-white" />
+                  </div>
+                  <span className="text-base font-semibold bg-gray-900 bg-clip-text text-transparent">
+                    Reddit Idea Extractor
+                  </span>
+                </div>
+
+                <div className="space-y-2">
+                  {shouldShowUserMenu ? (
+                    // Authenticated mobile menu
+                    <>
+                      {authenticatedNavItems.map((item) => {
+                        const IconComponent = item.icon;
+                        return (
+                          <Link
+                            key={item.path}
+                            to={item.path}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className={`flex items-center space-x-3 w-full text-left py-2.5 px-3 text-base font-medium rounded-lg transition-colors ${
+                              isActive(item.path)
+                                ? 'text-gray-900'
+                                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                            }`}
+                          >
+                            <IconComponent className="h-5 w-5" />
+                            <span>{item.label}</span>
+                          </Link>
+                        );
+                      })}
+                      
+                      {/* Homepage navigation for authenticated users in mobile */}
+                      <div className="pt-2 border-t border-gray-100 mt-2">
+                        {homepageNavItems.map((item) => {
+                          const IconComponent = item.icon;
+                          return (
+                            <button
+                              key={item.id}
+                              onClick={() => scrollToSection(item.id)}
+                              className="flex items-center space-x-3 w-full text-left py-2.5 px-3 text-base font-medium text-gray-600 hover:text-purple-600 hover:bg-gray-50 rounded-lg transition-colors"
+                            >
+                              <IconComponent className="h-5 w-5" />
+                              <span>{item.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                      
+                      <div className="pt-3 border-t border-gray-200 mt-4">
+                        <div className="flex items-center space-x-3 px-3 py-2.5 mb-3">
+                          <Avatar className="h-9 w-9">
+                            <AvatarFallback className="bg-purple-100 text-purple-700 text-sm font-semibold">
+                              {getUserInitials(user?.name)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+                            <p className="text-xs text-gray-500">{user?.email}</p>
+                          </div>
+                        </div>
+                        
+                        <Link
+                          to="/profile"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center space-x-3 w-full text-left py-2.5 px-3 text-base font-medium text-gray-600 hover:text-purple-600 hover:bg-gray-50 rounded-lg transition-colors"
+                        >
+                          <User className="h-5 w-5" />
+                          <span>Profile</span>
+                        </Link>
+                        
+                        <button
+                          onClick={handleLogout}
+                          className="flex items-center space-x-3 w-full text-left py-2.5 px-3 text-base font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <LogOut className="h-5 w-5" />
+                          <span>Log out</span>
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    // Public mobile menu
+                    <>
+                      {publicNavItems.map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => scrollToSection(item.id)}
+                          className="block w-full text-left py-2.5 px-3 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                      
+                      <div className="pt-3 border-t border-gray-200 space-y-2 mt-4">
+                        <Link
+                          to="/login"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="block w-full py-2.5 px-3 text-base font-medium text-gray-600 hover:text-gray-900 transition-colors text-center border border-gray-300 rounded-lg"
+                        >
+                          Login
+                        </Link>
+                        <Link
+                          to="/signup"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="block w-full py-2.5 px-3 bg-gradient-to-r from-gray-900 to-gray-900 !text-white rounded-lg font-medium hover:from-gray-900 hover:to-gray-900 transition-all text-center"
+                        >
+                          Sign up
+                        </Link>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </nav>
     </>
   );
 };
 
-export default Navbar;
+export default EnhancedAnimatedNavbar;
