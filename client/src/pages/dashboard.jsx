@@ -1,5 +1,5 @@
 import apiRequest from "../lib/apiRequest";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Search, RefreshCw, Calendar, ExternalLink, Heart } from "lucide-react";
 import {
   Card,
@@ -26,41 +26,49 @@ import {
 } from "../components/ui/select";
 import { Badge } from "../components/ui/badge";
 
+const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
+
 const DashboardPage = () => {
-    const [allIdeas, setAllIdeas] = useState([]);
   const [ideas, setIdeas] = useState([]);
-  const [totalIdeas, setTotalIdeas] = useState(0);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("rankScore");
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  const [selectedTags, setSelectedTags] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
-  const [favoriteIds, setFavoriteIds] = useState([]);
-  // const [allTags, setAllTags] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [favoriteIds, setFavoriteIds] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  
+  // Filter states
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [sortBy, setSortBy] = useState('newest');
+  
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalIdeas, setTotalIdeas] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const itemsPerPage = 6; // Use server-side pagination instead of fetching all
+  
+  // Debounce search term to avoid excessive API calls
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-  // // Tags state and fetch logic
-  // useEffect(() => {
-  //   const fetchTags = async () => {
-  //     try {
-  //       const response = await apiRequest.get("/ideas/tags");
-  //       setAllTags(response.data?.data || []);
-  //     } catch (error) {
-  //       console.error("Failed to fetch tags:", error);
-  //       setAllTags([]);
-  //     }
-  //   };
-  //   fetchTags();
-  // }, []);
-
-  // Categories state and fetch logic
+  // Fetch categories only once on mount
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const response = await apiRequest.get("/ideas/categories");
-        // Wrap string categories as objects with a 'name' property for UI compatibility
         const data = response.data?.data || [];
         const normalized = data.map((cat) =>
           typeof cat === "string" ? { name: cat } : cat
@@ -74,225 +82,220 @@ const DashboardPage = () => {
     fetchCategories();
   }, []);
 
-  // Fetch favorite IDs on mount
-  useEffect(() => {
-    const fetchFavorites = async () => {
-      try {
-        const response = await apiRequest.get("/favorites", {
-          params: { page: 1, limit: 1000 },
-        });
-        const ids = (response.data.data || []).map((fav) => fav._id || fav.id);
-        setFavoriteIds(ids);
-      } catch (error) {
-        setFavoriteIds([]);
-      }
-    };
-    fetchFavorites();
-  }, []);
-
-  const fetchAllIdeas = async () => {
-    setIsLoading(true);
+  // Fetch favorites only once on mount and when needed
+  const fetchFavorites = useCallback(async () => {
     try {
-      const favResponse = await apiRequest.get("/favorites", {
+      const response = await apiRequest.get("/favorites", {
         params: { page: 1, limit: 1000 },
       });
-      const ids = Array.isArray(favResponse.data.data)
-        ? favResponse.data.data.filter(Boolean).map((fav) => fav._id || fav.id)
-        : [];
+      const ids = (response.data.data || []).map((fav) => fav._id || fav.id);
       setFavoriteIds(ids);
+      return ids;
+    } catch (error) {
+      console.error("Failed to fetch favorites:", error);
+      setFavoriteIds([]);
+      return [];
+    }
+  }, []);
 
-      const params = {};
-      if (selectedCategories.length > 0) params.category = selectedCategories.join(",");
-      if (searchTerm) params.search = searchTerm;
-      if (selectedTags.length > 0) params.tags = selectedTags.join(",");
-      params.limit = 1000; // Fetch all ideas at once
+  // Main ideas fetching function - now uses server-side pagination
+  const fetchIdeas = useCallback(async (page = 1) => {
+    setIsLoading(true);
+    setError(null);
 
-      console.log("Fetching all ideas with params:", params);
-      const response = await apiRequest.get("/ideas", { params });
-      console.log("Ideas API response:", response.data);
-      
-      let fetchedIdeas = Array.isArray(response.data.data)
-        ? response.data.data.filter(Boolean)
-        : [];
+    setIdeas([])
 
-      // Apply category filter if any categories are selected (case-insensitive check)
+    try {
+      // Build query parameters
+      const params = {
+        page,
+        limit: itemsPerPage,
+      };
+
+      // Add filters
       if (selectedCategories.length > 0) {
-        fetchedIdeas = fetchedIdeas.filter((idea) => {
-          const cat = idea.category || idea.topic;
-          if (!cat) return false;
-          
-          // Get the category name in a case-insensitive way
-          const categoryName = typeof cat === "string" 
-            ? cat 
-            : (cat.name || '');
-            
-          return selectedCategories.some(
-            selectedCat => selectedCat.toLowerCase() === categoryName.toLowerCase()
+        params.category = selectedCategories.join(",");
+      }
+      if (debouncedSearchTerm.trim()) {
+        params.search = debouncedSearchTerm.trim();
+      }
+      if (selectedTags.length > 0) {
+        params.tags = selectedTags.join(",");
+      }
+
+      console.log("Fetching ideas with params:", params);
+      
+      // Fetch ideas with server-side pagination
+      const [ideasResponse, fetchedFavoriteIds] = await Promise.all([
+        apiRequest.get("/ideas", { params }),
+        favoriteIds.length === 0 ? fetchFavorites() : Promise.resolve(favoriteIds)
+      ]);
+      
+      // Use the fetched favorite IDs
+      const currentFavoriteIds = fetchedFavoriteIds || [];
+
+      console.log("Ideas API response:", ideasResponse.data);
+
+      if (ideasResponse.data.success) {
+        let fetchedIdeas = Array.isArray(ideasResponse.data.data)
+          ? ideasResponse.data.data.filter(Boolean)
+          : [];
+
+        // Apply client-side sorting if needed (server should handle this ideally)
+        if (sortBy === "rankScore") {
+          fetchedIdeas = [...fetchedIdeas].sort(
+            (a, b) => (b.rankScore || 0) - (a.rankScore || 0)
           );
-        });
-      }
+        } else if (sortBy === "newest") {
+          fetchedIdeas = [...fetchedIdeas].sort(
+            (a, b) => new Date(b.postDate || b.createdAt || 0) - new Date(a.postDate || a.createdAt || 0)
+          );
+        } else if (sortBy === "oldest") {
+          fetchedIdeas = [...fetchedIdeas].sort(
+            (a, b) => new Date(a.postDate || a.createdAt || 0) - new Date(b.postDate || b.createdAt || 0)
+          );
+        } else if (sortBy === "Potential") {
+          const potentialOrder = { 'High': 3, 'Medium': 2, 'Low': 1, 'None': 0 };
+          fetchedIdeas = [...fetchedIdeas].sort(
+            (a, b) => (potentialOrder[b.businessPotential] || 0) - (potentialOrder[a.businessPotential] || 0)
+          );
+        }
 
-      // Mark favorites
-      fetchedIdeas = fetchedIdeas.map((idea) => ({
-        ...idea,
-        isFavorited: idea && idea._id ? ids.includes(idea._id) : false,
-      }));
+        // Mark favorites
+        const ideasWithFavorites = fetchedIdeas.map((idea) => ({
+          ...idea,
+          isFavorited: idea && idea._id ? currentFavoriteIds.includes(idea._id) : false,
+        }));
 
-      // Apply sorting
-      if (sortBy === "rankScore") {
-        fetchedIdeas = [...fetchedIdeas].sort(
-          (a, b) => (b.rankScore || 0) - (a.rankScore || 0)
-        );
-      } else if (sortBy === "newest") {
-        fetchedIdeas = [...fetchedIdeas].sort(
-          (a, b) => new Date(b.postDate || 0) - new Date(a.postDate || 0)
-        );
-      } else if (sortBy === "oldest") {
-        fetchedIdeas = [...fetchedIdeas].sort(
-          (a, b) => new Date(a.postDate || 0) - new Date(b.postDate || 0)
-        );
+        setIdeas(ideasWithFavorites);
+        
+        // Use pagination info from server
+        const pagination = ideasResponse.data.pagination;
+        if (pagination) {
+          setTotalIdeas(pagination.totalItems);
+          setTotalPages(pagination.totalPages);
+        } else {
+          setTotalIdeas(fetchedIdeas.length);
+          setTotalPages(Math.ceil(fetchedIdeas.length / itemsPerPage));
+        }
+      } else {
+        throw new Error('API response indicates failure');
       }
-      else if (sortBy === "Potential") {
-        const potentialOrder = { 'High': 3, 'Medium': 2, 'Low': 1, 'None': 0 };
-        fetchedIdeas = [...fetchedIdeas].sort(
-          (a, b) => (potentialOrder[b.businessPotential] || 0) - (potentialOrder[a.businessPotential] || 0)
-        );
-      }
-
-      setAllIdeas(fetchedIdeas);
-      setTotalIdeas(fetchedIdeas.length);
     } catch (error) {
       console.error("Failed to fetch ideas:", error);
-      setAllIdeas([]);
+      setError("Failed to load ideas. Please try again.");
       setIdeas([]);
       setTotalIdeas(0);
+      setTotalPages(1);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedCategories, debouncedSearchTerm, selectedTags, sortBy, itemsPerPage]);
 
-  // Fetch and filter ideas when filters/sort change
+  // Initial load
   useEffect(() => {
-    fetchAllIdeas();
-    setCurrentPage(1); // Reset to first page when filters change
-    // eslint-disable-next-line
-  }, [selectedCategories, searchTerm, sortBy, selectedTags]);
+    fetchFavorites();
+  }, [fetchFavorites]);
 
-  // Apply pagination when currentPage or allIdeas change
+  // Fetch ideas when filters change
   useEffect(() => {
-    if (allIdeas.length > 0) {
-      const startIndex = (currentPage - 1) * itemsPerPage;
-      const endIndex = startIndex + itemsPerPage;
-      const paginatedIdeas = allIdeas.slice(startIndex, endIndex);
-      setIdeas(paginatedIdeas);
-    } else {
-      setIdeas([]);
-    }
-  }, [currentPage, allIdeas, itemsPerPage]);
+    fetchIdeas(1); // Reset to first page when filters change
+    setCurrentPage(1);
+  }, [fetchIdeas]);
 
-  const handleToggleFavorite = async (ideaId) => {
-    // Optimistically update both ideas and allIdeas state for immediate UI feedback
+  // Fetch ideas when page changes
+useEffect(() => {
+
+  if (currentPage !== 1 || (selectedCategories.length === 0 && !debouncedSearchTerm && selectedTags.length === 0)) {
+    fetchIdeas(currentPage);
+  }
+}, [currentPage]);
+
+  // Optimized favorite toggle with better error handling
+  const handleToggleFavorite = useCallback(async (ideaId) => {
+    const isCurrentlyFavorited = favoriteIds.includes(ideaId);
+    const isFavoriting = !isCurrentlyFavorited;
+
+    // Optimistic update
     setIdeas(prevIdeas => 
       prevIdeas.map(idea => 
         idea._id === ideaId 
-          ? { ...idea, isFavorited: !idea.isFavorited } 
-          : idea
-      )
-    );
-  
-    // Also update allIdeas to maintain consistency
-    setAllIdeas(prevAllIdeas => 
-      prevAllIdeas.map(idea => 
-        idea._id === ideaId 
-          ? { ...idea, isFavorited: !idea.isFavorited } 
+          ? { ...idea, isFavorited: isFavoriting } 
           : idea
       )
     );
 
-    // Update favoriteIds state
-    setFavoriteIds(prev => {
-      const isCurrentlyFavorited = prev.includes(ideaId);
-      return isCurrentlyFavorited
-        ? prev.filter(id => id !== ideaId)
-        : [...prev, ideaId];
-    });
+    setFavoriteIds(prev => 
+      isFavoriting
+        ? [...prev, ideaId]
+        : prev.filter(id => id !== ideaId)
+    );
 
-    const isFavoriting = !favoriteIds.includes(ideaId);
-  
     try {
       if (isFavoriting) {
         await apiRequest.post(`/favorites/${ideaId}`);
       } else {
         await apiRequest.delete(`/favorites/${ideaId}`);
       }
-      
-      // Refresh the data to ensure consistency with the server
-      await fetchAllIdeas();
     } catch (error) {
       console.error("Error toggling favorite:", error);
       
-      // Revert the optimistic update if there's an error
+      // Revert optimistic update on error
       setIdeas(prevIdeas => 
         prevIdeas.map(idea => 
           idea._id === ideaId 
-            ? { ...idea, isFavorited: !isFavoriting } 
+            ? { ...idea, isFavorited: isCurrentlyFavorited } 
             : idea
         )
       );
       
-      setAllIdeas(prevAllIdeas => 
-        prevAllIdeas.map(idea => 
-          idea._id === ideaId 
-            ? { ...idea, isFavorited: !isFavoriting } 
-            : idea
-        )
-      );
-      
-      // Revert favoriteIds state
       setFavoriteIds(prev => 
-        isFavoriting
-          ? prev.filter(id => id !== ideaId)
-          : [...prev, ideaId]
+        isCurrentlyFavorited
+          ? [...prev, ideaId]
+          : prev.filter(id => id !== ideaId)
       );
       
-      // Show error toast or notification
-      // toast.error("Failed to update favorite status. Please try again.");
-    }  
-  };
+      // Show error notification
+      setError("Failed to update favorite status. Please try again.");
+    }
+  }, [favoriteIds]);
 
-  const handleRefreshIdeas = async () => {
-    await fetchIdeas();
-  };
-
-  const handleTagToggle = (tag) => {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+  // Memoized handlers to prevent unnecessary re-renders
+  const handleTagToggle = useCallback((tag) => {
+    setSelectedTags(prev =>
+      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
     );
     setCurrentPage(1);
-  };
+  }, []);
 
-  const handleCategoryToggle = (category) => {
-    // Convert to lowercase for consistent comparison
+  const handleCategoryToggle = useCallback((category) => {
     const lowerCategory = category.toLowerCase();
-    setSelectedCategories((prev) =>
+    setSelectedCategories(prev =>
       prev.some(cat => cat.toLowerCase() === lowerCategory)
         ? prev.filter(cat => cat.toLowerCase() !== lowerCategory)
-        : [...prev, category] // Keep original case for display
+        : [...prev, category]
     );
     setCurrentPage(1);
-  };
+  }, []);
 
-  const getCategoryColor = (idea) => {
+  const handleRefreshIdeas = useCallback(async () => {
+    await fetchIdeas(currentPage);
+  }, [fetchIdeas, currentPage]);
+
+  const handlePageChange = useCallback((page) => {
+    setCurrentPage(page);
+  }, []);
+
+  // Memoized values
+  const sidebarCategories = useMemo(() => 
+    categories.map(cat => cat.name), [categories]
+  );
+
+  const getCategoryColor = useCallback((idea) => {
     if (idea.category === "tech") return "blue";
     if (idea.category === "business") return "orange";
     return "gray";
-  };
-
-  const totalPages = Math.max(1, Math.ceil(totalIdeas / itemsPerPage));
-  const currentIdeas = ideas;
-
-  // Define the hardcoded categories
-  const sidebarCategories = categories.map(cat => cat.name);
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#e6ebef] pt-16 sm:pt-16 momentum-scroll">
@@ -467,20 +470,20 @@ const DashboardPage = () => {
           <CardHeader className="pb-2 px-3 sm:px-4 pt-2 sm:pt-3 ">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-1 sm:space-y-0">
               <CardTitle className="text-sm sm:text-base font-semibold text-gray-900">
-                Business Ideas ({currentIdeas.length})
+                Business Ideas ({ideas.length})
               </CardTitle>
 
               <div className="mb-2 sm:mb-3 px-1 text-left">
-          {isLoading ? (
+          {isLoading? (
             <div className="flex space-x-1.5">
-              <RefreshCw className="h-3.5 w-3.5 animate-spin text-gray-500" />
-              <p className="text-xs text-gray-600">Loading ideas...</p>
+              <RefreshCw className="h-5 w-5 animate-spin text-gray-500" />
+              <p className="text-sm text-gray-600">Loading ideas...</p>
             </div>
           ) : (
             <p className="text-sm text-gray-600">
               {totalIdeas > 0
                 ? `Showing ${Math.min(
-                    currentIdeas.length,
+                  ideas.length,
                     itemsPerPage
                   )} of ${totalIdeas} ideas${
                     selectedCategories.length > 0
@@ -527,7 +530,7 @@ const DashboardPage = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody className="bg-white divide-y divide-gray-100">
-                  {currentIdeas.map((idea) => (
+                  {ideas.map((idea) => (
                     <TableRow
                       key={idea._id}
                       className="block sm:table-row hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 text-sm"
@@ -717,7 +720,7 @@ const DashboardPage = () => {
                   </div>
                 ))}
               </div>
-            ) : currentIdeas.length === 0 ? (
+            ) : ideas.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-slate-400 mb-2">No ideas found</div>
                 <p className="text-slate-600">
