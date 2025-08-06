@@ -1,6 +1,6 @@
 import apiRequest from "../lib/apiRequest";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { Search, RefreshCw, Calendar, ExternalLink, Heart } from "lucide-react";
+import { Search, RefreshCw, Calendar, ExternalLink, Heart, Brain, Instagram, Linkedin, Youtube, Twitter } from "lucide-react";
 import {
   Card,
   CardHeader,
@@ -53,7 +53,7 @@ const DashboardPage = () => {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
-  const [sortBy, setSortBy] = useState('newest');
+  const [sortBy, setSortBy] = useState('rankScore');
   
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -393,77 +393,6 @@ useEffect(() => {
             </div>
           </div>
         </div>
-
-        {/* Filters */}
-        {/* <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4 md:p-6 mb-4 sm:mb-6">
-          <div className="space-y-3 sm:space-y-4"> */}
-            {/* Category Filters Section Removed - Moved to Sidebar */}
-
-            {/* Active Filters */}
-            {/* {(selectedTags.length > 0 ||
-              selectedCategories.length > 0 ||
-              searchTerm) && (
-              <div className="mt-4">
-                <h4 className="text-sm font-medium text-gray-600 mb-2">
-                  Active Filters
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  {selectedTags.map((tag) => (
-                    <div
-                      key={tag}
-                      className="flex items-center bg-gradient-to-br from-purple-50 to-blue-50 text-purple-700 text-sm px-3 py-1.5 rounded-lg border border-purple-100 shadow-sm"
-                    >
-                      {tag}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleTagToggle(tag);
-                        }}
-                        className="ml-2 text-purple-500 hover:text-purple-700 hover:bg-purple-100 rounded-full w-5 h-5 flex items-center justify-center transition-colors"
-                      >
-                        &times;
-                      </button>
-                    </div>
-                  ))}
-                  {selectedCategories.map((cat) => (
-                    <div
-                      key={cat}
-                      className="flex items-center bg-green-50 text-green-700 text-sm px-3 py-1.5 rounded-lg border border-green-100 shadow-sm"
-                    >
-                      {cat}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleCategoryToggle(cat);
-                        }}
-                        className="ml-2 text-green-500 hover:text-green-700 hover:bg-green-100 rounded-full w-5 h-5 flex items-center justify-center transition-colors"
-                      >
-                        &times;
-                      </button>
-                    </div>
-                  ))}
-                  {searchTerm && (
-                    <div className="flex items-center bg-gray-50 text-gray-700 text-sm px-3 py-1.5 rounded-lg border border-gray-100 shadow-sm">
-                      "{searchTerm}"
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSearchTerm("");
-                        }}
-                        className="ml-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full w-5 h-5 flex items-center justify-center transition-colors"
-                      >
-                        &times;
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )} */}
-          {/* </div>
-        </div> */}
-
-        {/* Results Count */}
-        
 
         {/* Ideas Grid */}
         <Card className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden -mt-2">
@@ -841,6 +770,58 @@ useEffect(() => {
           </div>
         )}
       </div>
+
+      <footer className="border-t border-gray-200 py-8 md:py-12 px-4 sm:px-6 lg:px-8">
+              <div className="mx-auto max-w-[1250px]">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8">
+                  <div className="flex items-center mb-6 md:mb-0">
+                    <div className="h-8 w-8 rounded-lg bg-gray-900 flex items-center justify-center mr-3">
+                      <Brain className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="text-lg font-semibold text-gray-900">Reddit Idea Extractor</span>
+                  </div>
+      
+                  <div className="flex space-x-4">
+                    <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors p-2">
+                      <Instagram size={20} />
+                    </a>
+                    <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors p-2">
+                      <Linkedin size={20} />
+                    </a>
+                    <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors p-2">
+                      <Youtube size={20} />
+                    </a>
+                    <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors p-2">
+                      <Twitter size={20} />
+                    </a>
+                  </div>
+                </div>
+      
+                <div className="border-t border-gray-900 pt-6 mb-6">
+                  <nav className="flex flex-wrap gap-4 md:gap-8">
+                    {['Features', 'Pricing', 'Faqs', 'Contact', 'Privacy', 'Terms'].map((item) => (
+                      <a
+                        key={item}
+                        href="#"
+                        className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                      >
+                        {item}
+                      </a>
+                    ))}
+                  </nav>
+                </div>
+      
+                <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-500 gap-2">
+                  <p>© 2025 Reddit Idea Extractor</p>
+                  <a
+                    href="mailto:ideaextractor@support.com"
+                    className="hover:text-gray-700 transition-colors"
+                  >
+                    ideaextractor@support.com
+                  </a>
+                </div>
+              </div>
+            </footer>
     </div>
   );
 };

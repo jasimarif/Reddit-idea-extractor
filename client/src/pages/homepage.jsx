@@ -445,10 +445,10 @@ const HomePage = () => {
                 <span>Feel free to mail us for any enquiries:</span>
               </div>
               <a 
-                href="mailto:alter@support.com" 
+                href="mailto:RedditIdeaExtractor@support.com" 
                 className="text-gray-900 font-medium hover:underline"
               >
-                alter@support.com
+                RedditIdeaExtractor@support.com
               </a>
             </div>
           </div>
@@ -507,7 +507,7 @@ const HomePage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 py-8 md:py-12 px-4 sm:px-6 lg:px-8">
+      <footer id="footer" className="border-t border-gray-200 py-8 md:py-12 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8">
             <div className="flex items-center mb-6 md:mb-0">
@@ -533,7 +533,7 @@ const HomePage = () => {
             </div>
           </div>
 
-          <div className="border-t border-gray-200 pt-6 mb-6">
+          <div className="border-t border-gray-900 pt-6 mb-6">
             <nav className="flex flex-wrap gap-4 md:gap-8">
               {['Features', 'Pricing', 'Faqs', 'Contact', 'Privacy', 'Terms'].map((item) => (
                 <a

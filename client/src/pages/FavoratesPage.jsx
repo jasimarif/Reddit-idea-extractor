@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import IdeaCard from "../components/IdeaCard";
-import { Heart, Search, Loader2 } from "lucide-react";
+import { Heart, Search, Brain, Instagram, Linkedin, Youtube, Twitter } from "lucide-react";
 import apiRequest from "../lib/apiRequest";
 
 const FavoritesPage = () => {
@@ -280,6 +280,58 @@ const FavoritesPage = () => {
           </>
         )}
       </div>
+
+      <footer className="border-t border-gray-200 py-8 md:py-12 px-4 sm:px-6 lg:px-8">
+                    <div className="mx-auto max-w-[1240px]">
+                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8">
+                        <div className="flex items-center mb-6 md:mb-0">
+                          <div className="h-8 w-8 rounded-lg bg-gray-900 flex items-center justify-center mr-3">
+                            <Brain className="h-4 w-4 text-white" />
+                          </div>
+                          <span className="text-lg font-semibold text-gray-900">Reddit Idea Extractor</span>
+                        </div>
+            
+                        <div className="flex space-x-4">
+                          <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors p-2">
+                            <Instagram size={20} />
+                          </a>
+                          <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors p-2">
+                            <Linkedin size={20} />
+                          </a>
+                          <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors p-2">
+                            <Youtube size={20} />
+                          </a>
+                          <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors p-2">
+                            <Twitter size={20} />
+                          </a>
+                        </div>
+                      </div>
+            
+                      <div className="border-t border-gray-900 pt-6 mb-6">
+                        <nav className="flex flex-wrap gap-4 md:gap-8">
+                          {['Features', 'Pricing', 'Faqs', 'Contact', 'Privacy', 'Terms'].map((item) => (
+                            <a
+                              key={item}
+                              href="#"
+                              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                            >
+                              {item}
+                            </a>
+                          ))}
+                        </nav>
+                      </div>
+            
+                      <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-500 gap-2">
+                        <p>© 2025 Reddit Idea Extractor</p>
+                        <a
+                          href="mailto:ideaextractor@support.com"
+                          className="hover:text-gray-700 transition-colors"
+                        >
+                          ideaextractor@support.com
+                        </a>
+                      </div>
+                    </div>
+                  </footer>
     </div>
   );
 };

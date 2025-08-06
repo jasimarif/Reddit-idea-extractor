@@ -138,7 +138,7 @@ const EnhancedAnimatedNavbar = () => {
         { label: "Features", id: "features", icon: Zap },
         { label: "Pricing", id: "pricing", icon: DollarSign },
         { label: "Faqs", id: "Faqs", icon: Clock },
-        { label: "Reviews", id: "contact", icon: Mail },
+        { label: "Contact", id: "footer", icon: Mail },
       ]
     : [];
 
@@ -156,7 +156,7 @@ const EnhancedAnimatedNavbar = () => {
         { label: "Features", id: "features", icon: Zap },
         { label: "Pricing", id: "pricing", icon: DollarSign },
         { label: "Faqs", id: "Faqs", icon: Clock },
-        { label: "Reviews", id: "contact", icon: Mail },
+        { label: "Contact", id: "footer", icon: Mail },
       ]
     : [];
   return (
