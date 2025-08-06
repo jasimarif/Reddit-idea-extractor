@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const Post = require("../models/PainPoint");
 const Favorite = require("../models/Favorite");
-const ideaService = require("../services/idea.service");
 
 const getIdeas = async (req, res, next) => {
   try {
@@ -134,43 +133,6 @@ const getIdea = async (req, res, next) => {
   }
 };
 
-const createIdea = async (req, res, next) => {
-  try {
-    const { title, body, summary, tags, url, topic, postDate, subreddit } =
-      req.body;
-
-    if (!title || !body) {
-      return res.status(400).json({
-        success: false,
-        message: "Please provide title and body",
-      });
-    }
-
-    const newIdea = new Post({
-      title,
-      body,
-      summary: summary || "",
-      tags: tags || [],
-      url,
-      topic,
-      postDate,
-      subreddit: subreddit || "manual",
-      userId: req.user ? req.user._id : null,
-      isManuallyAdded: true,
-      isProcessed: true,
-      status: "processed",
-    });
-
-    await newIdea.save(); // Save the new idea to the database
-
-    res.status(201).json({
-      success: true,
-      data: newIdea,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
 
 const getTags = async (req, res, next) => {
   try {
@@ -204,74 +166,9 @@ const getCategories = async (req, res, next) => {
 };
 
 
-const fetchIdeasNow = async (req, res, next) => {
-  try {
-    const subredditList = [
-      "personalfinance",
-      "startups",
-      "Entrepreneur",
-      "smallbusiness",
-      "freelance",
-      "consulting",
-      "overemployed",
-      "jobs",
-      "resumes",
-      "careerguidance",
-    ];
-
-    const subreddit =
-      req.query.subreddit ||
-      subredditList[Math.floor(Math.random() * subredditList.length)];
-    const limit = parseInt(req.query.limit) || 5;
-
-    const result = await ideaService.fetchAndSaveRedditIdeas(subreddit, limit);
-
-    res.status(200).json({
-      success: true,
-      message: `Successfully fetched and saved ${result.savedCount} new ideas from r/${subreddit}`,
-      data: result,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-const getComments = async (req, res) => {
-  try {
-    const post = await Post.findById(req.params.id, 'comments');
-    if (!post) return res.status(404).json({ message: 'Post not found' });
-    res.json({ data: post.comments || [] });
-  } catch (err) {
-    res.status(500).json({ message: 'Error fetching comments' });
-  }
-};
-
-const addComment = async (req, res, next) => {
-  try {
-    const { author, text } = req.body;
-    if (!author || !text) {
-      return res.status(400).json({ success: false, message: "Author and text are required" });
-    }
-    const post = await Post.findById(req.params.id);
-    if (!post) {
-      return res.status(404).json({ success: false, message: "Post not found" });
-    }
-    const comment = { author, text, createdAt: new Date() };
-    post.comments.push(comment);
-    await post.save();
-    res.status(201).json({ success: true, data: comment });
-  } catch (error) {
-    next(error);
-  }
-};
-
 module.exports = {
   getIdeas,
   getIdea,
-  createIdea,
   getTags,
   getCategories,
-  fetchIdeasNow,
-  getComments,
-  addComment,
 };

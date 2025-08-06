@@ -3,13 +3,13 @@ const cors = require("cors");
 require("dotenv").config();
 const redditRoutes = require("./routes/reddit.route");
 const twitterRoutes = require("./routes/twitter.routes");
-const summarizeRoutes = require("./routes/summarize.route");
 const authRoutes = require("./routes/auth.route");
 const ideaRoutes = require("./routes/idea.route");
 const favoriteRoutes = require("./routes/favorite.route");
 const painpointRoutes = require("./routes/painpoint.route");
 const marketGapRoutes = require("./routes/marketGap.route");
 const landingPageRoutes = require("./routes/landingPage.route");
+const adminRoutes = require("./routes/admin.route")
 const cookieParser = require("cookie-parser");
 const passport = require("passport");
 const { initializeRedis } = require("./utils/redisClient");
@@ -57,7 +57,6 @@ app.use(cookieParser());
 
 app.use(passport.initialize());
 
-app.use("/api/summarize", summarizeRoutes);
 app.use("/api/reddit", redditRoutes);
 app.use("/api/twitter", twitterRoutes);
 app.use("/api/auth", authRoutes);
@@ -66,5 +65,6 @@ app.use("/api/favorites", favoriteRoutes);
 app.use("/api/painpoints", painpointRoutes);
 app.use("/api/marketgaps", marketGapRoutes);
 app.use("/api/landingpages", landingPageRoutes);
+app.use("/api/admin", adminRoutes);
 
 module.exports = app;

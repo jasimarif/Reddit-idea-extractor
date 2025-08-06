@@ -1,6 +1,5 @@
 const BusinessIdea = require('../models/BusinessIdea');
 const langchain = require('./langchain.service');
-const { buildBusinessIdeaPrompt } = require('./promptUtils');
 
 async function generateBusinessIdeas(painPoints) {
   console.log('Starting business idea generation with pain points:', JSON.stringify(painPoints, null, 2));

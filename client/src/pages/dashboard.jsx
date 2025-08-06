@@ -1,6 +1,6 @@
 import apiRequest from "../lib/apiRequest";
 import React, { useState, useEffect } from "react";
-import { Search, RefreshCw, Calendar, ExternalLink } from "lucide-react";
+import { Search, RefreshCw, Calendar, ExternalLink, Heart } from "lucide-react";
 import {
   Card,
   CardHeader,
@@ -500,28 +500,29 @@ const DashboardPage = () => {
                 <TableHeader className="bg-gray-50 hidden sm:table-header-group">
                   <TableRow className="border-b border-gray-200 h-8">
                     <TableHead className="px-1.5 sm:px-2 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider w-8 sm:w-10"></TableHead>
-                    <TableHead className="px-1.5 sm:px-3 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider w-auto sm:w-2/5">
+                    <TableHead className="px-1.5 sm:px-4 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider w-auto sm:w-2/5">
                       Business Idea
                     </TableHead>
-                    <TableHead className="px-1.5 sm:px-2 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell w-1/8">
+                    <TableHead className="px-1.5 sm:px-6 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider w-auto sm:w-2/5">
+                      Description
+                    </TableHead>
+                    <TableHead className="px-1.5 sm:px-5 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell w-1/8">
                       Source
                     </TableHead>
-                    <TableHead className="px-1.5 sm:px-4 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell w-1/8">
+                    <TableHead className="px-1.5 sm:px-7 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell w-1/8">
                       Category
                     </TableHead>
-                    <TableHead className="px-1.5 sm:px-3 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider w-12 sm:w-16 md:w-20">
+                    <TableHead className="px-1.5 sm:px-8 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider w-12 sm:w-16 md:w-20">
                       <span className="hidden sm:inline">Score</span>
                       <span className="sm:hidden">Score & Date</span>
                     </TableHead>
-                    <TableHead className="hidden lg:table-cell px-1.5 sm:px-4 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider w-1/8">
+                    <TableHead className="hidden lg:table-cell px-1.5 sm:px-12 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider w-1/8">
                       Date
                     </TableHead>
                     <TableHead className="hidden md:table-cell px-1.5 sm:px-4 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider w-1/8">
                       Potential
                     </TableHead>
-                    <TableHead className="hidden md:table-cell px-1.5 sm:px-4 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider w-1/8">
-                      Actions
-                    </TableHead>
+                    
                     
                   </TableRow>
                 </TableHeader>
@@ -547,24 +548,15 @@ const DashboardPage = () => {
                                 : "Add to favorites"
                             }
                           >
-                            <svg
-                              className={`h-4 w-4 ${
+                            <Heart
+                              className={`h-4 w-4 transition-colors ${
                                 idea.isFavorited
-                                  ? "text-yellow-400 fill-current"
-                                  : "text-gray-300 hover:text-yellow-400"
+                                  ? "text-red-500 fill-current"
+                                  : "text-gray-300 hover:text-red-400"
                               }`}
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 24 24"
                               fill={idea.isFavorited ? "currentColor" : "none"}
-                              stroke="currentColor"
                               strokeWidth="2"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                              />
-                            </svg>
+                            />
                           </button>
                           <span className="text-sm font-medium text-gray-500">
                           <a 
@@ -592,7 +584,7 @@ const DashboardPage = () => {
                           </Link>
                         </div>
                       </div>
-                      <TableCell className="hidden sm:table-cell px-3 sm:px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                      <TableCell className="hidden sm:table-cell px-3 sm:px-3 py-3 whitespace-nowrap text-sm text-gray-900">
                         <button
                           onClick={(e) => {
                             e.preventDefault();
@@ -606,34 +598,30 @@ const DashboardPage = () => {
                               : "Add to favorites"
                           }
                         >
-                          <svg
-                            className={`h-5 w-5 ${
+                          <Heart
+                            className={`h-5 w-5 transition-colors ${
                               idea.isFavorited
-                                ? "text-yellow-400 fill-current"
-                                : "text-gray-300 hover:text-yellow-400"
+                                ? "text-red-500 fill-current"
+                                : "text-gray-300 hover:text-red-400"
                             }`}
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
                             fill={idea.isFavorited ? "currentColor" : "none"}
-                            stroke="currentColor"
                             strokeWidth="2"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                            />
-                          </svg>
+                          />
                         </button>
                       </TableCell>
-                      <TableCell className="block sm:table-cell px-4 sm:px-6 py-3 whitespace-normal text-sm text-gray-900 max-w-md">
-                        <div className="sm:hidden text-xs font-medium text-gray-500 mb-1">Idea</div>
+                      <TableCell className="block sm:table-cell px-4 sm:px-1 py-3 whitespace-normal text-xs text-left !text-gray-900 max-w-md ">
+                        <div className="sm:hidden text-xs font-medium text-gray-900 mb-1">Business Idea</div>
                         <Link
                           to={`/idea/${idea._id}`}
                           className="text-blue-600 hover:text-blue-800 hover:underline font-medium block mb-2 sm:mb-0"
                         >
                           {idea.title || idea.summary}
                         </Link>
+                      
+                      </TableCell>
+
+                      <TableCell className="block sm:table-cell px-4 sm:px-2 py-3 whitespace-normal text-xs text-left !text-gray-900 max-w-md ">
+                        <div className="sm:hidden text-xs font-medium !text-gray-900 mb-1">Description</div>
                         {idea.summary && (
                           <p className="text-gray-600 text-sm mt-1 line-clamp-2">
                             {idea.summary}
@@ -703,19 +691,7 @@ const DashboardPage = () => {
                         </Badge>
                       </TableCell>
 
-                      <TableCell className="hidden sm:table-cell px-3 sm:px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="sm:hidden text-xs font-medium text-gray-500 mb-1">Actions</div>
-                        <Link to={`/idea/${idea._id}`}>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 h-8 sm:h-9 px-2 sm:px-3"
-                          >
-                            <ExternalLink className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
-                            <span className="hidden sm:inline">View</span>
-                          </Button>
-                        </Link>
-                      </TableCell>
+                      
                     </TableRow>
                   ))}
                 </TableBody>

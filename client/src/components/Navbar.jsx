@@ -1,8 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { Brain, Menu, X, User, LogOut, Heart, Home, ChevronDown, Zap, DollarSign, Clock, Mail } from 'lucide-react';
+import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import {
+  Brain,
+  Menu,
+  X,
+  User,
+  LogOut,
+  Heart,
+  Home,
+  ChevronDown,
+  Zap,
+  DollarSign,
+  Clock,
+  Mail,
+} from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   DropdownMenu,
@@ -25,13 +38,13 @@ const EnhancedAnimatedNavbar = () => {
 
   // Don't show user menu during auth-related flows
   const isAuthPage = [
-    '/reset-password',
-    '/forgot-password',
-    '/login',
-    '/signup',
-    '/verify-email'
+    "/reset-password",
+    "/forgot-password",
+    "/login",
+    "/signup",
+    "/verify-email",
   ].includes(location.pathname);
-  
+
   const shouldShowUserMenu = user && !isAuthPage;
 
   useEffect(() => {
@@ -40,8 +53,8 @@ const EnhancedAnimatedNavbar = () => {
       setScrolled(offset > 100);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
@@ -53,34 +66,37 @@ const EnhancedAnimatedNavbar = () => {
       }
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target) && 
-          !event.target.closest('.mobile-menu-button')) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target) &&
+        !event.target.closest(".mobile-menu-button")
+      ) {
         setMobileMenuOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   // Prevent body scrolling when mobile menu is open
   useEffect(() => {
     if (mobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = 'auto';
+      document.body.style.overflow = "auto";
     }
     return () => {
-      document.body.style.overflow = 'auto';
+      document.body.style.overflow = "auto";
     };
   }, [mobileMenuOpen]);
 
@@ -88,8 +104,8 @@ const EnhancedAnimatedNavbar = () => {
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
+        behavior: "smooth",
+        block: "start",
       });
     }
     setMobileMenuOpen(false);
@@ -97,51 +113,57 @@ const EnhancedAnimatedNavbar = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate("/");
     setMobileMenuOpen(false);
   };
 
   const isActive = (path) => location.pathname === path;
 
   const getUserInitials = (name) => {
-    if (!name || typeof name !== 'string') return '??';
+    if (!name || typeof name !== "string") return "??";
     return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
+      .split(" ")
+      .map((word) => word[0])
+      .join("")
       .toUpperCase()
       .slice(0, 2);
   };
 
   // Check if current page is home
-  const isHomePage = location.pathname === '/';
+  const isHomePage = location.pathname === "/";
 
   // Navigation items for non-authenticated users (only shown on home page)
-  const publicNavItems = isHomePage ? [
-    { label: 'Features', id: 'features', icon: Zap },
-    { label: 'Pricing', id: 'pricing', icon: DollarSign },
-    { label: 'Faqs', id: 'Faqs', icon: Clock },
-    { label: 'Reviews', id: 'contact', icon: Mail },
-  ] : [];
+  const publicNavItems = isHomePage
+    ? [
+        { label: "Features", id: "features", icon: Zap },
+        { label: "Pricing", id: "pricing", icon: DollarSign },
+        { label: "Faqs", id: "Faqs", icon: Clock },
+        { label: "Reviews", id: "contact", icon: Mail },
+      ]
+    : [];
 
   // Navigation items for authenticated users (always shown when logged in)
-  const authenticatedNavItems = user ? [
-    { label: 'Ideas', path: '/dashboard', icon: Home },
-    { label: 'Favorites', path: '/favorites', icon: Heart },
-  ] : [];
+  const authenticatedNavItems = user
+    ? [
+        { label: "Ideas", path: "/dashboard", icon: Home },
+        { label: "Favorites", path: "/favorites", icon: Heart },
+      ]
+    : [];
 
   // Homepage navigation items (only shown on home page)
-  const homepageNavItems = isHomePage ? [
-    { label: 'Features', id: 'features', icon: Zap },
-    { label: 'Pricing', id: 'pricing', icon: DollarSign },
-    { label: 'Faqs', id: 'Faqs', icon: Clock },
-    { label: 'Reviews', id: 'contact', icon: Mail },
-  ] : [];
-    return (
+  const homepageNavItems = isHomePage
+    ? [
+        { label: "Features", id: "features", icon: Zap },
+        { label: "Pricing", id: "pricing", icon: DollarSign },
+        { label: "Faqs", id: "Faqs", icon: Clock },
+        { label: "Reviews", id: "contact", icon: Mail },
+      ]
+    : [];
+  return (
     <>
       {/* Mobile menu overlay */}
       {mobileMenuOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-opacity duration-300 md:hidden"
           onClick={() => setMobileMenuOpen(false)}
         />
@@ -149,45 +171,57 @@ const EnhancedAnimatedNavbar = () => {
 
       {/* Desktop Navbar */}
       <motion.nav
-        className={`fixed top-0 z-50 transition-all duration-500 ease-out hidden md:block ${
-          scrolled
-            ? 'left-1/2 w-auto mt-2 navbar-centered'
-            : 'left-0 w-full mt-0'
+        className={`fixed top-0 z-50 hidden md:block ${
+          scrolled ? "navbar-centered" : ""
         }`}
         initial={false}
         animate={{
-          y: scrolled ? 0 : 0,
-          x: scrolled ? '-50%' : 0,
-          left: scrolled ? '50%' : 0,
-          width: scrolled ? 'auto' : '100%',
+          y: 0,
+          x: scrolled ? "-50%" : 0,
+          left: scrolled ? "50%" : 0,
+          width: scrolled ? "auto" : "100%",
+          marginTop: scrolled ? "0.5rem" : 0,
         }}
-        transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+        transition={{
+          duration: 2.1,
+          ease: [0.23, 1, 0.32, 1], // smoother easing curve
+          type: "tween",
+        }}
       >
         <motion.div
           className={`${
             scrolled
-              ? 'bg-white/95 backdrop-blur-xl rounded-full px-4 py-1.5 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-gray-200/50'
-              : 'bg-transparent px-6 py-2 border-none'
+              ? "bg-white/95 backdrop-blur-xl rounded-full px-4 py-1.5 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-gray-200/50"
+              : "bg-transparent px-6 py-2 border-none"
           } transition-all duration-200 ease-out`}
           layout
           transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
         >
           <div className="flex items-center justify-between min-w-0 gap-6">
             {/* Logo */}
-            <motion.div 
-              className="flex items-center space-x-2"
-              layout
-            >
+            <motion.div className="flex items-center space-x-2" layout>
               <Link to="/" className="flex items-center space-x-2">
-                <div className={`${scrolled ? 'h-6 w-6' : 'h-7 w-7'} rounded-lg bg-gray-900 flex items-center justify-center transition-all duration-500`}>
-                  <Brain className={`${scrolled ? 'h-3 w-3' : 'h-3.5 w-3.5'} text-white`} />
+                <div
+                  className={`${
+                    scrolled ? "h-6 w-6" : "h-7 w-7"
+                  } rounded-lg bg-gray-900 flex items-center justify-center transition-all duration-500`}
+                >
+                  <Brain
+                    className={`${
+                      scrolled ? "h-3 w-3" : "h-3.5 w-3.5"
+                    } text-white`}
+                  />
                 </div>
-                <span className={`${scrolled ? 'text-sm' : 'text-base'} font-semibold bg-gray-900 bg-clip-text text-transparent transition-all duration-500 whitespace-nowrap`}>
+                <span
+                  className={`${
+                    scrolled ? "text-sm" : "text-base"
+                  } font-semibold bg-gray-900 bg-clip-text text-transparent transition-all duration-500 whitespace-nowrap`}
+                >
                   Reddit Idea Extractor
                 </span>
               </Link>
             </motion.div>
-            
+
             {/* Navigation Items */}
             <div className="flex items-center space-x-1">
               {shouldShowUserMenu ? (
@@ -201,8 +235,8 @@ const EnhancedAnimatedNavbar = () => {
                         to={item.path}
                         className={`flex items-center space-x-1.5 px-2 py-1.5 rounded-lg text-md font-medium transition-all duration-200 ${
                           isActive(item.path)
-                            ? 'text-gray-900'
-                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray'
+                            ? "!text-gray-900"
+                            : "!text-gray-900 hover:text-gray-900 hover:bg-gray"
                         }`}
                       >
                         <IconComponent className="h-3.5 w-3.5" />
@@ -210,21 +244,19 @@ const EnhancedAnimatedNavbar = () => {
                       </Link>
                     );
                   })}
-                  
+
                   {/* Homepage navigation for authenticated users */}
                   {homepageNavItems.map((item) => {
-                    const IconComponent = item.icon;
                     return (
                       <Link
                         key={item.id}
                         onClick={() => scrollToSection(item.id)}
                         className={`flex items-center space-x-1.5 px-2 py-1.5 rounded-lg text-md font-medium transition-all duration-200 ${
                           isActive(item.id)
-                            ? 'bg-gray-900 text-gray-900'
-                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray'
+                            ? "!bg-gray-900 !text-gray-900"
+                            : "!text-gray-900 hover:text-gray-900 hover:bg-gray"
                         }`}
                       >
-                        <IconComponent className="h-3.5 w-3.5" />
                         <span>{item.label}</span>
                       </Link>
                     );
@@ -239,8 +271,8 @@ const EnhancedAnimatedNavbar = () => {
                       onClick={() => scrollToSection(item.id)}
                       className={`flex items-center space-x-1.5 px-2 py-1.5 rounded-lg text-md font-medium transition-all duration-200 ${
                         isActive(item.id)
-                          ? 'bg-gray-900 text-gray-900'
-                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray'
+                          ? "!bg-gray-900 !text-gray-900"
+                          : "!text-gray-900 hover:text-gray-900 hover:bg-gray"
                       }`}
                     >
                       {item.label}
@@ -256,19 +288,27 @@ const EnhancedAnimatedNavbar = () => {
                 // User dropdown
                 <DropdownMenu>
                   <DropdownMenuTrigger className="flex items-center space-x-1.5 px-2 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50">
-                    <Avatar className={`${scrolled ? 'h-6 w-6' : 'h-7 w-7'} transition-all duration-500`}>
-                      <AvatarFallback className="bg-purple-100 text-purple-700 text-sm font-semibold">
+                    <Avatar
+                      className={`${
+                        scrolled ? "h-6 w-6" : "h-7 w-7"
+                      } transition-all duration-500`}
+                    >
+                      <AvatarFallback className="bg-gray-200 text-gray-700 text-xs font-semibold">
                         {getUserInitials(user?.name)}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="hidden lg:inline text-xs">{user?.name}</span>
+                    <span className="hidden lg:inline text-xs">
+                      {user?.name}
+                    </span>
                     <ChevronDown className="h-3.5 w-3.5" />
                   </DropdownMenuTrigger>
 
                   <DropdownMenuContent align="end" className="w-56 bg-white">
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">{user?.name}</p>
+                        <p className="text-sm font-medium leading-none">
+                          {user?.name}
+                        </p>
                         <p className="text-xs leading-none text-muted-foreground">
                           {user?.email}
                         </p>
@@ -278,7 +318,10 @@ const EnhancedAnimatedNavbar = () => {
                     <DropdownMenuSeparator />
 
                     <DropdownMenuItem asChild>
-                      <Link to="/profile" className="flex items-center space-x-2 cursor-pointer">
+                      <Link
+                        to="/profile"
+                        className="flex items-center space-x-2 cursor-pointer"
+                      >
                         <User className="h-4 w-4" />
                         <span>Profile</span>
                       </Link>
@@ -307,12 +350,12 @@ const EnhancedAnimatedNavbar = () => {
                   <motion.button
                     className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all duration-500 ${
                       scrolled
-                        ? 'bg-gradient-to-r from-gray-900 to-gray-900 text-white hover:from-gray-900 hover:to-gray-900 shadow-md'
-                        : 'bg-gradient-to-r from-gray-900 to-gray-900 text-white hover:from-gray-900 hover:to-gray-900 shadow-md'
+                        ? "bg-gradient-to-r from-gray-900 to-gray-900 text-white hover:from-gray-900 hover:to-gray-900 shadow-md"
+                        : "bg-gradient-to-r from-gray-900 to-gray-900 text-white hover:from-gray-900 hover:to-gray-900 shadow-md"
                     }`}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => navigate('/signup')}
+                    onClick={() => navigate("/signup")}
                     layout
                   >
                     Signup
@@ -364,10 +407,10 @@ const EnhancedAnimatedNavbar = () => {
                             key={item.path}
                             to={item.path}
                             onClick={() => setMobileMenuOpen(false)}
-                            className={`flex items-center space-x-3 w-full text-left py-2.5 px-3 text-base font-medium rounded-lg transition-colors ${
+                            className={`flex items-center space-x-3 w-full text-left py-2.5 px-3 text-base !font-medium rounded-lg transition-colors ${
                               isActive(item.path)
-                                ? 'text-gray-900'
-                                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                ? "!text-gray-900"
+                                : "!text-gray-900 hover:text-gray-900 hover:bg-gray-50"
                             }`}
                           >
                             <IconComponent className="h-5 w-5" />
@@ -375,49 +418,51 @@ const EnhancedAnimatedNavbar = () => {
                           </Link>
                         );
                       })}
-                      
+
                       {/* Homepage navigation for authenticated users in mobile */}
                       <div className="pt-2 border-t border-gray-100 mt-2">
                         {homepageNavItems.map((item) => {
-                          const IconComponent = item.icon;
                           return (
                             <button
                               key={item.id}
                               onClick={() => scrollToSection(item.id)}
-                              className="flex items-center space-x-3 w-full text-left py-2.5 px-3 text-base font-medium text-gray-600 hover:text-purple-600 hover:bg-gray-50 rounded-lg transition-colors"
+                              className="flex items-center space-x-3 w-full text-left py-2.5 px-3 text-base !font-medium !text-gray-900 hover:text-purple-600 hover:bg-gray-50 rounded-lg transition-colors"
                             >
-                              <IconComponent className="h-5 w-5" />
                               <span>{item.label}</span>
                             </button>
                           );
                         })}
                       </div>
-                      
+
                       <div className="pt-3 border-t border-gray-200 mt-4">
                         <div className="flex items-center space-x-3 px-3 py-2.5 mb-3">
                           <Avatar className="h-9 w-9">
-                            <AvatarFallback className="bg-purple-100 text-purple-700 text-sm font-semibold">
+                            <AvatarFallback className="bg-gray-200 text-gray-700 text-sm font-semibold">
                               {getUserInitials(user?.name)}
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-                            <p className="text-xs text-gray-500">{user?.email}</p>
+                            <p className="text-sm font-medium text-gray-900">
+                              {user?.name}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {user?.email}
+                            </p>
                           </div>
                         </div>
-                        
+
                         <Link
                           to="/profile"
                           onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center space-x-3 w-full text-left py-2.5 px-3 text-base font-medium text-gray-600 hover:text-purple-600 hover:bg-gray-50 rounded-lg transition-colors"
+                          className="flex items-center space-x-3 w-full text-left py-2.5 px-3 text-base !font-medium !text-gray-900 hover:text-purple-600 hover:bg-gray-50 rounded-lg transition-colors"
                         >
                           <User className="h-5 w-5" />
                           <span>Profile</span>
                         </Link>
-                        
+
                         <button
                           onClick={handleLogout}
-                          className="flex items-center space-x-3 w-full text-left py-2.5 px-3 text-base font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          className="flex items-center space-x-3 w-full text-left py-2.5 px-3 text-base !font-medium !text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         >
                           <LogOut className="h-5 w-5" />
                           <span>Log out</span>
@@ -431,17 +476,17 @@ const EnhancedAnimatedNavbar = () => {
                         <button
                           key={item.id}
                           onClick={() => scrollToSection(item.id)}
-                          className="block w-full text-left py-2.5 px-3 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                          className="block w-full text-left py-2.5 px-3 text-base !font-medium !text-gray-900 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
                         >
                           {item.label}
                         </button>
                       ))}
-                      
+
                       <div className="pt-3 border-t border-gray-200 space-y-2 mt-4">
                         <Link
                           to="/login"
                           onClick={() => setMobileMenuOpen(false)}
-                          className="block w-full py-2.5 px-3 text-base font-medium text-gray-600 hover:text-gray-900 transition-colors text-center border border-gray-300 rounded-lg"
+                          className="block w-full py-2.5 px-3 font-medium !text-gray-900 hover:text-gray-600 transition-colors text-center border border-gray-300 rounded-lg"
                         >
                           Login
                         </Link>

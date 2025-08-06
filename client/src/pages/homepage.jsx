@@ -192,13 +192,13 @@ const HomePage = () => {
               
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center px-4">
-                <button className="w-full sm:w-auto px-6 md:px-8 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg font-medium hover:from-purple-700 hover:to-purple-800 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center">
+                <Link to="/dashboard" className="w-full sm:w-auto px-6 md:px-8 py-3 bg-gradient-to-r from-purple-700 to-purple-900 !text-white rounded-lg font-medium hover:from-purple-700 hover:to-purple-800 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center">
                   Get Started
                   <ArrowRight className="ml-2 h-4 w-4" />
-                </button>
-                <button className="w-full sm:w-auto px-6 md:px-8 py-3 bg-[#3B4A6B] rounded-lg font-medium hover:bg-[#2E3B58] transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center">
+                </Link>
+                <Link className="w-full sm:w-auto px-6 md:px-8 py-3 bg-gray-900 rounded-lg !text-white font-medium hover:bg-[#2E3B58] transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center">
                   Learn More
-                </button>
+                </Link>
               </div>
             </div>
           </ScrollAnimationWrapper>

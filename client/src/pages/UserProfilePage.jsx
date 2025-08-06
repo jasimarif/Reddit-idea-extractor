@@ -320,15 +320,15 @@ const UserProfilePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#e6ebef] pt-16 sm:pt-20 py-4 sm:py-6 px-3 sm:px-4">
+    <div className="min-h-screen bg-[#e6ebef] pt-18 sm:pt-20 py-4 sm:py-6 px-3 sm:px-4">
       <div className="max-w-4xl mx-auto">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 ml-2 mb-2">
+          <h2 className="text-2xl font-bold text-gray-900">My Profile</h2>
           <Button
             variant="outline"
             size="sm"
             onClick={handleLogout}
-            className="flex items-center gap-2 w-full sm:w-auto justify-center"
+            className="flex items-center gap-2 w-full sm:w-auto justify-center "
           >
             <LogOut className="h-4 w-4" />
             <span>Logout</span>

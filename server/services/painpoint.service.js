@@ -1,7 +1,6 @@
 const PainPoint = require("../models/PainPoint");
 const Thread = require("../models/Threads");
 const langchain = require("./langchain.service");
-const { buildPainPointExtractionPrompt } = require("./promptUtils");
 
 const calculateTextSimilarity = (text1, text2) => {
   const words1 = new Set(text1.split(" "));

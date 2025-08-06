@@ -2,6 +2,12 @@ const cron = require("node-cron");
 const painpointService = require("./services/painpoint.service");
 const marketGapService = require("./services/marketGap.service");
 const axios = require("axios");
+const {
+  fetchTopPosts,
+  fetchComments,
+  storeThread,
+} = require("./services/reddit.service");
+const Thread = require("./models/Threads");
 
 // Rate limiting configuration
 const RATE_LIMIT_DELAY = 2000; // 2 seconds between requests
@@ -33,103 +39,96 @@ async function makeRequestWithRetry(requestFn, retryCount = 0) {
 const startCronJobs = () => {
   console.log("Starting cron jobs...");
 
-  const {
-    fetchTopPosts,
-    fetchComments,
-    storeThread,
-  } = require("./services/reddit.service");
-  const Thread = require("./models/Threads");
-
   cron.schedule(
     "49 17 * * *",
     async () => {
       console.log("Running daily Reddit idea fetch...");
-      const subredditList = [
-        "startups",
-        "Entrepreneur",
-        "careerguidance",
-        "Health",
-        "mentalhealth",
-        "depression",
-        "Fitness",
-        "personalfinance",
-        "relationships",
-        "relationship_advice",
-        "parenting",
-        "coparenting",
-        "productivity",
-      ];
+      // const subredditList = [
+      //   "startups",
+        // "Entrepreneur",
+        // "careerguidance",
+        // "Health",
+        // "mentalhealth",
+        // "depression",
+        // "Fitness",
+        // "personalfinance",
+        // "relationships",
+        // "relationship_advice",
+        // "parenting",
+        // "coparenting",
+        // "productivity",
+      // ];
 
-      const threadIds = [];
-      let savedThreads = 0;
+      // const threadIds = [];
+      // let savedThreads = 0;
 
-      try {
-        for (const subreddit of subredditList) {
-          console.log(`\n=== Fetching from r/${subreddit} ===`);
-          try {
-            // Fetch posts with retry logic
-            const posts = await makeRequestWithRetry(
-              () => fetchTopPosts(subreddit, 0)
-            );
-            console.log(`Found ${posts.length} posts in r/${subreddit}`);
+      // try {
+      //   for (const subreddit of subredditList) {
+      //     console.log(`\n=== Fetching from r/${subreddit} ===`);
+      //     try {
+      //       // Fetch posts with retry logic
+      //       const posts = await makeRequestWithRetry(
+      //         () => fetchTopPosts(subreddit, 0)
+      //       );
+      //       console.log(`Found ${posts.length} posts in r/${subreddit}`);
 
-            for (const post of posts) {
-              try {
-                console.log(
-                  `\nProcessing post: ${post.title.substring(0, 50)}...`
-                );
+      //       for (const post of posts) {
+      //         try {
+      //           console.log(
+      //             `\nProcessing post: ${post.title.substring(0, 50)}...`
+      //           );
 
-                // Fetch comments with retry logic
-                console.log("Fetching comments...");
-                const comments = await makeRequestWithRetry(
-                  () => fetchComments(post.id)
-                );
-                console.log(`Found ${comments.length} relevant comments`);
+      //           // Fetch comments with retry logic
+      //           console.log("Fetching comments...");
+      //           const comments = await makeRequestWithRetry(
+      //             () => fetchComments(post.id)
+      //           );
+      //           console.log(`Found ${comments.length} relevant comments`);
 
-                // Save thread with retry logic
-                console.log("Saving thread to database...");
-                const savedThread = await makeRequestWithRetry(
-                  () => storeThread({ ...post, subreddit }, comments)
-                );
+      //           // Save thread with retry logic
+      //           console.log("Saving thread to database...");
+      //           const savedThread = await makeRequestWithRetry(
+      //             () => storeThread({ ...post, subreddit }, comments)
+      //           );
 
-                if (savedThread && savedThread._id) {
-                  threadIds.push(savedThread._id.toString());
-                  savedThreads++;
-                  console.log(`Successfully saved thread ${savedThread._id}`);
-                } else {
-                  console.log("Thread was not saved (may be a duplicate)");
-                }
+      //           if (savedThread && savedThread._id) {
+      //             threadIds.push(savedThread._id.toString());
+      //             savedThreads++;
+      //             console.log(`Successfully saved thread ${savedThread._id}`);
+      //           } else {
+      //             console.log("Thread was not saved (may be a duplicate)");
+      //           }
 
-                // Standard delay between requests
-                await new Promise((resolve) => setTimeout(resolve, RATE_LIMIT_DELAY));
-              } catch (postError) {
-                console.error(
-                  `Error processing post ${post.id}:`,
-                  postError.message
-                );
-                continue;
-              }
-            }
+      //           // Standard delay between requests
+      //           await new Promise((resolve) => setTimeout(resolve, RATE_LIMIT_DELAY));
+      //         } catch (postError) {
+      //           console.error(
+      //             `Error processing post ${post.id}:`,
+      //             postError.message
+      //           );
+      //           continue;
+      //         }
+      //       }
 
-            console.log(
-              `Finished processing r/${subreddit}. Waiting before next subreddit...`
-            );
-            await new Promise((resolve) => setTimeout(resolve, 3000));
-          } catch (subredditError) {
-            console.error(
-              `Error processing subreddit r/${subreddit}:`,
-              subredditError.message
-            );
-            continue;
-          }
-        }
+      //       console.log(
+      //         `Finished processing r/${subreddit}. Waiting before next subreddit...`
+      //       );
+      //       await new Promise((resolve) => setTimeout(resolve, 3000));
+      //     } catch (subredditError) {
+      //       console.error(
+      //         `Error processing subreddit r/${subreddit}:`,
+      //         subredditError.message
+      //       );
+      //       continue;
+      //     }
+      //   }
 
-        console.log(`\n=== Thread Fetching Complete ===`);
-        console.log(
-          `Total threads processed: ${savedThreads} new, ${
-            threadIds.length - savedThreads
-          } existing`
-        );
+      //   console.log(`\n=== Thread Fetching Complete ===`);
+      //   console.log(
+      //     `Total threads processed: ${savedThreads} new, ${
+      //       threadIds.length - savedThreads
+      //     } existing`
+      //   );
 
         // if (threadIds.length > 0) {
         //   console.log("\n=== Starting Pain Point Analysis ===");
@@ -278,43 +277,43 @@ const startCronJobs = () => {
         //   }
         // } else {
         //   console.log("No new threads to analyze");
-        // }
+        }
 
-        console.log(
-          "Daily Reddit idea fetch and analysis completed successfully"
-        );
-      } catch (error) {
-        console.error("Error in daily Reddit idea fetch:", error);
-      }
-    },
-    {
-      timezone: "Asia/Karachi",
-    }
+    //     console.log(
+    //       "Daily Reddit idea fetch and analysis completed successfully"
+    //     );
+    //   } catch (error) {
+    //     console.error("Error in daily Reddit idea fetch:", error);
+    //   }
+    // },
+    // {
+    //   timezone: "Asia/Karachi",
+    // }
   );
 
-  cron.schedule(
-    "0 0 * * 0",
-    async () => {
-      console.log("Running weekly cleanup...");
+  // cron.schedule(
+  //   "0 0 * * 0",
+  //   async () => {
+  //     console.log("Running weekly cleanup...");
 
-      try {
-        const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
-        const Post = require("./models/PainPoint");
+  //     try {
+  //       const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+  //       const Post = require("./models/PainPoint");
 
-        const result = await Post.deleteMany({
-          createdAt: { $lt: ninetyDaysAgo },
-          isManuallyAdded: false,
-        });
+  //       const result = await Post.deleteMany({
+  //         createdAt: { $lt: ninetyDaysAgo },
+  //         isManuallyAdded: false,
+  //       });
 
-        console.log(`Cleaned up ${result.deletedCount} old posts`);
-      } catch (error) {
-        console.error("Error in weekly cleanup:", error);
-      }
-    },
-    {
-      timezone: "Asia/Karachi",
-    }
-  );
+  //       console.log(`Cleaned up ${result.deletedCount} old posts`);
+  //     } catch (error) {
+  //       console.error("Error in weekly cleanup:", error);
+  //     }
+  //   },
+  //   {
+  //     timezone: "Asia/Karachi",
+  //   }
+  // );
 
   console.log("Cron jobs scheduled successfully");
 };
