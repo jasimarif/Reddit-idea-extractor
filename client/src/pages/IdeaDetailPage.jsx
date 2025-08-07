@@ -304,7 +304,7 @@ const IdeaDetailPage = () => {
                   {idea.summary}
                 </p>
               </div>
-
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-gray-50 p-3 rounded-lg">
                   <h3 className="text-xs font-semibold text-foreground mb-1 flex items-center">

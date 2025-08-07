@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
   ArrowRight,
   Search,
@@ -15,14 +16,7 @@ import {
   Linkedin,
   Youtube,
   Twitter,
-  Target,
   Lightbulb,
-  BarChart3,
-  Users,
-  Rocket,
-  Globe,
-  Sparkles,
-  MessageSquare,
   Shield,
   Layers,
   LayoutTemplate,
@@ -161,12 +155,84 @@ const HomePage = () => {
     },
   ];
 
+  const CloudBackground = ({ 
+    className = '', 
+    left = false, 
+    right = false,
+    size = 'base', // 'sm', 'base', 'lg'
+    delay = 0,
+    duration = 0,
+    opacity = 50
+  }) => {
+    // Size mapping for responsive cloud sizes
+    const sizeClasses = {
+      sm: 'w-[400px] md:w-[600px]',
+      base: 'w-[500px] md:w-[800px]',
+      lg: 'w-[600px] md:w-[1000px]'
+    };
+
+    // Animation settings
+    const animDuration = duration || 10 + Math.random() * 5; // 10-15s
+    const animDelay = delay || Math.random() * 3; // 0-3s
+    const baseOpacity = opacity / 100;
+    const minOpacity = Math.max(0.1, baseOpacity * 0.8); // Ensure minimum opacity
+    const maxOpacity = baseOpacity * 1.3; // Slight variation in opacity
+
+    // Position classes based on left/right props
+    const positionClass = left ? 'left-0 -translate-x-1/2' : 
+                         right ? 'right-0 translate-x-1/2' : 'left-1/2 -translate-x-1/2';
+
+    return (
+      <motion.div
+        initial={{ 
+          opacity: minOpacity,
+          filter: 'brightness(1)'
+        }}
+        animate={{ 
+          opacity: [
+            minOpacity,
+            maxOpacity,
+            minOpacity,
+            maxOpacity,
+            minOpacity
+          ],
+          filter: [
+            'brightness(1)',
+            'brightness(1.2)',
+            'brightness(1)',
+            'brightness(1.1)',
+            'brightness(1)'
+          ]
+        }}
+        transition={{
+          duration: animDuration,
+          repeat: Infinity,
+          repeatType: 'loop',
+          ease: 'easeInOut',
+          delay: animDelay,
+          times: [0, 0.25, 0.5, 0.75, 1]
+        }}
+        className={`absolute ${sizeClasses[size] || sizeClasses.base} h-auto pointer-events-none z-0 ${positionClass} ${className}`}
+      >
+        <img 
+          src="/cloud.svg" 
+          alt="" 
+          className="w-full h-auto"
+          loading="lazy"
+        />
+      </motion.div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-[#e6ebef] momentum-scroll">
-      
       {/* Hero Section */}
-      <section id="hero" className="relative pt-20 md:pt-32 pb-16 md:pb-20 scroll-section bg-[#e6ebef] px-4 sm:px-6 lg:px-8">
+      <section id="hero" className="relative pt-20 md:pt-32 pb-16 md:pb-20 scroll-section bg-[#e6ebef] px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="relative max-w-6xl mx-auto">
+          {/* Hero Section Clouds */}
+          <CloudBackground className="top-[15%] -translate-y-1/2" left size="lg" opacity={30} />
+          <CloudBackground className="top-[60%] -translate-y-1/2" right size="base" opacity={35} delay={2} />
+          <CloudBackground className="top-[85%] -translate-y-1/2" left size="sm" opacity={25} delay={4} />
           <ScrollAnimationWrapper>
             <div className="text-center max-w-4xl mx-auto">
               {/* Icon */}
@@ -205,9 +271,15 @@ const HomePage = () => {
         </div>
       </section>
 
+    
       {/* Features Section */}
-      <section id="features" className="py-16 md:py-24 scroll-section bg-[#e6ebef] px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
+      <section id="features" className="relative py-16 md:py-24 scroll-section bg-[#e6ebef] px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Features Section Clouds */}
+        <CloudBackground className="top-[20%] -translate-y-1/2" left size="base" opacity={30} delay={1} />
+        <CloudBackground className="top-[50%] -translate-y-1/2" right size="lg" opacity={25} delay={3} />
+        <CloudBackground className="top-[80%] -translate-y-1/2" left size="sm" opacity={20} delay={5} />
+        <div className="relative mx-auto max-w-7xl z-10">
+          
           <ScrollAnimationWrapper>
             <div className="mx-auto max-w-2xl text-center mb-12 md:mb-16">
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-medium tracking-tight text-gray-900 mb-4 md:mb-6 px-2">
@@ -220,6 +292,7 @@ const HomePage = () => {
           </ScrollAnimationWrapper>
 
           <div className="mx-auto max-w-6xl">
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {features.map((feature, index) => (
                 <ScrollAnimationWrapper key={index} delay={index * 0.1}>
@@ -260,8 +333,12 @@ const HomePage = () => {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-16 md:py-24 scroll-section bg-[#e6ebef] px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
+      <section id="pricing" className="relative py-16 md:py-24 scroll-section bg-[#e6ebef] px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Pricing Section Clouds */}
+        <CloudBackground className="top-[15%] -translate-y-1/2" left size="lg" opacity={35} delay={2} />
+        <CloudBackground className="top-[50%] -translate-y-1/2" right size="sm" opacity={25} delay={4} />
+        <CloudBackground className="top-[85%] -translate-y-1/2" left size="base" opacity={20} delay={1} />
+        <div className="relative mx-auto max-w-7xl z-10">
           <ScrollAnimationWrapper>
             <div className="mx-auto max-w-2xl text-center mb-12 md:mb-16">
               <div className="inline-flex items-center bg-gray-100 text-gray-700 rounded-full px-4 py-2 mb-4 md:mb-6">
@@ -397,8 +474,12 @@ const HomePage = () => {
       </section>
 
       {/* FAQ Section */}
-      <section id="Faqs" className="py-16 md:py-24 scroll-section bg-[#e6ebef] px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-4xl">
+      <section id="Faqs" className="relative py-16 md:py-24 scroll-section bg-[#e6ebef] px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* FAQ Section Clouds */}
+        <CloudBackground className="top-[20%] -translate-y-1/2" left size="base" opacity={25} delay={3} />
+        <CloudBackground className="top-[60%] -translate-y-1/2" right size="lg" opacity={20} delay={1} />
+        <CloudBackground className="top-[90%] -translate-y-1/2" left size="sm" opacity={15} delay={5} />
+        <div className="relative mx-auto max-w-4xl z-10">
           <ScrollAnimationWrapper>
             <div className="mx-auto max-w-2xl text-center mb-12 md:mb-16">
               <div className="inline-flex items-center bg-gray-100 text-gray-700 rounded-full px-4 py-2 mb-4 md:mb-6">
@@ -456,8 +537,12 @@ const HomePage = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section id="contact" className="py-16 md:py-24 scroll-section bg-[#e6ebef] px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl">
+      <section id="contact" className="relative py-16 md:py-24 scroll-section bg-[#e6ebef] px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Testimonials Section Clouds */}
+        <CloudBackground className="top-[15%] -translate-y-1/2" left size="lg" opacity={30} delay={2} />
+        <CloudBackground className="top-[50%] -translate-y-1/2" right size="sm" opacity={25} delay={4} />
+        <CloudBackground className="top-[85%] -translate-y-1/2" left size="base" opacity={20} delay={1} />
+        <div className="relative mx-auto max-w-6xl z-10">
           <ScrollAnimationWrapper>
             <div className="mx-auto max-w-2xl text-center mb-12 md:mb-16">
               <div className="inline-flex items-center bg-gray-100 text-gray-700 rounded-full px-4 py-2 mb-4 md:mb-6">

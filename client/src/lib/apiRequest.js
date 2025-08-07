@@ -3,7 +3,7 @@ import { supabase } from "./supabaseClient";
 
 const apiRequest = axios.create({
   baseURL: (import.meta.env.VITE_API_URL || "http://localhost:3000") + "/api",
-  timeout: 30000,
+  timeout: 120000, 
   withCredentials: true,
 });
 
@@ -24,6 +24,36 @@ apiRequest.interceptors.request.use(async (config) => {
     return Promise.reject(error);
   }
 });
+
+// Helper function to retry requests on timeout (for Render cold starts)
+const retryRequest = async (requestFn, maxRetries = 2, baseDelay = 1000) => {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await requestFn();
+    } catch (error) {
+      const isTimeout = error.code === 'ECONNABORTED' || error.message?.includes('timeout');
+      const isLastAttempt = attempt === maxRetries;
+      
+      if (isTimeout && !isLastAttempt) {
+        const delay = baseDelay * Math.pow(2, attempt); // Exponential backoff
+        console.log(`Request timed out, retrying in ${delay}ms... (attempt ${attempt + 1}/${maxRetries + 1})`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+      
+      throw error;
+    }
+  }
+};
+
+// Wrapper functions with retry logic
+const apiRequestWithRetry = {
+  get: (url, config) => retryRequest(() => apiRequest.get(url, config)),
+  post: (url, data, config) => retryRequest(() => apiRequest.post(url, data, config)),
+  put: (url, data, config) => retryRequest(() => apiRequest.put(url, data, config)),
+  delete: (url, config) => retryRequest(() => apiRequest.delete(url, config)),
+  patch: (url, data, config) => retryRequest(() => apiRequest.patch(url, data, config))
+};
 
 // Add response interceptor to handle token refresh
 apiRequest.interceptors.response.use(
@@ -58,4 +88,6 @@ apiRequest.interceptors.response.use(
   }
 );
 
-export default apiRequest;
+// Export both the regular apiRequest and the retry-enabled version
+export { apiRequestWithRetry };
+export default apiRequestWithRetry; // Use retry version as default for better UX
