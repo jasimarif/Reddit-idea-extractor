@@ -63,7 +63,6 @@ export const AuthProvider = ({ children }) => {
 
     // Set up auth state change listener
     const { data: { subscription } } = onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', event);
       setSession(session);
       setUser(session ? formatUserData(session) : null);
       

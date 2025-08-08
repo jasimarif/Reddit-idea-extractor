@@ -6,7 +6,7 @@ import {
   Clock,
   Lightbulb,
   Brain,
-  Eye,
+  Plus,
   Instagram,
   Linkedin,
   Youtube,
@@ -87,18 +87,15 @@ const IdeaDetailPage = () => {
   useEffect(() => {
     const fetchIdea = async () => {
       if (!id) {
-        console.log("No ID provided");
         setIdea(null);
         setIsLoading(false);
         return;
       }
 
-      console.log("Fetching idea with ID:", id);
       setIsLoading(true);
       try {
         // First fetch the idea
         const response = await apiRequest.get(`/ideas/${id}`);
-        console.log("API Response:", response);
 
         if (!response || !response.data) {
           throw new Error("No response data received");
@@ -109,7 +106,7 @@ const IdeaDetailPage = () => {
         }
 
         const ideaData = response.data.data;
-        console.log("Idea data:", ideaData);
+        
 
         setIdea(ideaData);
       } catch (error) {
@@ -129,11 +126,11 @@ const IdeaDetailPage = () => {
       if (!idea?._id) return;
       setIsGeneratingIdeas(true);
       try {
-        console.log("Fetching business ideas for pain point ID:", idea._id);
+        
         const response = await apiRequest.get(
           `/marketgaps/ideas/by-painpoint/${idea._id}`
         );
-        console.log("Business ideas response:", response.data);
+        
         if (response.data?.success) {
           setBusinessIdeas(
             Array.isArray(response.data.data) ? response.data.data : []
@@ -393,19 +390,20 @@ const IdeaDetailPage = () => {
           ) : businessIdeas.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {businessIdeas.map((businessIdea, index) => {
-                console.log("Business Idea:", businessIdea); // Debug log
+                
                 return (
                   <div
                     key={businessIdea.id}
                     className="bg-white rounded-2xl p-5 shadow-sm border hover:shadow-md transition-all duration-300 group relative"
                   >
-                    {/* Eye icon for redirection to landing page */}
+                    {/* Plus icon and text for creating landing page */}
                     <Link
                       to={`/landingPage/${businessIdea.id || businessIdea._id}`}
-                      className="absolute top-3 right-3 p-1.5 rounded-full hover:bg-gray-100 transition-colors"
-                      title="View landing page"
+                      className="absolute top-4 right-3 flex items-center space-x-1 px-3 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors text-xs text-blue-600 hover:text-blue-800 border border-blue-100"
+                      title="Create landing page"
                     >
-                      <Eye className="h-4 w-4 text-gray-500 hover:text-gray-700" />
+                      <Plus className="h-4 w-4" />
+                      <span>Create Landing Page</span>
                     </Link>
 
                     <div className="space-y-4">

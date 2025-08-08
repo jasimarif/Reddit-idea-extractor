@@ -17,7 +17,7 @@ const IdeaViewerPage = () => {
 
   useEffect(() => {
     const fetchIdea = async () => {
-      console.log("Fetching landing page with businessIdeaId:", businessIdeaId);
+      
 
       if (!businessIdeaId) {
         console.error("No businessIdeaId provided for landing page");
@@ -32,11 +32,11 @@ const IdeaViewerPage = () => {
         const response = await apiRequest.get(
           `/landingpages/landing-page/${businessIdeaId}`
         );
-        console.log("Landing page response:", response);
+        
 
         if (response.data && response.data.landingPage) {
           const landingPage = response.data.landingPage;
-          console.log("Landing page data:", landingPage);
+          
 
           setIdea({
             landingPageUrl: landingPage.landingPageUrl || "#",

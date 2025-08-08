@@ -124,7 +124,7 @@ const DashboardPage = () => {
         params.tags = selectedTags.join(",");
       }
 
-      console.log("Fetching ideas with params:", params);
+      
       
       // Fetch ideas with server-side pagination
       const [ideasResponse, fetchedFavoriteIds] = await Promise.all([
@@ -135,7 +135,7 @@ const DashboardPage = () => {
       // Use the fetched favorite IDs
       const currentFavoriteIds = fetchedFavoriteIds || [];
 
-      console.log("Ideas API response:", ideasResponse.data);
+      
 
       if (ideasResponse.data.success) {
         let fetchedIdeas = Array.isArray(ideasResponse.data.data)
