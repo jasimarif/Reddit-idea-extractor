@@ -27,7 +27,10 @@ async function generateBusinessIdeas(painPoints) {
     console.log('Formatted pain points for AI:', JSON.stringify(formattedPainPoints, null, 2));
     
     try {
-      const agent = await langchain.getMarketGapAgent();
+      // const agent = await langchain.getMarketGapAgent();
+      // const prompt = formattedPainPoints;
+      // const response = await agent.invoke({ input: prompt });
+      const agent = await langchain.getClaudeMarketGapAgent();
       const prompt = formattedPainPoints;
       const response = await agent.invoke({ input: prompt });
       console.log('OpenAI response:', JSON.stringify(response, null, 2));

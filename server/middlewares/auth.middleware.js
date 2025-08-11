@@ -50,16 +50,26 @@ const protect = async (req, res, next) => {
     const user = await User.findOne({ supabaseUserId: supabaseUser.id }).select('-password');
     
     if (!user) {
-      // Optionally create user if they don't exist in your database yet
-      const newUser = new User({
-        supabaseUserId: supabaseUser.id,
-        email: supabaseUser.email,
-        name: supabaseUser.user_metadata?.full_name || supabaseUser.email.split('@')[0],
-        // Add other user fields as needed
-      });
+      // Check if a user with this email already exists (in case they signed up through a different provider)
+      const existingUser = await User.findOne({ email: supabaseUser.email });
       
-      const savedUser = await newUser.save();
-      req.user = savedUser;
+      if (existingUser) {
+        // Update the existing user with the supabaseUserId
+        existingUser.supabaseUserId = supabaseUser.id;
+        const updatedUser = await existingUser.save();
+        req.user = updatedUser;
+      } else {
+        // Create a new user if no user with this email exists
+        const newUser = new User({
+          supabaseUserId: supabaseUser.id,
+          email: supabaseUser.email,
+          name: supabaseUser.user_metadata?.full_name || supabaseUser.email.split('@')[0],
+          // Add other user fields as needed
+        });
+        
+        const savedUser = await newUser.save();
+        req.user = savedUser;
+      }
     } else {
       req.user = user;
     }

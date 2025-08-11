@@ -41,20 +41,42 @@ const findSimilarPainPoint = async (ppData) => {
 
 // Utility to extract the first JSON object from a string
 function extractFirstJsonObject(text) {
-  const match = text.match(/\{[\s\S]*\}/);
-  if (match) {
-    return match[0];
+  if (!text) {
+    throw new Error('Empty response from LLM');
   }
-  throw new Error("No JSON object found in response");
+  
+  // Try to parse directly if it's already valid JSON
+  try {
+    const parsed = JSON.parse(text);
+    return JSON.stringify(parsed);
+  } catch (e) {
+    // If direct parse fails, try to extract JSON from the text
+    const match = text.match(/\{[\s\S]*\}/);
+    if (match) {
+      try {
+        // Validate that the matched content is valid JSON
+        JSON.parse(match[0]);
+        return match[0];
+      } catch (e) {
+        console.error('Matched content is not valid JSON:', match[0]);
+      }
+    }
+    
+    console.error('Failed to extract JSON from response. Response content:', text);
+    throw new Error(`No valid JSON object found in response. Response type: ${typeof text}, Length: ${text.length}`);
+  }
 }
 
+// Cache for thread processing state
+const threadProcessingCache = new Map();
+
 const extractPainPointsFromThread = async (thread) => {
+  const threadId = thread._id.toString();
   console.debug(
-    `Extracting pain points from thread: ${
-      thread._id
-    } - ${thread.title?.substring(0, 50)}...`
+    `Extracting pain points from thread: ${threadId} - ${thread.title?.substring(0, 50)}...`
   );
 
+  // Prepare thread content for analysis
   const threadContent = {
     title: thread.title,
     content: thread.content || "",
@@ -71,13 +93,11 @@ const extractPainPointsFromThread = async (thread) => {
           classifiedAt: thread.metadata.llmClassification.classifiedAt,
         }
       : null,
-    // Include original metadata if needed
     metadata: {
       source: thread.metadata?.source || "reddit",
       tags: thread.metadata?.tags || [],
       triggerKeywords: thread.metadata?.triggerKeywords || [],
     },
-
     comments: (thread.comments || []).map((c) => ({
       author: c.author || "anonymous",
       content: c.text || c.content || "",
@@ -86,73 +106,115 @@ const extractPainPointsFromThread = async (thread) => {
   };
 
   try {
-    console.debug("Calling LangChain OpenAI agent to extract pain points...");
-    console.log(`LLM request for thread ${thread._id}:`, threadContent);
-    const agent = await langchain.getPainPointAgent();
-    const prompt = threadContent;
-    const response = await agent.invoke({ input: prompt });
-    console.log(`LLM response received for thread ${thread._id}:`, response);
-    let extracted;
+    // const agent = await langchain.getPainPointAgent();
+    // const prompt = threadContent;
+    // const response = await agent.invoke({ input: prompt });
+    
+    const conversationId = `thread_${threadId}`;
+    const cacheKey = `processing_${threadId}`;
+    
+    // Check if we're already processing this thread
+    if (threadProcessingCache.has(cacheKey)) {
+      console.debug(`Thread ${threadId} is already being processed`);
+      return [];
+    }
+    
+    // Mark thread as being processed
+    threadProcessingCache.set(cacheKey, true);
+    
     try {
-      let content = response.response || response.text || response;
+      console.debug(`Calling Claude agent for thread ${threadId}...`);
+      
+      // Get or create agent with conversation context
+      const { invoke } = await langchain.getClaudePainPointAgent({ conversationId });
+      
+      // Only send the thread content - system prompt is handled by the agent
+      console.debug('Sending request to Claude agent...');
+      let response;
       try {
-        extracted = typeof content === "string" ? JSON.parse(content) : content;
-      } catch (e) {
-        // Try to extract JSON if parsing fails
-        content = extractFirstJsonObject(content);
-        extracted = JSON.parse(content);
+        response = await invoke(threadContent);
+        console.debug('Received response from Claude agent');
+      } catch (error) {
+        console.error('Error from Claude agent invocation:', error);
+        throw new Error(`Claude agent invocation failed: ${error.message}`);
       }
-    } catch (e) {
-      console.error("Failed to parse LLM response:", response.response);
-      throw new Error("Invalid JSON response from LLM");
+      
+      let extracted;
+      try {
+        // let content = response.response || response.text || response;
+        // Handle the response format from the agent
+        console.debug('Processing Claude agent response...');
+        const content = response;
+        
+        try {
+          extracted = typeof content === "string" ? JSON.parse(content) : content;
+          console.debug('Successfully parsed response as JSON');
+        } catch (e) {
+          console.debug('Direct JSON parse failed, attempting to extract JSON from response...');
+          // Try to extract JSON if parsing fails
+          const jsonContent = extractFirstJsonObject(content);
+          extracted = JSON.parse(jsonContent);
+          console.debug('Successfully extracted and parsed JSON from response');
+        }
+      } catch (e) {
+        console.error("Failed to process LLM response. Response type:", typeof response);
+        console.error("Response content:", response);
+        console.error("Error details:", e);
+        throw new Error(`Invalid response from LLM: ${e.message}`);
+      }
+      
+      // Accept both { painPoints: [...] } and single object/array
+      let painPointsArr = [];
+      if (Array.isArray(extracted)) {
+        painPointsArr = extracted;
+      } else if (extracted && Array.isArray(extracted.painPoints)) {
+        painPointsArr = extracted.painPoints;
+      } else if (extracted && typeof extracted === "object") {
+        painPointsArr = [extracted];
+      } else {
+        throw new Error("LLM agent did not return a valid pain points array");
+      }
+      
+      return painPointsArr.map((pp, index) => ({
+        redditPostId: thread.sourceId
+          ? `${thread.sourceId}-${Date.now()}-${Math.random()
+              .toString(36)
+              .substring(2, 8)}`
+          : `generated-${thread._id}-${Date.now()}-${Math.random()
+              .toString(36)
+              .substring(2, 8)}`,
+        title: pp.title || "Untitled Pain Point",
+        summary: pp.summary || "",
+        description: pp.description || "",
+        subCategory: pp.subCategory || "",
+        upvotes: thread.upvotes || 0,
+        category: pp.category || thread.marketCategory || "Other",
+        intensity: ["Low", "Medium", "High"].includes(pp.intensity)
+          ? pp.intensity
+          : "Medium",
+        urgency: ["Low", "Medium", "High"].includes(pp.urgency)
+          ? pp.urgency
+          : "Medium",
+        quotes: Array.isArray(pp.quotes) ? pp.quotes : [],
+        keywords: Array.isArray(pp.keywords) ? pp.keywords : [],
+        threadId: thread._id,
+        subreddit: pp.subreddit || thread.subreddit || "",
+        businessPotential: pp.businessPotential || "Low",
+        topic: thread.title || "General",
+        url: thread.url || thread.permalink || "",
+        postDate: thread.createdAt || new Date(),
+        extractedAt: new Date(),
+        extractedBy: "anthropic-langchain",
+      }));
+    } catch (error) {
+      console.error(`Error in Claude agent for thread ${threadId}:`, error);
+      throw error;
+    } finally {
+      // Ensure we always clean up the processing cache
+      threadProcessingCache.delete(cacheKey);
     }
-    // Accept both { painPoints: [...] } and single object/array
-    let painPointsArr = [];
-    if (Array.isArray(extracted)) {
-      painPointsArr = extracted;
-    } else if (extracted && Array.isArray(extracted.painPoints)) {
-      painPointsArr = extracted.painPoints;
-    } else if (extracted && typeof extracted === "object") {
-      painPointsArr = [extracted];
-    } else {
-      throw new Error("LLM agent did not return a valid pain points array");
-    }
-    return painPointsArr.map((pp, index) => ({
-      redditPostId: thread.sourceId
-        ? `${thread.sourceId}-${Date.now()}-${Math.random()
-            .toString(36)
-            .substring(2, 8)}`
-        : `generated-${thread._id}-${Date.now()}-${Math.random()
-            .toString(36)
-            .substring(2, 8)}`,
-      title: pp.title || "Untitled Pain Point",
-      summary: pp.summary || "",
-      description: pp.description || "",
-      subCategory: pp.subCategory || "",
-      upvotes: thread.upvotes || 0,
-      category: pp.category || thread.marketCategory || "Other",
-      intensity: ["Low", "Medium", "High"].includes(pp.intensity)
-        ? pp.intensity
-        : "Medium",
-      urgency: ["Low", "Medium", "High"].includes(pp.urgency)
-        ? pp.urgency
-        : "Medium",
-      quotes: Array.isArray(pp.quotes) ? pp.quotes : [],
-      keywords: Array.isArray(pp.keywords) ? pp.keywords : [],
-      threadId: thread._id,
-      subreddit: pp.subreddit,
-      businessPotential: pp.businessPotential || "Low",
-      topic: thread.title || "General",
-      url: thread.url || thread.permalink || "",
-      postDate: thread.createdAt || new Date(),
-      extractedAt: new Date(),
-      extractedBy: "anthropic-langchain",
-    }));
   } catch (error) {
-    console.error(
-      `Error extracting pain points from thread ${thread._id}:`,
-      error
-    );
+    console.error(`Error extracting pain points from thread ${threadId}:`, error);
     throw error;
   }
 };

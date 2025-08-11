@@ -10,7 +10,8 @@ async function generateLandingPageHandler(req, res) {
     if (!businessIdeaId) {
       return res.status(400).json({ error: "businessIdeaId is required" });
     }
-    const landingPage = await generateLandingPage(businessIdeaId);
+    const userId = req.user._id; // Get the authenticated user's ID
+    const landingPage = await generateLandingPage(businessIdeaId, userId);
     res.status(201).json({ landingPage });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -23,8 +24,9 @@ async function getLandingPageByBusinessIdeaIdHandler(req, res) {
     if (!businessIdeaId) {
       return res.status(400).json({ error: "businessIdeaId is required" });
     }
-
-    const landingPage = await getLandingPageByBusinessIdeaId(businessIdeaId);
+    
+    const userId = req.user._id; // Get the authenticated user's ID
+    const landingPage = await getLandingPageByBusinessIdeaId(businessIdeaId, userId);
 
     if (!landingPage) {
       return res.status(404).json({ error: "Landing page not found" });
@@ -61,8 +63,10 @@ async function generateAndDeployLandingPageHandler(req, res) {
     const { businessIdeaId } = req.params;
     const { target = 'vercel' } = req.body;
     
+    const userId = req.user._id; // Get the authenticated user's ID
     const result = await landingPageService.generateAndDeployLandingPage(
-      businessIdeaId, 
+      businessIdeaId,
+      userId,
       { target }
     );
     

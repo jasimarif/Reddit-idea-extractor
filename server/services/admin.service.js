@@ -3,6 +3,7 @@ const csv = require('csv-parser');
 const mongoose = require('mongoose');
 const PainPoint = require('../models/PainPoint');
 const BusinessIdea = require('../models/BusinessIdea');
+const Thread = require('../models/Threads')
 
 const parseArrayField = (value) => {
   if (!value || value.trim() === '') return [];
@@ -13,6 +14,42 @@ const parseArrayField = (value) => {
     return value.split(',').map(item => item.trim()).filter(item => item);
   } catch {
     return [value.trim()];
+  }
+};
+
+const parseCommentsArray = (value) => {
+  if (!value || value.trim() === '') return [];
+  try {
+    if (value.startsWith('[') && value.endsWith(']')) {
+      const parsed = JSON.parse(value);
+      return parsed.map(comment => ({
+        author: comment.author || '',
+        text: comment.text || '',
+        createdAt: comment.createdAt ? new Date(comment.createdAt) : new Date(),
+        _id: comment._id ? new mongoose.Types.ObjectId(comment._id) : new mongoose.Types.ObjectId()
+      }));
+    }
+    // Handle simple comma-separated comments (author:text format)
+    return value.split('|').map(commentStr => {
+      const [author, text] = commentStr.split(':');
+      return {
+        author: author?.trim() || 'Anonymous',
+        text: text?.trim() || '',
+        createdAt: new Date(),
+        _id: new mongoose.Types.ObjectId()
+      };
+    }).filter(comment => comment.text);
+  } catch {
+    return [];
+  }
+};
+
+const parseObjectField = (value) => {
+  if (!value || value.trim() === '') return {};
+  try {
+    return JSON.parse(value);
+  } catch {
+    return {};
   }
 };
 
@@ -35,14 +72,6 @@ const parseObjectIdArray = (value) => {
   }
 };
 
-const parseObjectField = (value) => {
-  if (!value || value.trim() === '') return {};
-  try {
-    return JSON.parse(value);
-  } catch {
-    return {};
-  }
-};
 
 const parseNumber = (value) => {
   if (!value || value.trim() === '') return 0;
@@ -266,4 +295,109 @@ async function importBusinessIdeasFromCsv(filePath) {
   });
 }
 
-module.exports = { importPainPointsFromCsv, importBusinessIdeasFromCsv };
+async function importThreadsFromCsv(filePath) {
+  const threads = [];
+  const errors = [];
+  let rowIndex = 0;
+
+  return new Promise((resolve, reject) => {
+    const stream = fs.createReadStream(filePath)
+      .pipe(csv({
+        skipEmptyLines: true,
+      }))
+      .on('data', (row) => {
+        rowIndex++;
+        try {
+          const threadData = {
+            _id: row._id ? parseObjectId(row._id) : new mongoose.Types.ObjectId(),
+            platform: row.platform || 'reddit',
+            sourceId: row.sourceId || '',
+            subreddit: row.subreddit || '',
+            author: row.author || '',
+            title: row.title || '',
+            content: row.content || '',
+            permalink: row.permalink || '',
+            upvotes: parseNumber(row.upvotes),
+            commentCount: parseNumber(row.commentCount),
+            matchedQuery: row.matchedQuery || null,
+            comments: parseCommentsArray(row.comments),
+            // painPointsExtracted: parseBoolean(row.painPointsExtracted),
+            // isProcessed: parseBoolean(row.isProcessed),
+            // metadata: parseObjectField(row.metadata),
+            // createdAt: parseDate(row.createdAt),
+            // updatedAt: parseDate(row.updatedAt),
+            // fetchedAt: parseDate(row.fetchedAt),
+            // __v: parseNumber(row.__v)
+          };
+
+          // Validate required fields
+          const requiredFields = ['platform', 'sourceId'];
+          const missingFields = requiredFields.filter(field => 
+            !threadData[field] || threadData[field].toString().trim() === ''
+          );
+          
+          if (missingFields.length > 0) {
+            errors.push(`Row ${rowIndex}: Missing required fields: ${missingFields.join(', ')}`);
+            return; // Skip this row
+          }
+
+          // Validate platform enum (assuming common platforms)
+          const validPlatforms = ['reddit', 'twitter', 'discord', 'hackernews', 'producthunt'];
+          if (!validPlatforms.includes(threadData.platform.toLowerCase())) {
+            // Don't reject, just log warning
+            console.warn(`Row ${rowIndex}: Unknown platform "${threadData.platform}", proceeding anyway`);
+          }
+
+          const thread = new Thread(threadData);
+          threads.push(thread);
+        } catch (rowError) {
+          errors.push(`Row ${rowIndex}: ${rowError.message}`);
+        }
+      })
+      .on('end', async () => {
+        try {
+          if (threads.length === 0) {
+            return reject(new Error('No valid threads found in the CSV'));
+          }
+
+          // Use insertMany with ordered: false to continue on individual errors
+          const insertOptions = {
+            ordered: false,
+            rawResult: true
+          };
+
+          const result = await Thread.insertMany(threads, insertOptions);
+
+          resolve({
+            inserted: result.insertedCount || threads.length,
+            totalProcessed: threads.length,
+            errors: errors.length > 0 ? errors : []
+          });
+        } catch (bulkError) {
+          // Handle duplicate key errors and other bulk insert errors
+          if (bulkError.writeErrors) {
+            const writeErrors = bulkError.writeErrors.map(err => 
+              `Document ${err.index + 1}: ${err.errmsg}`
+            );
+            errors.push(...writeErrors);
+            
+            const insertedCount = threads.length - bulkError.writeErrors.length;
+            resolve({
+              inserted: insertedCount,
+              totalProcessed: threads.length,
+              errors: errors
+            });
+          } else {
+            reject(bulkError);
+          }
+        }
+      })
+      .on('error', (error) => {
+        reject(new Error(`CSV parsing error: ${error.message}`));
+      });
+  });
+}
+
+
+
+module.exports = { importPainPointsFromCsv, importBusinessIdeasFromCsv, importThreadsFromCsv };

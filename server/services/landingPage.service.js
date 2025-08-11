@@ -4,7 +4,7 @@ const { generateLovablePromptBAB } = require('./langchain.service');
 const landingPageDeployer = require('./landingPageDeploy.service');
 
 
-async function generateLandingPage(businessIdeaId) {
+async function generateLandingPage(businessIdeaId, userId) {
   // Fetch business idea and customer insights
   const idea = await BusinessIdea.findById(businessIdeaId);
   if (!idea) throw new Error('Business idea not found');
@@ -47,6 +47,7 @@ async function generateLandingPage(businessIdeaId) {
   const ctaText = generatedValues.ctaText || `Get Started with ${ideaName} Today`;
 
   const landingPage = new LandingPage({
+    userId,
     businessIdeaId,
     headline,
     subheadline,
@@ -115,9 +116,12 @@ async function deployLandingPage(landingPageId, options = {}) {
   }
 }
 
-async function getLandingPageByBusinessIdeaId(businessIdeaId) {
+async function getLandingPageByBusinessIdeaId(businessIdeaId, userId) {
   try {
-    return await LandingPage.findOne({ businessIdeaId })
+    return await LandingPage.findOne({ 
+      businessIdeaId,
+      userId 
+    })
       .select('-__v')
       .lean()
       .exec();
@@ -128,9 +132,9 @@ async function getLandingPageByBusinessIdeaId(businessIdeaId) {
 }
 
 // Generate and deploy in one step
-async function generateAndDeployLandingPage(businessIdeaId, options = {}) {
+async function generateAndDeployLandingPage(businessIdeaId, userId, options = {}) {
   // First generate the landing page
-  const landingPage = await generateLandingPage(businessIdeaId);
+  const landingPage = await generateLandingPage(businessIdeaId, userId);
   
   // Then deploy it
   const result = await deployLandingPage(landingPage._id, options);

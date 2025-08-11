@@ -10,7 +10,7 @@ const {
 } = require('../controllers/landingPage.controller');
 
 // Cache landing page for 1 hour (3600 seconds) as they don't change often
-router.get('/landing-page/:businessIdeaId', cacheRoute(3600, 'landingpage:'), getLandingPageByBusinessIdeaIdHandler);
+router.get('/landing-page/:businessIdeaId', cacheRoute(3600, 'landingpage:'), protect, getLandingPageByBusinessIdeaIdHandler);
 
 // No cache for write operations
 router.post('/generate-landing-page', protect, generateLandingPageHandler);

@@ -1,52 +1,349 @@
 // LangChain integration using initialized assistants
 const { ChatOpenAI } = require("@langchain/openai");
+const { ChatAnthropic } = require("@langchain/anthropic");
 const { ConversationChain } = require("langchain/chains");
 const { BufferMemory } = require("langchain/memory");
 const { RunnableSequence } = require("@langchain/core/runnables");
 const { PromptTemplate } = require("@langchain/core/prompts");
+const { v4: uuidv4 } = require('uuid');
 const {
   getOrCreateLandingPageAssistant,
   getOrCreatePageCraftAssistant,
+  getOrCreateClaudePainPointAgent,
+  getOrCreateClaudeMarketGapAgent,
   ensureInitialized,
 } = require("./assistant.service");
+const { getOrCreateConversation } = require('./conversation.service');
 const { OpenAI } = require("openai");
 
-// Cache for initialized assistants
-const agentCache = new Map();
+// // Cache for initialized assistants(openai old)
+// const agentCache = new Map();
 
-// Helper function to create and cache an agent
-const getOrCreateAgent = async (type, getAssistantFn) => {
-  const cacheKey = `${type}AssistantId`;
+// // Helper function to create and cache an agent
+// const getOrCreateAgent = async (type, getAssistantFn) => {
+//   const cacheKey = `${type}AssistantId`;
 
-  // Return cached agent if available
-  if (agentCache.has(cacheKey)) {
-    return agentCache.get(cacheKey);
+//   // Return cached agent if available
+//   if (agentCache.has(cacheKey)) {
+//     return agentCache.get(cacheKey);
+//   }
+
+
+// Agent types
+const AGENT_TYPES = {
+  OPENAI: 'openai',
+  CLAUDE: 'claude'
+};
+
+// Cache for agent configurations (not conversation state)
+const agentConfigCache = new Map();
+
+/**
+ * Helper function to get agent configuration
+ * @param {string} type - The type of agent (e.g., 'painPoint', 'marketGap')
+ * @param {Function} getAssistantFn - Function to get the assistant configuration
+ * @param {string} [agentType=AGENT_TYPES.OPENAI] - Type of agent (openai or claude)
+ * @returns {Promise<Object>} The agent configuration and LLM instance
+ */
+const getAgentConfig = async (type, getAssistantFn, agentType = AGENT_TYPES.OPENAI) => {
+  const cacheKey = `${agentType}_${type}_config`;
+
+  // Return cached config if available
+  if (agentConfigCache.has(cacheKey)) {
+    return agentConfigCache.get(cacheKey);
   }
 
   // Ensure assistant exists and get its details
   await ensureInitialized();
-  const assistant = await getAssistantFn();
+  
+  let config;
+  
+  if (agentType === AGENT_TYPES.CLAUDE) {
+    // Handle Claude agent
+    const claudeConfig = await getAssistantFn();
+    
+    const claude = new ChatAnthropic({
+      anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+      modelName: claudeConfig.model,
+      temperature: type === "marketGap" ? 0.7 : 0.3,
+      maxTokens: 3000,
+    });
+    
+    config = {
+      type: agentType,
+      llm: claude,
+      systemPrompt: claudeConfig.system || '',
+      model: claudeConfig.model
+    };
+    
+    console.log(`Loaded Claude agent config for ${type} with model ${claudeConfig.model}`);
+  } else {
+    // Handle OpenAI agent (default)
+    const assistant = await getAssistantFn();
+    
+    const openai = new ChatOpenAI({
+      openAIApiKey: process.env.OPENAI_API_KEY,
+      modelName: assistant.model,
+      configuration: {
+        baseURL: "https://api.openai.com/v1",
+      },
+      temperature: type === "marketGap" ? 0.7 : 0.3,
+      maxTokens: 3000,
+    });
 
-  // Create new ChatOpenAI instance with assistant's configuration
-  const openai = new ChatOpenAI({
-    openAIApiKey: process.env.OPENAI_API_KEY,
-    modelName: assistant.model,
-    configuration: {
-      baseURL: "https://api.openai.com/v1",
+  //     // Create and cache the agent
+  // const memory = new BufferMemory();
+  // const agent = new ConversationChain({
+  //   llm: openai,
+  //   memory,
+  //   // Add any assistant-specific configuration here
+  // });
+    
+    config = {
+      type: agentType,
+      llm: openai,
+      systemPrompt: assistant.instructions || '',
+      model: assistant.model
+    };
+    
+    console.log(`Loaded OpenAI agent config for ${type} with model ${assistant.model}`);
+  }
+  
+  // Cache the config
+  agentConfigCache.set(cacheKey, config);
+  return config;
+};
+
+/**
+ * Get a conversation-aware agent
+ * @param {string} type - The type of agent (e.g., 'painPoint', 'marketGap')
+ * @param {Object} options - Options for the agent
+ * @param {string} [options.conversationId] - Optional conversation ID for maintaining context
+ * @param {string} [options.agentType=AGENT_TYPES.OPENAI] - Type of agent (openai or claude)
+ * @param {Function} getAssistantFn - Function to get the assistant configuration
+ * @returns {Promise<Object>} Object with agent and conversation info
+ */
+const getAgent = async (type, options, getAssistantFn) => {
+  const { 
+    conversationId = uuidv4(),
+    agentType = AGENT_TYPES.OPENAI 
+  } = options || {};
+  
+  // Get the agent config (cached)
+  const agentConfig = await getAgentConfig(type, getAssistantFn, agentType);
+  
+  // Get or create conversation
+  const conversation = getOrCreateConversation(conversationId, {
+    systemPrompt: agentConfig.systemPrompt
+  });
+  
+  // Create a new prompt template with the system message
+  // We'll use a custom template that doesn't try to interpret the JSON as template variables
+  const prompt = new PromptTemplate({
+    template: `{system_prompt}\n\n{input}`,
+    inputVariables: ['input'],
+    partialVariables: {
+      system_prompt: agentConfig.systemPrompt || ''
+    }
+  });
+  
+  // Create the agent chain with conversation memory
+  const agent = RunnableSequence.from([
+    {
+      input: (input) => input.input,
+      memory: () => conversation.memory.loadMemoryVariables({})
     },
-    temperature: type === "marketGap" ? 0.7 : 0.3, // Different temperature based on agent type
-    maxTokens: 3000,
-  });
+    {
+      input: (previousOutput) => previousOutput.input,
+      memory: (previousOutput) => previousOutput.memory
+    },
+    prompt,
+    agentConfig.llm,
+    (response) => response.content
+  ]);
+  
+  return {
+    agent,
+    conversationId,
+    model: agentConfig.model,
+    invoke: async (input) => {
+      const response = await agent.invoke({ input });
+      
+      // Save the interaction to memory
+      await conversation.memory.saveContext(
+        { input },
+        { output: response }
+      );
+      
+      return response;
+    }
+  };
+};
 
-  // Create and cache the agent
-  const memory = new BufferMemory();
-  const agent = new ConversationChain({
-    llm: openai,
-    memory,
-    // Add any assistant-specific configuration here
-  });
+// Cache for initialized agents
+const agentCache = new Map();
 
+// --- Claude PainPoint Agent ---
+const getClaudePainPointAgent = async (options = {}) => {
+  const { conversationId = `conv_${uuidv4()}` } = options;
+  const cacheKey = `claude_painpoint_${conversationId}`;
+  
+  // Return cached agent if available
+  if (agentCache.has(cacheKey)) {
+    return agentCache.get(cacheKey);
+  }
+  
+  // Get or create the Claude agent config (without system prompt)
+  const config = await getAgentConfig(
+    'painPoint', 
+    getOrCreateClaudePainPointAgent, 
+    AGENT_TYPES.CLAUDE
+  );
+  
+  // Get or create conversation with the system prompt
+  const conversation = await getOrCreateConversation(conversationId, {
+    systemPrompt: config.systemPrompt
+  });
+  
+  // Initialize the agent with system prompt once
+  const agent = {
+    invoke: async (input) => {
+      try {
+        // Only include the system prompt if this is the first message
+        const messages = [];
+        const memoryVariables = await conversation.memory.loadMemoryVariables({});
+        
+        if (!memoryVariables.chat_history?.length) {
+          // First message - include system prompt
+          messages.push({
+            role: "system",
+            content: conversation.systemPrompt,
+          });
+        } else {
+          // Subsequent messages - only include chat history
+          messages.push(...memoryVariables.chat_history);
+        }
+        
+        // Add user input
+        messages.push({
+          role: "user",
+          content: JSON.stringify(input),
+        });
+        
+        // Get response from Claude
+        const response = await config.llm.invoke(messages);
+        
+        // Save to conversation memory
+        await conversation.memory.saveContext(
+          { input: JSON.stringify(input) },
+          { output: response.content }
+        );
+        
+        return response.content;
+      } catch (error) {
+        console.error('Error in Claude PainPoint agent:', error);
+        throw error;
+      }
+    },
+    conversationId,
+    clear: () => {
+      agentCache.delete(cacheKey);
+      conversation.memory.clear();
+    }
+  };
+  
+  // Cache the agent
   agentCache.set(cacheKey, agent);
+  
+  // Clean up old agents periodically
+  setTimeout(() => {
+    if (agentCache.has(cacheKey)) {
+      agentCache.delete(cacheKey);
+    }
+  }, 60 * 60 * 1000); // 1 hour TTL
+  
+  return agent;
+};
+
+// --- Claude MarketGap Agent ---
+const getClaudeMarketGapAgent = async (options = {}) => {
+  const { conversationId = `conv_${uuidv4()}` } = options;
+  const cacheKey = `claude_marketgap_${conversationId}`;
+  
+  // Return cached agent if available
+  if (agentCache.has(cacheKey)) {
+    return agentCache.get(cacheKey);
+  }
+  
+  // Get or create the Claude agent config (without system prompt)
+  const config = await getAgentConfig(
+    'marketGap', 
+    getOrCreateClaudeMarketGapAgent, 
+    AGENT_TYPES.CLAUDE
+  );
+  
+  // Get or create conversation with the system prompt
+  const conversation = await getOrCreateConversation(conversationId, {
+    systemPrompt: config.systemPrompt
+  });
+  
+  // Initialize the agent with system prompt once
+  const agent = {
+    invoke: async (input) => {
+      try {
+        // Only include the system prompt if this is the first message
+        const messages = [];
+        const memoryVariables = await conversation.memory.loadMemoryVariables({});
+        
+        if (!memoryVariables.chat_history?.length) {
+          // First message - include system prompt
+          messages.push({
+            role: "system",
+            content: conversation.systemPrompt,
+          });
+        } else {
+          // Subsequent messages - only include chat history
+          messages.push(...memoryVariables.chat_history);
+        }
+        
+        // Add user input
+        messages.push({
+          role: "user",
+          content: JSON.stringify(input),
+        });
+        
+        // Get response from Claude
+        const response = await config.llm.invoke(messages);
+        
+        // Save to conversation memory
+        await conversation.memory.saveContext(
+          { input: JSON.stringify(input) },
+          { output: response.content }
+        );
+        
+        return response.content;
+      } catch (error) {
+        console.error('Error in Claude MarketGap agent:', error);
+        throw error;
+      }
+    },
+    conversationId,
+    clear: () => {
+      agentCache.delete(cacheKey);
+      conversation.memory.clear();
+    }
+  };
+  
+  // Cache the agent
+  agentCache.set(cacheKey, agent);
+  
+  // Clean up old agents periodically
+  setTimeout(() => {
+    if (agentCache.has(cacheKey)) {
+      agentCache.delete(cacheKey);
+    }
+  }, 60 * 60 * 1000); // 1 hour TTL
+  
   return agent;
 };
 
@@ -429,15 +726,29 @@ async function generateLovablePromptBAB({
   potentialChallenges = [],
   differentiators = [],
   successMetrics = [],
+  agentType = 'claude', // 'openai' or 'claude'
 }) {
-  // Get or create the landing page agent
-  const agent = await getOrCreateAgent(
-    "landingPage",
-    getOrCreateLandingPageAssistant
-  );
-
-  // Use the agent's LLM for the completion
-  const openai = agent.llm;
+  let llm;
+  
+  if (agentType === 'claude') {
+    // Get Claude agent for landing page
+    const { getOrCreateClaudeLandingPageAgent } = require('./assistant.service');
+    const claudeAgent = await getOrCreateClaudeLandingPageAgent();
+    
+    // Initialize Claude LLM
+    llm = new ChatAnthropic({
+      anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+      modelName: claudeAgent.model || 'claude-3-haiku-20240307',
+      temperature: 0.7,
+    });
+  } else {
+    // Get or create the landing page agent (OpenAI)
+    const agent = await getOrCreateAgent(
+      "landingPage",
+      getOrCreateLandingPageAssistant
+    );
+    llm = agent.llm;
+  }
 
   // Helper functions for intelligent analysis
   function generateSmartCTA(title, description, industry) {
@@ -578,113 +889,23 @@ CRITICAL INSTRUCTIONS:
 OUTPUT FORMAT: Generate the complete Lovable.dev prompt following this exact structure:
 
 ---
-
 Create a modern, high-converting landing page for "${title}" using React and Tailwind CSS.
-
 **DESIGN REQUIREMENTS:**
-- Mobile-first responsive design with smooth micro-animations
-- Modern UI with glassmorphism effects and subtle gradients
-- Color scheme: Primary ${colors.primary}, CTA ${colors.cta}, Accent ${
-    colors.accent
-  }
-- Clean typography using Inter font family
-- Conversion-optimized layout with clear visual hierarchy
-- Fast-loading animations and hover effects
-- Include visual elements like icons, illustrations, and data visualizations
-- Ensure proper spacing and visual breathing room
-- Use social proof elements strategically
-
 **PAGE STRUCTURE:**
-
 🎯 **HERO SECTION:**
-- Headline: Write a clear, benefit-driven headline that addresses the main pain point
-- Subheadline: Expand on the transformation in 1-2 sentences
-- Benefit Bullets (3-4):
-  • Start with emoji + specific, quantifiable benefit
-  • Focus on outcomes, not features
-  • Use customer language from pain points
-- Primary CTA: "${intelligentCTA}" (include emotional outcome, e.g., "Start Free Trial – Take Control of Your Cash Flow")
-- Secondary CTA: "Watch Demo" or "See How It Works"
-- Hero Visual: Show product/solution in context (dashboard, app screen, etc.)
-- "Who It's For" Line: "Built for [specific audience] who want to [main benefit]" (be specific)
-
 **TECHNICAL SPECIFICATIONS:**
-- Single-page React component with Tailwind CSS
-- Mobile-first responsive design (test on all devices)
-- Email capture with validation + error handling
-- Smooth scroll navigation between sections
-- Loading states and skeleton loaders
-- SEO meta tags (title < 60 chars, meta description 150-160 chars)
-- OpenGraph tags for social sharing (og:title, og:description, og:image)
-- Accessibility: ARIA labels, keyboard navigation, color contrast
-- Contact form in footer (name, email, message)
-- Cookie consent banner (GDPR compliant)
-- Structured data (JSON-LD) for better SEO
-
 **FUNCTIONALITY:**
-- Form validation with clear error messages and success states
-- Smooth scrolling with anchor links and active state highlighting
-- Animated counters for statistics (e.g., "1,200+ Startups Helped")
-- Image lazy loading with optimized placeholders (blur-up technique)
-- PWA features: Offline access, add to home screen
-- Social sharing with pre-filled messages (Twitter, LinkedIn, Facebook)
-- Interactive elements where relevant (calculators, quizzes, configurators)
-- Exit-intent popup with special offer (20% off, free guide, etc.)
-- Live chat widget (e.g., Crisp, Intercom) for support
-- Trust signals: Security badges, payment methods, media mentions
-- FAQ accordion section for common objections
-
 Build this as a production-ready, fully functional landing page with all content, styling, and interactions included.
-
 ---
 
 CRUCIAL INSTRUCTIONS:
-1. COPYWRITING:
-   - Use customer's exact words from pain points
-   - Focus on benefits, not just features
-   - Include specific numbers and metrics (e.g., "Save 5 hours/week")
-   - Address objections preemptively
-   - Use power words that trigger emotions
-
-2. DESIGN & LAYOUT:
-   - Mobile-first, responsive design
-   - Clear visual hierarchy (F-pattern layout)
-   - Consistent spacing and alignment
-   - High-quality, relevant images
-   - White space for readability
-
-3. CONVERSION ELEMENTS:
-   - Multiple, clear CTAs above the fold
-   - Social proof (testimonials, logos, numbers)
-   - Risk reversal (free trial, money-back guarantee)
-   - Urgency and scarcity where appropriate
-   - Clear next steps
-
-4. TECHNICAL REQUIREMENTS:
-   - Fast loading (<3s)
-   - SEO-optimized
-   - Accessible (WCAG 2.1 AA)
-   - Cross-browser compatible
-   - Secure (HTTPS, form validation)
-
-5. TRUST SIGNALS:
-   - Customer testimonials with photos
-   - Trust badges and security seals
-   - Media mentions and press logos
-   - Clear contact information
-   - Money-back guarantee
-
-6. METRICS TO INCLUDE:
-   - Number of users/customers
-   - Success rate or improvement percentage
-   - Time saved/cost reduced
-   - Industry benchmarks (if available)
-
-7. DIFFERENTIATORS:
-   - Clearly state what makes this unique
-   - Compare with alternatives
-   - Focus on outcomes, not just features
-   - Use specific examples`;
+1. COPYWRITING
+2. DESIGN & LAYOUT
+3. CONVERSION ELEMENTS
+4. TECHNICAL REQUIREMENTS
+5. TRUST SIGNALS
+6. METRICS TO INCLUDE
+7. DIFFERENTIATORS`;
 
   const prompt = new PromptTemplate({
     template,
@@ -705,7 +926,7 @@ CRUCIAL INSTRUCTIONS:
     ],
   });
 
-  const chain = RunnableSequence.from([prompt, openai]);
+  const chain = RunnableSequence.from([prompt, llm]);
 
   // Prepare the input for the chain
   const chainInput = {
@@ -864,9 +1085,22 @@ function parseLovablePromptResponse(lovablePrompt, originalData) {
 }
 
 module.exports = {
+  // OpenAI Agents
   getPainPointAgent,
   getMarketGapAgent,
   getPageCraftAgent,
-  parseLovablePromptResponse,
+  
+  // Claude Agents
+  getClaudePainPointAgent,
+  getClaudeMarketGapAgent,
+  
+  // Common functions
   generateLovablePromptBAB,
+  parseLovablePromptResponse,
+  
+  // Internal functions (exposed for testing)
+  _getAgent: getAgent,
+  
+  // Constants
+  AGENT_TYPES,
 };

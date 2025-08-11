@@ -26,6 +26,7 @@ const getIdeas = async (req, res, next) => {
       query.$or = [
         { title: { $regex: req.query.search, $options: "i" } },
         { idea: { $regex: req.query.search, $options: "i" } },
+        { description: { $regex: req.query.search, $options: "i" } },
       ];
     }
 

@@ -1,7 +1,5 @@
 const fs = require('fs');
-const { importPainPointsFromCsv } = require('../services/admin.service');
-const { importBusinessIdeasFromCsv } = require('../services/admin.service');
-
+const { importPainPointsFromCsv, importBusinessIdeasFromCsv, importThreadsFromCsv} = require('../services/admin.service');
 
 async function bulkImportPainPointsController(req, res) {
   let filePath = null;
@@ -167,5 +165,100 @@ async function bulkImportBusinessIdeasController(req, res) {
   }
 }
 
+async function bulkImportThreadsController(req, res) {
+  let filePath = null;
+  try {
+    // Check if file was uploaded
+    if (!req.file) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'No CSV file uploaded. Please select a file to upload.' 
+      });
+    }
 
-module.exports = { bulkImportPainPointsController, bulkImportBusinessIdeasController };
+    filePath = req.file.path;
+
+    // Check if file exists and is readable
+    if (!fs.existsSync(filePath)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Uploaded file could not be found.'
+      });
+    }
+
+    console.log(`Processing Threads CSV file: ${req.file.originalname}`);
+    
+    const result = await importThreadsFromCsv(filePath);
+
+    // Clean up the uploaded file
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Threads imported successfully',
+      stats: {
+        totalProcessed: result.totalProcessed,
+        inserted: result.inserted,
+        errors: result.errors,
+        hasErrors: result.errors && result.errors.length > 0,
+        skipped: result.totalProcessed - result.inserted
+      }
+    });
+
+  } catch (error) {
+    // Clean up the uploaded file on error
+    if (filePath && fs.existsSync(filePath)) {
+      try {
+        fs.unlinkSync(filePath);
+      } catch (unlinkError) {
+        console.error('Error cleaning up file:', unlinkError);
+      }
+    }
+
+    console.error('Threads bulk import error:', error);
+
+    // Handle specific error types
+    if (error.message.includes('No valid threads found')) {
+      return res.status(400).json({
+        success: false,
+        message: 'No valid threads found in the CSV file. Please check your data format.',
+        error: error.message
+      });
+    }
+
+    if (error.message.includes('CSV parsing error')) {
+      return res.status(400).json({
+        success: false,
+        message: 'Error parsing CSV file. Please check the file format.',
+        error: error.message
+      });
+    }
+
+    if (error.message.includes('validation failed')) {
+      return res.status(400).json({
+        success: false,
+        message: 'Data validation failed. Please check required fields and data types.',
+        error: error.message
+      });
+    }
+
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'Duplicate entries found. Some threads may already exist.',
+        error: 'Duplicate key error'
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to import threads',
+      error: error.message
+    });
+  }
+}
+
+
+module.exports = { bulkImportPainPointsController, bulkImportBusinessIdeasController, bulkImportThreadsController };

@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const { bulkImportPainPointsController, bulkImportBusinessIdeasController } = require('../controllers/admin.controller');
+const { bulkImportPainPointsController, bulkImportBusinessIdeasController, bulkImportThreadsController } = require('../controllers/admin.controller');
 // const requireAdmin = require('../middlewares/requireAdmin'); // Add this if using role-based auth
 
 const router = express.Router();
@@ -35,6 +35,21 @@ const storageBusinessIdeas = multer.diskStorage({
     // Add timestamp and sanitize filename
     const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
     cb(null, `business-ideas-${Date.now()}-${sanitizedName}`);
+  }
+});
+
+const storageThreads = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = 'uploads/threads/';
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    // Add timestamp and sanitize filename
+    const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
+    cb(null, `threads-${Date.now()}-${sanitizedName}`);
   }
 });
 
@@ -71,6 +86,25 @@ const uploadBusinessIdeas = multer({
   },
   limits: { 
     fileSize: 10 * 1024 * 1024, // 10MB
+    files: 1 // Only allow 1 file
+  }
+});
+
+// Configure multer with better error handling
+const uploadThreads = multer({
+  storage: storageThreads,
+  fileFilter: (req, file, cb) => {
+    // Check file type
+    if (file.mimetype === 'text/csv' || 
+        file.originalname.toLowerCase().endsWith('.csv') ||
+        file.mimetype === 'application/csv') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only CSV files are allowed. Please upload a .csv file.'), false);
+    }
+  },
+  limits: { 
+    fileSize: 50 * 1024 * 1024, // 50MB (larger for thread data)
     files: 1 // Only allow 1 file
   }
 });
@@ -133,6 +167,20 @@ router.post(
     });
   },
   bulkImportBusinessIdeasController
+);
+
+router.post(
+  '/threads/import',
+  // requireAdmin, // Uncomment to protect with admin middleware
+  (req, res, next) => {
+    uploadThreads.single('file')(req, res, (err) => {
+      if (err) {
+        return handleUploadError(err, req, res, next);
+      }
+      next();
+    });
+  },
+  bulkImportThreadsController
 );
 
 

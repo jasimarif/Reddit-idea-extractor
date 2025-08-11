@@ -1,6 +1,14 @@
 const mongoose = require('mongoose');
 
 const LandingPageSchema = new mongoose.Schema({
+    // Link to user who created this landing page
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      index: true
+    },
+    
   // Link to idea
   businessIdeaId: {
     type: mongoose.Schema.Types.ObjectId,

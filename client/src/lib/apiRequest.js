@@ -36,7 +36,6 @@ const retryRequest = async (requestFn, maxRetries = 2, baseDelay = 1000) => {
       
       if (isTimeout && !isLastAttempt) {
         const delay = baseDelay * Math.pow(2, attempt); // Exponential backoff
-        console.log(`Request timed out, retrying in ${delay}ms... (attempt ${attempt + 1}/${maxRetries + 1})`);
         await new Promise(resolve => setTimeout(resolve, delay));
         continue;
       }
