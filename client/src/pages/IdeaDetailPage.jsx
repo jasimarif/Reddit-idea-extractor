@@ -7,15 +7,13 @@ import {
   Lightbulb,
   Brain,
   Plus,
-  Instagram,
-  Linkedin,
-  Youtube,
-  Twitter,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import apiRequest from "../lib/apiRequest";
 import BackButton from "../components/BackButton";
+import BusinessIdeasGrid from "../components/BusinessIdeasGrid";
+import Footer from "../components/Footer";
 
 const getCategoryColor = (category) => {
   if (!category) return "bg-muted text-muted-foreground";
@@ -152,7 +150,7 @@ const IdeaDetailPage = () => {
         {/* Header Skeleton */}
         <div className="px-4 py-3">
           <div className="max-w-7xl mx-auto">
-            <div className="h-8 w-24 bg-gray-200 rounded-md animate-pulse"></div>
+            <div className="h-8 w-24 bg-white/60 backdrop-blur-sm rounded-xl animate-pulse"></div>
           </div>
         </div>
 
@@ -160,47 +158,47 @@ const IdeaDetailPage = () => {
           {/* Pain Points Section Skeleton */}
           <div className="mb-8">
             <div className="flex items-center space-x-3 mb-6">
-              <div className="w-8 h-8 bg-gray-200 rounded-lg animate-pulse"></div>
-              <div className="h-6 bg-gray-200 rounded w-48 animate-pulse"></div>
+              <div className="w-8 h-8 bg-white/60 backdrop-blur-sm rounded-xl animate-pulse"></div>
+              <div className="h-6 bg-white/60 backdrop-blur-sm rounded-xl w-48 animate-pulse"></div>
             </div>
 
             {/* Main Card Skeleton */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border mb-6">
+                        <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 border border-white/30 mb-6">
               <div className="space-y-6">
                 {/* Title and Badges */}
                 <div className="space-y-4">
-                  <div className="h-7 bg-gray-200 rounded w-3/4 animate-pulse"></div>
-                  <div className="flex flex-wrap gap-2">
-                    <div className="h-6 bg-gray-200 rounded-full w-20 animate-pulse"></div>
-                    <div className="h-6 bg-gray-200 rounded-full w-32 animate-pulse"></div>
-                    <div className="h-6 bg-gray-200 rounded-full w-28 animate-pulse"></div>
+                  <div className="h-7 bg-white/70 rounded-2xl w-3/4 animate-pulse"></div>
+                  <div className="flex flex-wrap gap-3">
+                    <div className="h-6 bg-white/70 rounded-full w-20 animate-pulse"></div>
+                    <div className="h-6 bg-white/70 rounded-full w-32 animate-pulse"></div>
+                    <div className="h-6 bg-white/70 rounded-full w-28 animate-pulse"></div>
                   </div>
                 </div>
 
                 {/* Problem Summary Skeleton */}
-                <div className="bg-gray-100 p-4 rounded-xl space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-32 mb-3 animate-pulse"></div>
-                  <div className="h-3 bg-gray-200 rounded w-full animate-pulse"></div>
-                  <div className="h-3 bg-gray-200 rounded w-5/6 animate-pulse"></div>
-                  <div className="h-3 bg-gray-200 rounded w-4/6 animate-pulse"></div>
+                <div className="bg-gradient-to-r from-white/70 to-gray-50/70 backdrop-blur-sm p-5 rounded-2xl space-y-3">
+                  <div className="h-4 bg-white/80 rounded-xl w-32 mb-3 animate-pulse"></div>
+                  <div className="h-3 bg-white/80 rounded-xl w-full animate-pulse"></div>
+                  <div className="h-3 bg-white/80 rounded-xl w-5/6 animate-pulse"></div>
+                  <div className="h-3 bg-white/80 rounded-xl w-4/6 animate-pulse"></div>
                 </div>
 
                 {/* Grid Skeleton */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-gray-50 p-3 rounded-lg space-y-2">
-                    <div className="h-3 bg-gray-200 rounded w-24 animate-pulse"></div>
-                    <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-gradient-to-r from-white/70 to-blue-50/50 backdrop-blur-sm p-4 rounded-2xl space-y-3">
+                    <div className="h-3 bg-white/80 rounded-xl w-24 animate-pulse"></div>
+                    <div className="h-4 bg-white/80 rounded-xl w-full animate-pulse"></div>
                   </div>
-                  <div className="bg-gray-50 p-3 rounded-lg space-y-2">
-                    <div className="h-3 bg-gray-200 rounded w-28 animate-pulse"></div>
-                    <div className="h-8 bg-gray-200 rounded w-24 animate-pulse"></div>
+                  <div className="bg-gradient-to-r from-white/70 to-emerald-50/50 backdrop-blur-sm p-4 rounded-2xl space-y-3">
+                    <div className="h-3 bg-white/80 rounded-xl w-28 animate-pulse"></div>
+                    <div className="h-6 bg-white/80 rounded-xl w-24 animate-pulse"></div>
                   </div>
                 </div>
 
                 {/* Footer Skeleton */}
-                <div className="flex items-center justify-between pt-4 border-t">
-                  <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
-                  <div className="h-6 bg-gray-200 rounded-full w-48 animate-pulse"></div>
+                <div className="flex items-center justify-between pt-4 border-t border-gray-100/50">
+                  <div className="h-4 bg-white/70 rounded-xl w-32 animate-pulse"></div>
+                  <div className="h-6 bg-white/70 rounded-full w-48 animate-pulse"></div>
                 </div>
               </div>
             </div>
@@ -214,16 +212,19 @@ const IdeaDetailPage = () => {
 
   if (!idea) {
     return (
-      <div className="min-h-screen bg-[#e6ebef] pt-16 sm:pt-20 momentum-scroll flex items-center justify-center">
-        <div className="text-center bg-white p-8 rounded-xl shadow-lg max-w-md w-full mx-4">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+      <div className="min-h-screen bg-[#e6ebef] pt-16 sm:pt-20 momentum-scroll flex items-center justify-center px-4 sm:px-6">
+        <div className="text-center bg-white/80 backdrop-blur-sm p-10 rounded-3xl max-w-lg w-full mx-4 border border-white/30">
+          <div className="w-16 h-16 bg-gradient-to-br from-red-400 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <Target className="h-8 w-8 text-white" />
+          </div>
+          <h2 className="text-3xl font-bold text-gray-900 mb-3">
             Idea not found
           </h2>
-          <p className="text-gray-600 mb-6">
-            The idea you're looking for doesn't exist.
+          <p className="text-gray-600 mb-8 text-lg leading-relaxed">
+            The idea you're looking for doesn't exist or may have been removed.
           </p>
-          <BackButton className="text-gray-600 hover:text-gray-800 text-sm font-medium">
-            Back
+          <BackButton className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-xl transition-all duration-200 transform hover:scale-105">
+            Go Back
           </BackButton>
         </div>
       </div>
@@ -245,14 +246,20 @@ const IdeaDetailPage = () => {
         {/* Pain Points Section */}
         <div className="mb-8">
           <div className="flex items-center space-x-3 mb-4">
-            <div className="w-8 h-8 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg flex items-center justify-center">
-              <Brain className="h-5 w-5 text-primary" />
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center relative overflow-hidden">
+              {/* 3D Brain Effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-400 via-blue-500 to-indigo-600 rounded-lg"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-purple-300/30 to-transparent rounded-lg"></div>
+              <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 bg-white/70 rounded-full"></div>
+              <div className="relative z-10">
+                <Brain className="h-4 w-4 text-white" />
+              </div>
             </div>
             <h2 className="text-2xl font-bold text-foreground">Pain Points</h2>
           </div>
 
           {/* Main Pain Point Card */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border mb-6">
+          <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 border border-white/20 transition-all duration-300">
             <div className="space-y-4">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -284,35 +291,35 @@ const IdeaDetailPage = () => {
                     </Badge>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-primary">
+                <div className="flex flex-col items-end space-y-1">
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-xl font-bold text-lg">
                     {idea.rankScore}
                   </div>
-                  <div className="text-xs text-muted-foreground">AI Score</div>
+                  <div className="text-xs text-muted-foreground font-medium">AI Score</div>
                 </div>
               </div>
 
               <div className="bg-gradient-to-br from-muted/30 to-muted/10 p-4 rounded-xl">
                 <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center">
-                  <Target className="h-4 w-4 mr-2 text-primary" />
+                  <Target className="h-4 w-4 mr-2 text-primary flex-shrink-0" />
                   Problem Summary
                 </h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
+                <p className="text-muted-foreground text-sm leading-relaxed text-left">
                   {idea.summary}
                 </p>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <h3 className="text-xs font-semibold text-foreground mb-1 flex items-center">
-                    <div className="w-1.5 h-1.5 bg-primary rounded-full mr-2"></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-gradient-to-br from-blue-50/80 to-indigo-50/60 backdrop-blur-sm p-4 rounded-2xl border border-blue-100/30 transition-all duration-200">
+                  <h3 className="text-sm font-semibold text-gray-800 mb-2 flex items-center text-left">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mr-3 flex-shrink-0"></div>
                     Discussion Topic
                   </h3>
-                  <p className="text-muted-foreground text-sm">{idea.topic}</p>
+                  <p className="text-gray-700 text-sm leading-relaxed text-left">{idea.topic}</p>
                 </div>
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <h3 className="text-xs font-semibold text-foreground mb-1 flex items-center">
-                    <div className="w-1.5 h-1.5 bg-primary rounded-full mr-2"></div>
+                <div className="bg-gradient-to-br from-emerald-50/80 to-teal-50/60 backdrop-blur-sm p-4 rounded-2xl border border-emerald-100/30 transition-all duration-200">
+                  <h3 className="text-sm font-semibold text-gray-800 mb-2 flex items-center">
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full mr-3"></div>
                     Source Community
                   </h3>
                   <div className="text-left">
@@ -320,7 +327,7 @@ const IdeaDetailPage = () => {
                       href={idea.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-4 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors hover:underline"
+                      className="inline-flex items-center px-4 py-2 text-sm font-medium bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-xl hover:from-gray-200 hover:to-gray-300 transition-all duration-200 transform hover:scale-105"
                     >
                       r/{idea.subreddit}
                     </a>
@@ -328,378 +335,58 @@ const IdeaDetailPage = () => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-3 text-xs border-t">
-                <span className="flex items-center text-muted-foreground">
-                  <Clock className="h-3 w-3 mr-1" />
-                  {new Date(idea.postDate).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </span>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 text-sm border-t border-gray-100/50">
+                <div className="flex items-center text-muted-foreground bg-gray-50/50 px-3 py-2 rounded-lg">
+                  <Clock className="h-4 w-4 mr-2 text-blue-500" />
+                  <span className="font-medium">
+                    {new Date(idea.postDate).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </span>
+                </div>
 
-                <Badge
-                  variant={idea.potentialSolvability ? "default" : "outline"}
-                  className="px-2 py-1 text-xs"
-                >
-                  Potential Solvability: {idea.businessPotential}
-                </Badge>
+                <div className="flex items-center">
+                  <Badge
+                    variant={idea.potentialSolvability ? "default" : "outline"}
+                    className={`px-3 py-2 text-sm font-medium ${
+                      idea.potentialSolvability
+                        ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white border-0"
+                        : "bg-gradient-to-r from-orange-100 to-yellow-100 text-orange-800 border-orange-200"
+                    }`}
+                  >
+                    <Target className="h-4 w-4 mr-2" />
+                    Potential Solvability: {idea.businessPotential}
+                  </Badge>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Business Solutions Section */}
-        <div>
+        <div className="mt-4">
           <div className="flex items-center space-x-3 mb-4">
-            <div className="w-8 h-8 bg-gradient-to-br from-accent/20 to-accent/10 rounded-lg flex items-center justify-center">
-              <Lightbulb className="h-5 w-5 text-accent-foreground" />
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center relative overflow-hidden">
+              {/* 3D Bulb Effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-400 via-orange-400 to-red-500 rounded-lg"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-yellow-300/30 to-transparent rounded-lg"></div>
+              <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-white/60 rounded-full"></div>
+              <div className="relative z-10">
+                <Lightbulb className="h-4 w-4 text-white" />
+              </div>
             </div>
             <h2 className="text-2xl font-bold text-foreground">
               Business Solutions
             </h2>
           </div>
 
-          {isGeneratingIdeas ? (
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-6">
-                <div className="h-6 bg-gray-200 rounded w-48 animate-pulse"></div>
-                <div className="h-9 bg-gray-200 rounded-lg w-36 animate-pulse"></div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[...Array(3)].map((_, index) => (
-                  <div
-                    key={index}
-                    className="bg-white rounded-xl p-5 shadow-sm border"
-                  >
-                    <div className="space-y-4">
-                      <div className="h-5 bg-gray-200 rounded w-3/4 animate-pulse"></div>
-                      <div className="h-3 bg-gray-200 rounded w-full animate-pulse"></div>
-                      <div className="h-3 bg-gray-200 rounded w-5/6 animate-pulse"></div>
-                      <div className="flex flex-wrap gap-2 pt-2">
-                        <div className="h-5 bg-gray-200 rounded-full w-16 animate-pulse"></div>
-                        <div className="h-5 bg-gray-200 rounded-full w-20 animate-pulse"></div>
-                      </div>
-                      <div className="h-9 bg-gray-200 rounded-lg w-full mt-4 animate-pulse"></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : businessIdeas.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {businessIdeas.map((businessIdea, index) => {
-                
-                return (
-                  <div
-                    key={businessIdea.id}
-                    className="bg-white rounded-2xl p-5 shadow-sm border hover:shadow-md transition-all duration-300 group relative"
-                  >
-                    {/* Plus icon and text for creating landing page */}
-                    <Link
-                      to={`/landingPage/${businessIdea.id || businessIdea._id}`}
-                      className="absolute top-4 right-3 flex items-center space-x-1 px-3 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors text-xs text-blue-600 hover:text-blue-800 border border-blue-100"
-                      title="Create landing page"
-                    >
-                      <Plus className="h-4 w-4" />
-                      <span>Create Landing Page</span>
-                    </Link>
-
-                    <div className="space-y-4">
-                      {/* Header with ID and Scores */}
-                      <div className="flex items-center justify-between text-xs text-muted-foreground pr-8">
-                        <div className="flex items-center space-x-2">
-                          <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded">
-                            Score:{" "}
-                            {businessIdea.feasibilityScore ||
-                              businessIdea.score ||
-                              "N/A"}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Main Content */}
-                      <div className="space-y-3">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h3 className="text-lg font-bold text-foreground mb-1">
-                              {businessIdea.ideaName || businessIdea.title}
-                            </h3>
-                            <div className="flex items-center space-x-2">
-                              <Badge variant="outline" className="text-xs">
-                                {businessIdea.businessModel || "SaaS"}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Description */}
-                        <p className="text-muted-foreground text-sm">
-                          {businessIdea.description ||
-                            businessIdea.solutionOverview}
-                        </p>
-
-                        {/* Key Details Grid */}
-                        <div className="grid grid-cols-2 gap-2">
-                          {/* Target Audience */}
-                          <div className="bg-gray-50 p-2 rounded">
-                            <h4 className="text-[10px] font-semibold text-foreground">
-                              Target Audience
-                            </h4>
-                            <p className="text-muted-foreground text-xs">
-                              {businessIdea.targetAudience || "N/A"}
-                            </p>
-                          </div>
-
-                          {/* Revenue Streams */}
-                          <div className="bg-green-50 p-2 rounded">
-                            <h4 className="text-[10px] font-semibold text-foreground">
-                              Revenue Streams
-                            </h4>
-                            <p className="text-muted-foreground text-xs">
-                              {businessIdea.revenueStreams?.join(", ") || "N/A"}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Key Features */}
-                        {businessIdea.keyFeatures?.length > 0 && (
-                          <div className="bg-amber-50 p-3 rounded-lg">
-                            <h4 className="text-xs font-semibold text-foreground mb-1">
-                              Key Features
-                            </h4>
-                            <ul className="list-disc pl-5 space-y-1">
-                              {businessIdea.keyFeatures
-                                .slice(0, 3)
-                                .map((feature, idx) => (
-                                  <li
-                                    key={idx}
-                                    className="text-left text-muted-foreground text-xs"
-                                  >
-                                    {feature}
-                                  </li>
-                                ))}
-                            </ul>
-                          </div>
-                        )}
-
-                        {/* Implementation & Challenges */}
-                        {businessIdea.implementationSteps?.length > 0 && (
-                          <div className="bg-amber-50 p-3 rounded-lg">
-                            <h4 className="text-xs font-semibold text-foreground mb-1">
-                              Implementation Steps
-                            </h4>
-                            <ul className="list-disc pl-5 space-y-1">
-                              {businessIdea.implementationSteps
-                                .slice(0, 3)
-                                .map((step, idx) => (
-                                  <li
-                                    key={idx}
-                                    className="text-left text-muted-foreground text-xs"
-                                  >
-                                    {step}
-                                  </li>
-                                ))}
-                            </ul>
-                          </div>
-                        )}
-
-                        {businessIdea.potentialChallenges?.length > 0 && (
-                          <div className="bg-amber-50 p-3 rounded-lg">
-                            <h4 className="text-xs font-semibold text-foreground mb-1">
-                              Potential Challenges
-                            </h4>
-                            <ul className="list-disc pl-5 space-y-1">
-                              {businessIdea.potentialChallenges
-                                .slice(0, 3)
-                                .map((feature, idx) => (
-                                  <li
-                                    key={idx}
-                                    className="text-left text-muted-foreground text-xs"
-                                  >
-                                    {feature}
-                                  </li>
-                                ))}
-                            </ul>
-                          </div>
-                        )}
-
-                        <div className="grid grid-cols-2 gap-2">
-                          {/* Target Audience */}
-                          <div className="bg-gray-50 p-2 rounded">
-                            <h4 className="text-[10px] font-semibold text-foreground">
-                              Success Metrics
-                            </h4>
-                            <p className="text-muted-foreground text-xs">
-                              {businessIdea.successMetrics?.join(", ") || "N/A"}
-                            </p>
-                          </div>
-
-                          {/* Revenue Streams */}
-                          <div className="bg-green-50 p-2 rounded">
-                            <h4 className="text-[10px] font-semibold text-foreground">
-                              Unique Value Proposition
-                            </h4>
-                            <p className="text-muted-foreground text-xs">
-                              {businessIdea.uniqueValueProposition?.join(
-                                ", "
-                              ) || "N/A"}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Use Case */}
-                        <div className="space-y-2">
-                          <div className="bg-blue-50 p-3 rounded-lg">
-                            <h4 className="text-xs font-semibold text-foreground mb-1">
-                              Use Case
-                            </h4>
-                            <p className="text-muted-foreground text-xs">
-                              {businessIdea.useCase || "N/A"}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <div className="bg-blue-50 p-3 rounded-lg">
-                            <h4 className="text-xs font-semibold text-foreground mb-1">
-                              Differentiator
-                            </h4>
-                            <p className="text-muted-foreground text-xs">
-                              {businessIdea.differentiator || "N/A"}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Keywords and Metadata */}
-                        <div className="flex flex-wrap gap-1 pt-1">
-                          {businessIdea.keywords
-                            ?.slice(0, 3)
-                            .map((keyword, idx) => (
-                              <span
-                                key={idx}
-                                className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full"
-                              >
-                                {keyword}
-                              </span>
-                            ))}
-                        </div>
-                      </div>
-
-                      {/* Footer */}
-                      <div className="flex items-center justify-between pt-2 border-t text-[11px] text-muted-foreground">
-                        <div className="flex items-center space-x-2">
-                          {/* <span>Source: {businessIdea.source || "ai-generated"}</span> */}
-                          {/* <span>{businessIdea.status}</span> */}
-                        </div>
-                        <span>
-                          {new Date(
-                            businessIdea.updatedAt || businessIdea.createdAt
-                          ).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="rounded-2xl p-8 shadow-sm border text-center">
-              <div className="flex flex-col items-center space-y-4">
-                <div className="relative">
-                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-accent/20 border-t-accent"></div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Lightbulb className="h-5 w-5 text-accent animate-pulse" />
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-1">
-                    Loading Solutions...
-                  </h3>
-                  <p className="text-muted-foreground text-sm">
-                    Please wait while fetching business ideas
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
+          <BusinessIdeasGrid businessIdeas={businessIdeas} isGeneratingIdeas={isGeneratingIdeas} />
         </div>
       </div>
 
-      {/* Enhanced Footer */}
-      <footer className="border-t border-gray-200 py-8 md:py-12 px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-[1300px]">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8">
-            <div className="flex items-center mb-6 md:mb-0">
-              <div className="h-8 w-8 rounded-lg bg-gray-900 flex items-center justify-center mr-3">
-                <Brain className="h-4 w-4 text-white" />
-              </div>
-              <span className="text-lg font-semibold text-gray-900">
-                Reddit Idea Extractor
-              </span>
-            </div>
-
-            <div className="flex space-x-4">
-              <a
-                href="#"
-                className="text-gray-400 hover:text-gray-600 transition-colors p-2"
-              >
-                <Instagram size={20} />
-              </a>
-              <a
-                href="#"
-                className="text-gray-400 hover:text-gray-600 transition-colors p-2"
-              >
-                <Linkedin size={20} />
-              </a>
-              <a
-                href="#"
-                className="text-gray-400 hover:text-gray-600 transition-colors p-2"
-              >
-                <Youtube size={20} />
-              </a>
-              <a
-                href="#"
-                className="text-gray-400 hover:text-gray-600 transition-colors p-2"
-              >
-                <Twitter size={20} />
-              </a>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-900 pt-6 mb-6">
-            <nav className="flex flex-wrap gap-4 md:gap-8">
-              {[
-                "Features",
-                "Pricing",
-                "Faqs",
-                "Contact",
-                "Privacy",
-                "Terms",
-              ].map((item) => (
-                <a
-                  key={item}
-                  href="#"
-                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  {item}
-                </a>
-              ))}
-            </nav>
-          </div>
-
-          <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-500 gap-2">
-            <p>© 2025 Reddit Idea Extractor</p>
-            <a
-              href="mailto:ideaextractor@support.com"
-              className="hover:text-gray-700 transition-colors"
-            >
-              ideaextractor@support.com
-            </a>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

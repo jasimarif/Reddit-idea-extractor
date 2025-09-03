@@ -3,7 +3,7 @@ const app = require("./app");
 const connectDB = require("./config/db");
 const {startCronJobs} = require("./cron.js");
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 
 connectDB()
 

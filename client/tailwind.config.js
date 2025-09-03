@@ -6,8 +6,10 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Poppins', 'system-ui', 'sans-serif'],
+      },
       colors: {
-        // Add any custom colors here
       },
     },
   },
