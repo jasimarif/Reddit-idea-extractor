@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import {
@@ -15,6 +14,18 @@ import {
   DollarSign,
   Clock,
   Mail,
+  Sparkles,
+  Rocket,
+  Star,
+  Crown,
+  Gem,
+  Palette,
+  Lightbulb,
+  Target,
+  Trophy,
+  Award,
+  HomeIcon,
+  HeartIcon,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
@@ -31,7 +42,6 @@ const EnhancedAnimatedNavbar = () => {
   const { user, logout, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
   const menuRef = useRef(null);
@@ -46,16 +56,6 @@ const EnhancedAnimatedNavbar = () => {
   ].includes(location.pathname);
 
   const shouldShowUserMenu = user && !isAuthPage;
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const offset = window.scrollY;
-      setScrolled(offset > 100);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -145,7 +145,7 @@ const EnhancedAnimatedNavbar = () => {
   // Navigation items for authenticated users (always shown when logged in)
   const authenticatedNavItems = user
     ? [
-        { label: "Ideas", path: "/dashboard", icon: Home },
+        { label: "Ideas", path: "/dashboard", icon: Lightbulb },
         { label: "Favorites", path: "/favorites", icon: Heart },
       ]
     : [];
@@ -170,76 +170,47 @@ const EnhancedAnimatedNavbar = () => {
       )}
 
       {/* Desktop Navbar */}
-      <motion.nav
-        className={`fixed top-0 z-50 hidden md:block ${
-          scrolled ? "navbar-centered" : ""
-        }`}
-        initial={false}
-        animate={{
-          y: 0,
-          x: scrolled ? "-50%" : 0,
-          left: scrolled ? "50%" : 0,
-          width: scrolled ? "auto" : "100%",
-          marginTop: scrolled ? "0.5rem" : 0,
-        }}
-        transition={{
-          duration: 2.1,
-          ease: [0.23, 1, 0.32, 1], // smoother easing curve
-          type: "tween",
-        }}
-      >
-        <motion.div
-          className={`${
-            scrolled
-              ? "bg-white/95 backdrop-blur-xl rounded-full px-4 py-1.5 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-gray-200/50"
-              : "bg-transparent px-6 py-2 border-none"
-          } transition-all duration-200 ease-out`}
-          layout
-          transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
-        >
-          <div className="flex items-center justify-between min-w-0 gap-6">
+      <nav className="fixed top-0 left-1/2 transform -translate-x-1/2 z-50 hidden md:block mt-3">
+        <div className="bg-white backdrop-blur-xl rounded-4xl px-6 py-3 shad border border-gray-200/50">
+
+          <div className="flex items-center justify-between min-w-0 gap-8 relative z-10">
             {/* Logo */}
-            <motion.div className="flex items-center space-x-2" layout>
-              <Link to="/" className="flex items-center space-x-2">
-                <div
-                  className={`${
-                    scrolled ? "h-6 w-6" : "h-7 w-7"
-                  } rounded-lg bg-gray-900 flex items-center justify-center transition-all duration-500`}
-                >
-                  <Brain
-                    className={`${
-                      scrolled ? "h-3 w-3" : "h-3.5 w-3.5"
-                    } text-white`}
-                  />
+            <div className="flex items-center space-x-3">
+              <Link to="/" className="flex items-center space-x-3 group">
+                <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-orange-500 to-red-600  flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-all duration-300">
+                  <Rocket className="h-4 w-4 text-white" />
                 </div>
-                <span
-                  className={`${
-                    scrolled ? "text-sm" : "text-base"
-                  } font-semibold bg-gray-900 bg-clip-text text-transparent transition-all duration-500 whitespace-nowrap`}
-                >
+                <span className="text-lg font-bold text-gray-900">
                   Reddit Idea Extractor
                 </span>
               </Link>
-            </motion.div>
+            </div>
 
             {/* Navigation Items */}
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center space-x-2">
               {shouldShowUserMenu ? (
                 // Authenticated user navigation
                 <>
                   {authenticatedNavItems.map((item) => {
                     const IconComponent = item.icon;
+                    const getIconColor = (path) => {
+                      switch (path) {
+                        case '/dashboard': return 'text-blue-300';
+                        case '/favorites': return 'text-red-300';
+                        default: return 'text-white';
+                      }
+                    };
                     return (
                       <Link
                         key={item.path}
                         to={item.path}
-                        className={`flex items-center space-x-1.5 px-2 py-1.5 rounded-lg text-md font-medium transition-all duration-200 ${
+                        className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors duration-200 ${
                           isActive(item.path)
-                            ? "!text-gray-900"
-                            : "!text-gray-900 hover:text-gray-900 hover:bg-gray"
+                            ? "bg-gray-100 text-gray-900"
+                            : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
                         }`}
                       >
-                        <IconComponent className="h-3.5 w-3.5" />
+                        <IconComponent className={`h-4 w-4 ${getIconColor(item.path)}`} fill="currentColor" />
                         <span>{item.label}</span>
                       </Link>
                     );
@@ -251,10 +222,10 @@ const EnhancedAnimatedNavbar = () => {
                       <Link
                         key={item.id}
                         onClick={() => scrollToSection(item.id)}
-                        className={`flex items-center space-x-1.5 px-2 py-1.5 rounded-lg text-md font-medium transition-all duration-200 ${
+                        className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors duration-200 ${
                           isActive(item.id)
-                            ? "!bg-gray-900 !text-gray-900"
-                            : "!text-gray-900 hover:text-gray-900 hover:bg-gray"
+                            ? "bg-gray-100 text-gray-900"
+                            : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
                         }`}
                       >
                         <span>{item.label}</span>
@@ -265,76 +236,85 @@ const EnhancedAnimatedNavbar = () => {
               ) : (
                 // Public navigation
                 <>
-                  {publicNavItems.map((item) => (
-                    <Link
-                      key={item.id}
-                      onClick={() => scrollToSection(item.id)}
-                      className={`flex items-center space-x-1.5 px-2 py-1.5 rounded-lg text-md font-medium transition-all duration-200 ${
-                        isActive(item.id)
-                          ? "!bg-gray-900 !text-gray-900"
-                          : "!text-gray-900 hover:text-gray-900 hover:bg-gray"
-                      }`}
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
+                  {publicNavItems.map((item) => {
+                    const getIcon = (id) => {
+                      switch (id) {
+                        case 'features': return <Sparkles className="h-4 w-4 text-yellow-300 drop-shadow-lg" />;
+                        case 'pricing': return <Crown className="h-4 w-4 text-purple-300 drop-shadow-lg" />;
+                        case 'Faqs': return <Lightbulb className="h-4 w-4 text-blue-300 drop-shadow-lg" />;
+                        case 'footer': return <Mail className="h-4 w-4 text-green-300 drop-shadow-lg" />;
+                        default: return <Star className="h-4 w-4 text-pink-300 drop-shadow-lg" />;
+                      }
+                    };
+
+                    return (
+                      <Link
+                        key={item.id}
+                        onClick={() => scrollToSection(item.id)}
+                        className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors duration-200 ${
+                          isActive(item.id)
+                            ? "bg-gray-100 text-gray-900"
+                            : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                        }`}
+                      >
+                        {getIcon(item.id)}
+                        <span>{item.label}</span>
+                      </Link>
+                    );
+                  })}
                 </>
               )}
             </div>
 
             {/* Right side - Auth or CTA */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-4">
               {shouldShowUserMenu ? (
                 // User dropdown
                 <DropdownMenu>
-                  <DropdownMenuTrigger className="flex items-center space-x-1.5 px-2 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50">
-                    <Avatar
-                      className={`${
-                        scrolled ? "h-6 w-6" : "h-7 w-7"
-                      } transition-all duration-500`}
-                    >
-                      <AvatarFallback className="bg-gray-200 text-gray-700 text-xs font-semibold">
+                  <DropdownMenuTrigger className="flex items-center space-x-2 px-3 py-2 rounded-xl text-sm font-semibold transition-colors duration-200 text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+                    <Avatar className="h-7 w-7 ring-2 ring-gray-200">
+                      <AvatarFallback className="bg-gradient-to-br from-purple-400 to-pink-400 text-white text-sm font-bold">
                         {getUserInitials(user?.name)}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="hidden lg:inline text-xs">
+                    <span className="hidden lg:inline text-sm font-medium">
                       {user?.name}
                     </span>
-                    <ChevronDown className="h-3.5 w-3.5" />
+                    <ChevronDown className="h-4 w-4" />
                   </DropdownMenuTrigger>
 
-                  <DropdownMenuContent align="end" className="w-56 bg-white">
-                    <DropdownMenuLabel className="font-normal">
+                  <DropdownMenuContent align="end" className="w-64 bg-white/95 backdrop-blur-xl border border-white/20 shadow-2xl">
+                    <DropdownMenuLabel className="font-semibold">
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">
+                        <p className="text-base font-bold leading-none bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                           {user?.name}
                         </p>
-                        <p className="text-xs leading-none text-muted-foreground">
+                        <p className="text-sm leading-none text-gray-600">
                           {user?.email}
                         </p>
                       </div>
                     </DropdownMenuLabel>
 
-                    <DropdownMenuSeparator />
+                    <DropdownMenuSeparator className="bg-gradient-to-r from-purple-200 to-pink-200" />
 
                     <DropdownMenuItem asChild>
                       <Link
                         to="/profile"
-                        className="flex items-center space-x-2 cursor-pointer"
+                        className="flex items-center space-x-3 cursor-pointer hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all duration-200"
                       >
-                        <User className="h-4 w-4" />
-                        <span>Profile</span>
+                        <User className="h-5 w-5 text-purple-500" />
+                        <span className="font-medium">Profile</span>
                       </Link>
                     </DropdownMenuItem>
 
-                    <DropdownMenuSeparator />
+                    <DropdownMenuSeparator className="bg-gradient-to-r from-purple-200 to-pink-200" />
 
                     <DropdownMenuItem
                       onClick={handleLogout}
-                      className="flex items-center space-x-2 cursor-pointer text-red-600 focus:text-red-600"
+                      className="flex items-center space-x-3 cursor-pointer text-red-600 hover:bg-red-50 transition-all duration-200"
                     >
-                      <LogOut className="h-4 w-4" />
-                      <span>Log out</span>
+                      <LogOut className="h-5 w-5" />
+                      <span className="font-medium">Log out</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -343,55 +323,48 @@ const EnhancedAnimatedNavbar = () => {
                 <div className="flex items-center space-x-3">
                   <Link
                     to="/login"
-                    className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors px-2 py-1 rounded-md "
+                    className="px-4 py-2 rounded-xl text-sm font-semibold text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors duration-200"
                   >
                     Login
                   </Link>
-                  <motion.button
-                    className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all duration-500 ${
-                      scrolled
-                        ? "bg-gradient-to-r from-gray-900 to-gray-900 text-white hover:from-gray-900 hover:to-gray-900 shadow-md"
-                        : "bg-gradient-to-r from-gray-900 to-gray-900 text-white hover:from-gray-900 hover:to-gray-900 shadow-md"
-                    }`}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                  <button
+                    className="px-6 py-2 rounded-xl text-sm font-bold bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md hover:shadow-lg transition-all duration-200"
                     onClick={() => navigate("/signup")}
-                    layout
                   >
-                    Signup
-                  </motion.button>
+                    Get Started
+                  </button>
                 </div>
               )}
             </div>
           </div>
-        </motion.div>
-      </motion.nav>
+        </div>
+      </nav>
 
       {/* Mobile Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 md:hidden bg-white/95 backdrop-blur-sm border-b border-gray-200/50">
-        <div className="flex items-center justify-between px-4 py-2.5">
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="h-7 w-7 rounded-lg bg-gray-900 flex items-center justify-center">
-              <Brain className="h-3.5 w-3.5 text-white" />
+      <nav className="fixed top-0 left-0 right-0 z-50 md:hidden bg-white/95 backdrop-blur-xl border-b border-gray-200/50">
+        <div className="flex items-center justify-between px-4 py-3">
+          <Link to="/" className="flex items-center space-x-3">
+            <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center shadow-md">
+              <Rocket className="h-4 w-4 text-white" />
             </div>
-            <span className="text-base font-semibold bg-gray-900 bg-clip-text text-transparent">
+            <span className="text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
               Reddit Idea Extractor
             </span>
           </Link>
 
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
-              <button className="mobile-menu-button p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                <Menu className="h-5 w-5 text-gray-600" />
+              <button className="mobile-menu-button p-2 hover:bg-gray-50 rounded-xl transition-colors duration-200">
+                <Menu className="h-6 w-6 text-gray-700" />
               </button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-80 bg-white">
+            <SheetContent side="right" className="w-80 bg-white border-l border-gray-200">
               <div className="flex flex-col space-y-6 mt-6">
-                <div className="flex items-center space-x-2 mb-4">
-                  <div className="h-7 w-7 rounded-lg bg-gray-900 flex items-center justify-center">
-                    <Brain className="h-3.5 w-3.5 text-white" />
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center shadow-md">
+                    <Rocket className="h-5 w-5 text-white" />
                   </div>
-                  <span className="text-base font-semibold bg-gray-900 bg-clip-text text-transparent">
+                  <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                     Reddit Idea Extractor
                   </span>
                 </div>
@@ -413,7 +386,7 @@ const EnhancedAnimatedNavbar = () => {
                                 : "!text-gray-900 hover:text-gray-900 hover:bg-gray-50"
                             }`}
                           >
-                            <IconComponent className="h-5 w-5" />
+                            <IconComponent className="h-5 w-5" fill="currentColor" />
                             <span>{item.label}</span>
                           </Link>
                         );

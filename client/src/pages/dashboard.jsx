@@ -1,6 +1,7 @@
 import apiRequest from "../lib/apiRequest";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { Search, RefreshCw, Calendar, ExternalLink, Heart, Brain, Instagram, Linkedin, Youtube, Twitter } from "lucide-react";
+import { Search, RefreshCw, Calendar, ExternalLink, Heart, Brain, Instagram, Linkedin, Youtube, Twitter, Filter, Sparkles, TrendingUp, Zap, Rocket, Layers } from "lucide-react";
+import { FaBrain } from "react-icons/fa";
 import {
   Card,
   CardHeader,
@@ -25,6 +26,7 @@ import {
   SelectValue,
 } from "../components/ui/select";
 import { Badge } from "../components/ui/badge";
+import Footer from "../components/Footer";
 
 const useDebounce = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -305,19 +307,31 @@ useEffect(() => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#e6ebef] pt-16 sm:pt-16 momentum-scroll">
-      <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 py-3 sm:py-4 md:py-5">
-        {/* Header */}
-        <div className="mb-4 sm:mb-5 md:mb-6 text-center">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Idea Dashboard
-            </h2>
-            <p className="mt-2 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">
-              Discover and organize the best ideas from Reddit communities
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <div className="pt-28 sm:pt-28 px-2 sm:px-4 lg:px-6">
+        <div className="max-w-screen-2xl mx-auto">
+          {/* Header */}
+          <div className="mb-8 sm:mb-10 md:mb-12 text-center">
+            <div className="max-w-4xl mx-auto">
+              <div className="flex items-center justify-center mb-4">
+                <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center mr-4 shadow-lg">
+                  <Rocket className="h-6 w-6 text-white" />
+                </div>
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold  text-gray-900">
+                  Idea Dashboard
+                </h1>
+              </div>
+              <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                Discover and organize the most innovative business ideas from Reddit communities
+              </p>
+              <div className="mt-6 flex items-center justify-center space-x-2">
+                <TrendingUp className="h-5 w-5 text-green-500" />
+                <span className="text-sm font-medium text-gray-700">
+                  {totalIdeas} ideas available
+                </span>
+              </div>
+            </div>
           </div>
-        </div>
         
         {/* Error Banner */}
         {error && (
@@ -358,32 +372,35 @@ useEffect(() => {
         <div className="flex flex-col lg:flex-row gap-3 sm:gap-4">
           
           {/* Sidebar */}
-          <div className="w-full lg:w-56 flex-shrink-0">
-            <div className="sticky top-4 bg-white rounded-xl p-3 sm:p-4 shadow-sm border border-gray-100">
-              <h3 className="text-base font-semibold text-gray-900 mb-2 sm:mb-3">Categories</h3>
-              <div className="space-y-1.5">
+          <div className="w-full lg:w-64 flex-shrink-0">
+            <div className="sticky top-6 bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 -xl border border-white/20">
+              <div className="flex items-center mb-4 sm:mb-6">
+                <Layers className="h-6 w-6 text-btn mr-3 drop-shadow-lg transform hover:scale-110 hover:-rotate-6 transition-all duration-300" />
+                <h3 className="text-lg font-bold text-gray-900">Categories</h3>
+              </div>
+              <div className="space-y-2">
                 {sidebarCategories.map((category) => {
                   // Check if this category is selected (case-insensitive)
                   const isSelected = selectedCategories.some(
                     cat => cat.toLowerCase() === category.toLowerCase()
                   );
-                  
+
                   return (
                     <button
                       key={category}
                       onClick={() => handleCategoryToggle(category)}
-                      className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${
+                      className={`w-full text-left px-4 py-3 rounded-xl  ${
                         isSelected
-                          ? "bg-blue-50 text-blue-700 font-medium"
-                          : "text-gray-700 hover:bg-gray-50"
+                          ? "bg-gradient-to-r from-btn to-btn text-white -md font-medium"
+                          : "text-gray-700 hover:bg-gray-100 hover:border-none hover:-sm"
                       }`}
                     >
-                      {category}
-                      {isSelected && (
-                        <span className="ml-2 text-blue-500">
-                          ✓
-                        </span>
-                      )}
+                      <div className="flex items-center justify-between">
+                        <span>{category}</span>
+                        {isSelected && (
+                          <span className="text-white text-lg">✓</span>
+                        )}
+                      </div>
                     </button>
                   );
                 })}
@@ -394,16 +411,15 @@ useEffect(() => {
           {/* Main Content */}
           <div className="flex-1">
         {/* Search and Sort */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-2 sm:p-3 mb-3 sm:mb-4">
-          <div className="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
-            {/* Category Dropdown Removed - Moved to Sidebar */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl -xl border border-white/20 p-4 mb-4">
+          <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
             {/* Search */}
-            <div className="flex-1 mb-3 sm:mb-0 mx-0 sm:mx-2">
+            <div className="flex-1">
               <div className="relative">
                 <input
                   type="text"
-                  className="w-full text-sm sm:text-base pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="Search ideas..."
+                  className="w-full text-sm sm:text-base pl-12 pr-4 py-3  rounded-xl focus:outline-none bg-gray-100 transition-all duration-200"
+                  placeholder="Search innovative ideas..."
                   value={searchTerm}
                   onChange={(e) => {
                     setSearchTerm(e.target.value);
@@ -411,25 +427,25 @@ useEffect(() => {
                   }}
                 />
                 <Search
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                  size={16}
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  size={18}
                 />
               </div>
             </div>
             {/* Sort */}
-            <div className="flex items-center justify-between sm:justify-start space-x-2 w-full sm:w-auto mt-2 sm:mt-0">
-              <span className="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">
+            <div className="flex items-center space-x-1 ml-5">
+              <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
                 Sort by:
               </span>
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-full sm:w-36 md:w-40 text-xs sm:text-sm">
+                <SelectTrigger className="w-48 text-sm bg-gray-100 cursor-pointer focus:ring-0 focus:ring-offset-0 border-none">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
-                <SelectContent className="bg-white">
-                  <SelectItem value="newest">Newest</SelectItem>
-                  <SelectItem value="rankScore">Most Rank Score</SelectItem>
-                  <SelectItem value="oldest">Oldest</SelectItem>
-                  <SelectItem value="Potential">Most Business Potential</SelectItem>
+                <SelectContent className="bg-white border border-gray-200 rounded-xl">
+                  <SelectItem value="newest" className="">Newest First</SelectItem>
+                  <SelectItem value="rankScore" className="">Highest Score</SelectItem>
+                  <SelectItem value="oldest" className="">Oldest First</SelectItem>
+                  <SelectItem value="Potential" className="">Business Potential</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -437,90 +453,105 @@ useEffect(() => {
         </div>
 
         {/* Ideas Grid */}
-        <Card className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden -mt-2">
-          <CardHeader className="pb-2 px-3 sm:px-4 pt-2 sm:pt-3 ">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-1 sm:space-y-0">
-              <CardTitle className="text-sm sm:text-base font-semibold text-gray-900">
-                Business Ideas ({ideas.length})
-              </CardTitle>
+        <Card className="bg-white/80 backdrop-blur-sm rounded-2xl -xl border border-white/20 overflow-hidden shadow-none">
+          <CardHeader className="pb-4 px-4 sm:px-6 pt-4 sm:pt-6 bg-gradient-to-r from-gray-50/50 to-blue-50/30">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0">
+              <div className="flex items-center space-x-3">
+                <FaBrain className="h-6 w-6 text-purple-500 transition-all duration-300 hover:scale-110" />
+                <CardTitle className="text-lg sm:text-xl font-bold text-gray-900">
+                  Business Ideas ({ideas.length})
+                </CardTitle>
+              </div>
 
-              <div className="mb-2 sm:mb-3 px-1 text-left">
-          {isLoading? (
-            <div className="flex space-x-1.5">
-              <RefreshCw className="h-5 w-5 animate-spin text-gray-500" />
-              <p className="text-sm text-gray-600">
-                {isInitialLoad 
-                  ? "Loading ideas..."
-                  : "Loading ideas..."
-                }
-              </p>
+              <div className="text-left">
+                {isLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <RefreshCw className="h-5 w-5 animate-spin text-purple-600" />
+                    <p className="text-sm text-gray-600">
+                      {isInitialLoad ? "Loading ideas..." : "Refreshing..."}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-600">
+                    {totalIdeas > 0
+                      ? `Showing ${Math.min(ideas.length, itemsPerPage)} of ${totalIdeas} ideas${
+                          selectedCategories.length > 0 ? ` in ${selectedCategories.join(", ")}` : ""
+                        }`
+                      : "No ideas found matching your criteria"}
+                  </p>
+                )}
+              </div>
             </div>
-          ) : (
-            <p className="text-sm text-gray-600">
-              {totalIdeas > 0
-                ? `Showing ${Math.min(
-                  ideas.length,
-                    itemsPerPage
-                  )} of ${totalIdeas} ideas${
-                    selectedCategories.length > 0
-                      ? ` in ${selectedCategories.join(", ")}`
-                      : ""
-                  }`
-                : "No ideas found matching your criteria"}
-            </p>
-          )}
-        </div>
-            </div>
-            
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
-              <Table className="min-w-full">
-                <TableHeader className="bg-gray-50 hidden sm:table-header-group">
-                  <TableRow className="border-b border-gray-200 h-8">
-                    <TableHead className="px-1.5 sm:px-2 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider w-8 sm:w-10"></TableHead>
-                    <TableHead className="px-1.5 sm:px-4 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider w-auto sm:w-2/5">
-                      Business Idea
+            <Table className="min-w-full">
+                <TableHeader className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-200">
+                  <TableRow className="border-b border-gray-200 h-10">
+                    <TableHead className="px-2 sm:px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-6 sm:w-8">
+                      <Heart className="h-4 w-4 mx-auto text-gray-500" />
                     </TableHead>
-                    <TableHead className="px-1.5 sm:px-6 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider w-auto sm:w-2/5">
-                      Description
+                    <TableHead className="px-2 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-auto sm:w-1/3">
+                      <div className="flex items-center">
+                        <Sparkles className="h-4 w-4 mr-2 text-gray-500" />
+                        Business Idea
+                      </div>
                     </TableHead>
-                    <TableHead className="px-1.5 sm:px-5 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell w-1/8">
-                      Source
+                    <TableHead className="px-2 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-auto sm:w-1/3">
+                      <div className="flex items-center">
+                        <Brain className="h-4 w-4 mr-2 text-gray-500" />
+                        Description
+                      </div>
                     </TableHead>
-                    <TableHead className="px-1.5 sm:px-7 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell w-1/8">
-                      Category
+                    <TableHead className="px-2 sm:px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden md:table-cell w-16">
+                      <div className="flex items-center">
+                        <ExternalLink className="h-4 w-4 mr-2 text-gray-500" />
+                        Source
+                      </div>
                     </TableHead>
-                    <TableHead className="px-1.5 sm:px-8 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider w-12 sm:w-16 md:w-20">
-                      <span className="hidden sm:inline">Score</span>
-                      <span className="sm:hidden">Score & Date</span>
+                    <TableHead className="px-2 sm:px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden lg:table-cell w-20">
+                      <div className="flex items-center">
+                        <Layers className="h-4 w-4 mr-2 text-gray-500" />
+                        Category
+                      </div>
                     </TableHead>
-                    <TableHead className="hidden lg:table-cell px-1.5 sm:px-12 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider w-1/8">
-                      Date
+                    <TableHead className="px-2 sm:px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-16 sm:w-20">
+                      <div className="flex items-center">
+                        <TrendingUp className="h-4 w-4 mr-2 text-gray-500" />
+                        <span className="hidden sm:inline">Score</span>
+                        <span className="sm:hidden">Score & Date</span>
+                      </div>
                     </TableHead>
-                    <TableHead className="hidden md:table-cell px-1.5 sm:px-4 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider w-1/8">
-                      Potential
+                    <TableHead className="hidden lg:table-cell px-2 sm:px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-20">
+                      <div className="flex items-center">
+                        <Calendar className="h-4 w-4 mr-2 text-gray-500" />
+                        Date
+                      </div>
                     </TableHead>
-                    
-                    
+                    <TableHead className="hidden md:table-cell px-2 sm:px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-20">
+                      <div className="flex items-center">
+                        <Zap className="h-4 w-4 mr-2 text-gray-500" />
+                        Potential
+                      </div>
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody className="bg-white divide-y divide-gray-100">
                   {ideas.map((idea) => (
                     <TableRow
                       key={idea._id}
-                      className="block sm:table-row hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 text-sm"
+                      className="block sm:table-row hover:bg-slate-50 transition-colors duration-200 border-b border-gray-100 last:border-b-0 text-sm"
                     >
                       {/* Mobile Header */}
-                      <div className="sm:hidden px-2 py-1.5 bg-gray-50 flex justify-between items-center border-b border-gray-100">
-                        <div className="flex items-center space-x-2">
+                      <div className="sm:hidden px-4 py-3 bg-slate-50 flex justify-between items-center border-b border-gray-100">
+                        <div className="flex items-center space-x-3">
                           <button
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
                               handleToggleFavorite(idea._id);
                             }}
-                            className="p-1 rounded-full hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                            className="p-1.5 rounded-full hover:bg-red-50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                             title={
                               idea.isFavorited
                                 ? "Remove from favorites"
@@ -531,46 +562,53 @@ useEffect(() => {
                               className={`h-4 w-4 transition-colors ${
                                 idea.isFavorited
                                   ? "text-red-500 fill-current"
-                                  : "text-gray-300 hover:text-red-400"
+                                  : "text-gray-400 hover:text-red-400"
                               }`}
                               fill={idea.isFavorited ? "currentColor" : "none"}
                               strokeWidth="2"
                             />
                           </button>
-                          <span className="text-sm font-medium text-gray-500">
-                          <a 
-                            href={idea.url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors hover:underline"
-                          >
-                            {idea.platform || "reddit"}
-                          </a>
-                          </span>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-gray-600">Platform:</span>
+                            <a
+                              href={idea.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-3 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
+                            >
+                              {idea.platform || "reddit"}
+                            </a>
+                          </div>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <Badge className="bg-green-50 text-green-700 border border-green-100 text-[10px] font-medium py-0 h-5">
+                        <div className="flex items-center space-x-3">
+                          <Badge className={`text-xs font-medium py-1 px-2 rounded-md ${
+                            idea.businessPotential === 'High'
+                              ? 'bg-green-50 text-green-700 border border-green-200'
+                              : idea.businessPotential === 'Medium'
+                              ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+                              : 'bg-gray-50 text-gray-600 border border-gray-200'
+                          }`}>
                             {idea.businessPotential}
                           </Badge>
                           <Link to={`/idea/${idea._id}`}>
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 h-6 w-6 p-1"
+                              className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 h-7 w-7 p-1.5 rounded-md"
                             >
-                              <ExternalLink className="h-3 w-3" />
+                              <ExternalLink className="h-3.5 w-3.5" />
                             </Button>
                           </Link>
                         </div>
                       </div>
-                      <TableCell className="hidden sm:table-cell px-3 sm:px-3 py-3 whitespace-nowrap text-sm text-gray-900">
+                      <TableCell className="hidden sm:table-cell px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                         <button
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
                             handleToggleFavorite(idea._id);
                           }}
-                          className="p-1 rounded-full hover:bg-gray-100 transition-colors focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-purple-400"
+                          className="p-1.5 rounded-full hover:bg-red-50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                           title={
                             idea.isFavorited
                               ? "Remove from favorites"
@@ -578,70 +616,73 @@ useEffect(() => {
                           }
                         >
                           <Heart
-                            className={`h-5 w-5 transition-colors ${
+                            className={`h-4 w-4 transition-colors ${
                               idea.isFavorited
                                 ? "text-red-500 fill-current"
-                                : "text-gray-300 hover:text-red-400"
+                                : "text-gray-400 hover:text-red-400"
                             }`}
                             fill={idea.isFavorited ? "currentColor" : "none"}
                             strokeWidth="2"
                           />
                         </button>
                       </TableCell>
-                      <TableCell className="block sm:table-cell px-4 sm:px-1 py-3 whitespace-normal text-xs text-left !text-gray-900 max-w-md ">
-                        <div className="sm:hidden text-xs font-medium text-gray-900 mb-1">Business Idea</div>
+                      <TableCell className="block sm:table-cell px-6 py-4 whitespace-normal text-sm text-left text-gray-900">
+                        <div className="sm:hidden text-xs font-medium text-gray-700 mb-2">Business Idea</div>
                         <Link
                           to={`/idea/${idea._id}`}
-                          className="text-blue-600 hover:text-blue-800 hover:underline font-medium block mb-2 sm:mb-0"
+                          className="text-btn hover:text-blue-800 hover:underline font-medium block mb-2 sm:mb-0 transition-colors"
                         >
                           {idea.title || idea.summary}
                         </Link>
-                      
                       </TableCell>
 
-                      <TableCell className="block sm:table-cell px-4 sm:px-2 py-3 whitespace-normal text-xs text-left !text-gray-900 max-w-md ">
-                        <div className="sm:hidden text-xs font-medium !text-gray-900 mb-1">Description</div>
+                      <TableCell className="block sm:table-cell px-6 py-4 whitespace-normal text-sm text-left text-gray-700">
+                        <div className="sm:hidden text-xs font-medium text-gray-700 mb-2">Description</div>
                         {idea.summary && (
-                          <p className="text-gray-600 text-sm mt-1 line-clamp-2">
+                          <p className="text-gray-600 text-sm leading-relaxed line-clamp-2">
                             {idea.summary}
                           </p>
                         )}
                       </TableCell>
 
-                      <TableCell className="hidden md:table-cell px-3 sm:px-4 py-3 whitespace-nowrap text-sm">
-                        <div className="sm:hidden text-xs font-medium text-gray-500 mb-1">Source</div>
+                      <TableCell className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm">
+                        <div className="sm:hidden text-xs font-medium text-gray-700 mb-2">Source</div>
                         <div className="flex items-center">
-                          <a 
-                            href={idea.url} 
-                            target="_blank" 
+                          <a
+                            href={idea.url}
+                            target="_blank"
                             rel="noopener noreferrer"
-                            className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors hover:underline"
+                            className="px-3 py-1.5 text-xs font-medium bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
                           >
                             {idea.platform || "reddit"}
                           </a>
                         </div>
                       </TableCell>
 
-                      <TableCell className="hidden lg:table-cell px-3 sm:px-4 py-3 whitespace-nowrap text-sm">
-                        <div className="sm:hidden text-xs font-medium text-gray-500 mb-1">Category</div>
+                      <TableCell className="hidden lg:table-cell px-6 py-4 whitespace-nowrap text-sm">
+                        <div className="sm:hidden text-xs font-medium text-gray-700 mb-2">Category</div>
                         <Badge
                           variant="outline"
-                          className={`${getCategoryColor(
-                            idea.category
-                          )} uppercase tracking-wide text-xs font-semibold`}
+                          className={`text-xs font-medium rounded-md px-2 py-1 ${
+                            idea.category === 'tech'
+                              ? 'bg-blue-50 text-blue-700 border-blue-200'
+                              : idea.category === 'business'
+                              ? 'bg-orange-50 text-orange-700 border-orange-200'
+                              : 'bg-gray-50 text-gray-600 border-gray-200'
+                          }`}
                         >
                           {idea.category || "General"}
                         </Badge>
                       </TableCell>
 
-                      <TableCell className="px-3 sm:px-4 py-3 whitespace-nowrap">
-                        <div className="flex flex-col sm:block">
+                      <TableCell className="px-6 py-4 whitespace-nowrap ">
+                        <div className="flex flex-col sm:block space-y-2 sm:space-y-0">
                           <div className="flex items-center gap-2">
-                            <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs sm:text-sm font-medium rounded">
+                            <span className="px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-md">
                               {idea.rankScore?.toFixed(2) || "N/A"}
                             </span>
                             <span className="sm:hidden text-xs text-gray-500 flex items-center">
-                              <Calendar className="h-3 w-3 mr-1 text-gray-400" />
+                              <Calendar className="h-3.5 w-3.5 mr-1.5 text-gray-400" />
                               {new Date(idea.postDate).toLocaleDateString("en-US", {
                                 year: 'numeric',
                                 month: 'short',
@@ -652,25 +693,31 @@ useEffect(() => {
                         </div>
                       </TableCell>
 
-                      <TableCell className="hidden lg:table-cell px-3 sm:px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                      <TableCell className="hidden lg:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                         <div className="flex items-center">
-                          <Calendar className="h-4 w-4 mr-1.5 text-gray-400" />
-                          {new Date(idea.postDate).toLocaleDateString("en-US", {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                          })}
+                          <Calendar className="h-4 w-4 mr-2 text-gray-400" />
+                          <span className="text-gray-700">
+                            {new Date(idea.postDate).toLocaleDateString("en-US", {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                            })}
+                          </span>
                         </div>
                       </TableCell>
 
-                      <TableCell className="hidden md:table-cell px-3 sm:px-4 py-3 whitespace-nowrap text-sm">
-                        <div className="sm:hidden text-xs font-medium text-gray-500 mb-1">Status</div>
-                        <Badge className="bg-green-50 text-green-700 border border-green-100 text-xs font-medium">
+                      <TableCell className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm">
+                        <div className="sm:hidden text-xs font-medium text-gray-700 mb-2">Potential</div>
+                        <Badge className={`text-xs font-medium py-1 px-2 rounded-md ${
+                          idea.businessPotential === 'High'
+                            ? 'bg-green-50 text-green-700 border border-green-200'
+                            : idea.businessPotential === 'Medium'
+                            ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+                            : 'bg-gray-50 text-gray-600 border border-gray-200'
+                        }`}>
                           {idea.businessPotential}
                         </Badge>
                       </TableCell>
-
-                      
                     </TableRow>
                   ))}
                 </TableBody>
@@ -697,11 +744,24 @@ useEffect(() => {
                 ))}
               </div>
             ) : ideas.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-slate-400 mb-2">No ideas found</div>
-                <p className="text-slate-600">
-                  Try adjusting your filters to see more results.
+              <div className="text-center py-16 px-4">
+                <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mx-auto mb-4">
+                  <Sparkles className="h-8 w-8 text-gray-400" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">No ideas found</h3>
+                <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                  Try adjusting your filters or search terms to discover more innovative business ideas.
                 </p>
+                <Button
+                  onClick={() => {
+                    setSelectedCategories([]);
+                    setSearchTerm('');
+                    setCurrentPage(1);
+                  }}
+                  className="bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white px-6 py-2 rounded-xl transition-all duration-200 transform hover:scale-105"
+                >
+                  Clear Filters
+                </Button>
               </div>
             ) : null}
           </CardContent>
@@ -712,163 +772,107 @@ useEffect(() => {
           
           {/* Pagination */}
           {totalPages > 1 && (
-          <div className="mt-6 sm:mt-8">
-            <div className="flex items-center justify-between sm:justify-center space-x-1">
-              <button
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className="px-3 py-2 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 flex items-center disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-200"
-              >
-                <svg
-                  className="w-4 h-4 mr-1 sm:mr-1.5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
+            <div className="mt-8 sm:mt-12">
+              <div className="flex items-center justify-center space-x-2">
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-purple-300 transition-all duration-200 flex items-center disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white -sm hover:-md"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-                <span className="hidden sm:inline">Previous</span>
-                <span className="sm:hidden">Prev</span>
-              </button>
+                  <svg
+                    className="w-4 h-4 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                  Previous
+                </button>
 
-              <div className="flex items-center space-x-1 overflow-x-auto py-2 px-1">
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  // Show first page, last page, current page, and pages around current
-                  let pageNum;
-                  if (totalPages <= 5) {
-                    pageNum = i + 1;
-                  } else if (currentPage <= 3) {
-                    pageNum = i + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    pageNum = totalPages - 4 + i;
-                  } else {
-                    pageNum = currentPage - 2 + i;
-                  }
+                <div className="flex items-center space-x-1 overflow-x-auto py-2 px-2">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
 
-                  return (
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`min-w-[44px] h-11 flex items-center justify-center cursor-pointer text-sm font-medium rounded-xl transition-all duration-200 ${
+                          currentPage === pageNum
+                            ? "bg-btn text-white"
+                            : "text-gray-600 bg-white hover:bg-gray-50 "
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+
+                  {totalPages > 5 && currentPage < totalPages - 2 && (
+                    <span className="px-2 text-gray-400 text-sm">...</span>
+                  )}
+
+                  {totalPages > 5 && currentPage < totalPages - 2 && (
                     <button
-                      key={pageNum}
-                      onClick={() => setCurrentPage(pageNum)}
-                      className={`min-w-[32px] h-8 sm:min-w-[40px] sm:h-10 flex items-center justify-center text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 ${
-                        currentPage === pageNum
-                          ? "bg-gradient-to-br from-purple-600 to-blue-600 text-white shadow-md shadow-purple-100 transform scale-105"
-                          : "text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-purple-700"
+                      onClick={() => setCurrentPage(totalPages)}
+                      className={`min-w-[44px] h-11 flex items-center justify-center text-sm font-medium cursor-pointer rounded-xl transition-all duration-200 ${
+                        currentPage === totalPages
+                          ? "bg-gradient-to-br from-purple-500 to-blue-600 text-white -lg transform scale-105"
+                          : "text-gray-600 bg-white  hover:bg-gray-50 "
                       }`}
                     >
-                      {pageNum}
+                      {totalPages}
                     </button>
-                  );
-                })}
+                  )}
+                </div>
 
-                {totalPages > 5 && currentPage < totalPages - 2 && (
-                  <span className="px-1 sm:px-2 text-gray-400 text-xs sm:text-sm">
-                    ...
-                  </span>
-                )}
-
-                {totalPages > 5 && currentPage < totalPages - 2 && (
-                  <button
-                    onClick={() => setCurrentPage(totalPages)}
-                    className={`min-w-[32px] h-8 sm:min-w-[40px] sm:h-10 flex items-center justify-center text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 ${
-                      currentPage === totalPages
-                        ? "bg-gradient-to-br from-purple-600 to-blue-600 text-white shadow-md shadow-purple-100 transform scale-105"
-                        : "text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-purple-700"
-                    }`}
-                  >
-                    {totalPages}
-                  </button>
-                )}
-              </div>
-
-              <button
-                onClick={() =>
-                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                }
-                disabled={currentPage === totalPages}
-                className="px-3 py-2 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 flex items-center disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-200"
-              >
-                <span className="sm:hidden">Next</span>
-                <span className="hidden sm:inline">Next</span>
-                <svg
-                  className="w-4 h-4 ml-1 sm:ml-1.5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                  }
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-3 text-sm font-medium text-gray-700 bg-white cursor-pointer rounded-xl hover:bg-gray-50 transition-all duration-200 flex items-center disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white -sm hover:-md"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </button>
+                  Next
+                  <svg
+                    className="w-4 h-4 ml-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <div className="mt-4 text-center text-sm text-gray-500">
+                Page {currentPage} of {totalPages}
+              </div>
             </div>
-            <div className="mt-2 text-center text-xs text-gray-500">
-              Page {currentPage} of {totalPages}
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      <footer className="border-t border-gray-200 py-8 md:py-12 px-4 sm:px-6 lg:px-8">
-              <div className="mx-auto max-w-[1250px]">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8">
-                  <div className="flex items-center mb-6 md:mb-0">
-                    <div className="h-8 w-8 rounded-lg bg-gray-900 flex items-center justify-center mr-3">
-                      <Brain className="h-4 w-4 text-white" />
-                    </div>
-                    <span className="text-lg font-semibold text-gray-900">Reddit Idea Extractor</span>
-                  </div>
-      
-                  <div className="flex space-x-4">
-                    <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors p-2">
-                      <Instagram size={20} />
-                    </a>
-                    <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors p-2">
-                      <Linkedin size={20} />
-                    </a>
-                    <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors p-2">
-                      <Youtube size={20} />
-                    </a>
-                    <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors p-2">
-                      <Twitter size={20} />
-                    </a>
-                  </div>
-                </div>
-      
-                <div className="border-t border-gray-900 pt-6 mb-6">
-                  <nav className="flex flex-wrap gap-4 md:gap-8">
-                    {['Features', 'Pricing', 'Faqs', 'Contact', 'Privacy', 'Terms'].map((item) => (
-                      <a
-                        key={item}
-                        href="#"
-                        className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-                      >
-                        {item}
-                      </a>
-                    ))}
-                  </nav>
-                </div>
-      
-                <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-500 gap-2">
-                  <p>© 2025 Reddit Idea Extractor</p>
-                  <a
-                    href="mailto:ideaextractor@support.com"
-                    className="hover:text-gray-700 transition-colors"
-                  >
-                    ideaextractor@support.com
-                  </a>
-                </div>
-              </div>
-            </footer>
+      <Footer />
     </div>
   );
 };

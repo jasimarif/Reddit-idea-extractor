@@ -232,7 +232,8 @@ const IdeaDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#e6ebef] pt-16 sm:pt-18 px-4 sm:px-6">
+    <div className="min-h-screen bg-[#e6ebef]">
+      <div className="pt-16 sm:pt-18 px-4 sm:px-6">
       {/* Header */}
       <div className="px-4 py-3">
         <div className="max-w-7xl mx-auto">
@@ -384,6 +385,8 @@ const IdeaDetailPage = () => {
 
           <BusinessIdeasGrid businessIdeas={businessIdeas} isGeneratingIdeas={isGeneratingIdeas} />
         </div>
+      </div>
+
       </div>
 
       <Footer />

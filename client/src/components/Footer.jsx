@@ -19,25 +19,25 @@ const Footer = () => {
           <div className="flex space-x-6">
             <a
               href="#"
-              className="text-gray-500 hover:text-pink-500 transition-all duration-200 p-3 rounded-lg hover:bg-pink-50 transform hover:scale-110"
+              className="text-pink-500 transition-all duration-200 p-3 rounded-lg hover:bg-pink-50 transform hover:scale-110"
             >
               <Instagram size={22} />
             </a>
             <a
               href="#"
-              className="text-gray-500 hover:text-blue-600 transition-all duration-200 p-3 rounded-lg hover:bg-blue-50 transform hover:scale-110"
+              className="text-blue-600 transition-all duration-200 p-3 rounded-lg hover:bg-blue-50 transform hover:scale-110"
             >
               <Linkedin size={22} />
             </a>
             <a
               href="#"
-              className="text-gray-500 hover:text-red-500 transition-all duration-200 p-3 rounded-lg hover:bg-red-50 transform hover:scale-110"
+              className="text-red-500 transition-all duration-200 p-3 rounded-lg hover:bg-red-50 transform hover:scale-110"
             >
               <Youtube size={22} />
             </a>
             <a
               href="#"
-              className="text-gray-500 hover:text-blue-400 transition-all duration-200 p-3 rounded-lg hover:bg-blue-50 transform hover:scale-110"
+              className="text-blue-400 transition-all duration-200 p-3 rounded-lg hover:bg-blue-50 transform hover:scale-110"
             >
               <Twitter size={22} />
             </a>
