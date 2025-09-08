@@ -24,74 +24,87 @@ import AnimatedPage from "./components/AnimatedPage";
 
 const queryClient = new QueryClient();
 
-function AnimatedRoutes() {
+function AppContent() {
   const location = useLocation();
-  
-  return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/google/callback" element={<GoogleCallback />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
-        <Route path="/oauth-test" element={<OAuthTestPage />} />
-        <Route path="/verify-email" element={<VerifyEmailPage />} />
 
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <AnimatedPage>
-                <DashboardPage />
-              </AnimatedPage>
-            </ProtectedRoute>
-          }
-        />
-        
-        <Route
-          path="/idea/:id"
-          element={
-            <ProtectedRoute>
-              <AnimatedPage>
-                <IdeaDetailPage />
-              </AnimatedPage>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/landingPage/:businessIdeaId"
-          element={
-            <ProtectedRoute>
-              <AnimatedPage>
-                <LandingPageViewer />
-              </AnimatedPage>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/favorites"
-          element={
-            <ProtectedRoute>
-              <AnimatedPage>
-                <FavoritesPage />
-              </AnimatedPage>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <AnimatedPage>
-                <UserProfilePage />
-              </AnimatedPage>
-            </ProtectedRoute>
-          }
-        />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </AnimatePresence>
+  // Hide navbar on auth pages
+  const isAuthPage = [
+    "/login",
+    "/signup",
+    "/reset-password",
+    "/verify-email",
+    "/oauth-test",
+    "/google/callback"
+  ].includes(location.pathname);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
+      {!isAuthPage && <Navbar />}
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/google/callback" element={<GoogleCallback />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/oauth-test" element={<OAuthTestPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
+
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <AnimatedPage>
+                  <DashboardPage />
+                </AnimatedPage>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/idea/:id"
+            element={
+              <ProtectedRoute>
+                <AnimatedPage>
+                  <IdeaDetailPage />
+                </AnimatedPage>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/landingPage/:businessIdeaId"
+            element={
+              <ProtectedRoute>
+                <AnimatedPage>
+                  <LandingPageViewer />
+                </AnimatedPage>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/favorites"
+            element={
+              <ProtectedRoute>
+                <AnimatedPage>
+                  <FavoritesPage />
+                </AnimatedPage>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <AnimatedPage>
+                  <UserProfilePage />
+                </AnimatedPage>
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -102,10 +115,7 @@ function App() {
         <ThemeProvider>
           <AuthProvider>
             <BrowserRouter>
-              <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
-                <Navbar />
-                <AnimatedRoutes />
-              </div>
+              <AppContent />
             </BrowserRouter>
           </AuthProvider>
         </ThemeProvider>

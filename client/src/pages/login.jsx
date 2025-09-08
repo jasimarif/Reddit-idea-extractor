@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import {
-  Brain,
+  Rocket,
   Mail,
   Lock,
   AlertCircle,
@@ -66,48 +66,56 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#e6ebef] pt-38 sm:pt-38 momentum-scroll flex items-center justify-center overflow-hidden px-4 py-8">
+    <div className="relative min-h-screen bg-[#e6ebef] flex items-center justify-center overflow-hidden px-4 py-8">
+      {/* Background decoration */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-purple-200/30 to-pink-200/30 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-200/30 to-purple-200/30 rounded-full blur-3xl"></div>
+      </div>
 
-
-      <div className="w-full max-w-md space-y-4 sm:space-y-5">
+      <div className="relative w-full max-w-md space-y-6">
+        {/* Header */}
         <div className="text-center">
-          <div className="mx-auto w-12 h-10 flex items-center justify-center -mt-17 mb-1">
-            <Brain className="h-9 w-9 text-w" />
+          <div className="mx-auto w-16 h-16 flex items-center justify-center bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl mb-4">
+            <Rocket className="h-8 w-8 text-white" />
           </div>
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">
             Welcome back
-          </h2>
-          <p className="mt-1 text-xs sm:text-sm text-gray-600">
+          </h1>
+          <p className="text-gray-600 text-sm">
             Don't have an account?{" "}
             <Link
               to="/signup"
-              className="font-medium text-purple-600 hover:text-purple-500 transition-colors"
+              className="font-semibold text-orange-600 hover:text-orange-700 transition-colors duration-200"
             >
               Sign up here
             </Link>
           </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-5 transition-all duration-300 hover:shadow-xl">
-          <div className="space-y-4">
+        {/* Login Form Card */}
+        <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-white/20 p-8 transition-all duration-300">
+          <div className="space-y-6">
+            {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center space-x-2">
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center space-x-3">
                 <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
-                <span className="text-red-700 text-sm">{error}</span>
+                <span className="text-red-700 text-sm font-medium">{error}</span>
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
+              {/* Email Field */}
+              <div className="space-y-2">
                 <label
                   htmlFor="email"
-                  className="block text-xs font-medium text-gray-600 mb-1"
+                  className="block text-sm font-semibold text-gray-700 text-left"
                 >
                   Email address
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
-                    <Mail className="h-4 w-4 text-gray-400" />
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Mail className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
                     id="email"
@@ -115,7 +123,7 @@ const LoginPage = () => {
                     type="email"
                     autoComplete="email"
                     required
-                    className="block w-full pl-8 pr-3 py-2.5 text-sm border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                    className="block w-full pl-12 pr-4 py-3 text-sm border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-gray-50/50 focus:bg-white"
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -123,16 +131,17 @@ const LoginPage = () => {
                 </div>
               </div>
 
-              <div>
+              {/* Password Field */}
+              <div className="space-y-2">
                 <label
                   htmlFor="password"
-                  className="block text-xs font-medium text-gray-600 mb-1"
+                  className="block text-sm font-semibold text-gray-700 text-left"
                 >
                   Password
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
-                    <Lock className="h-4 w-4 text-gray-400" />
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Lock className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
                     id="password"
@@ -140,7 +149,7 @@ const LoginPage = () => {
                     type={showPassword ? "text" : "password"}
                     autoComplete="current-password"
                     required
-                    className="block w-full pl-8 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                    className="block w-full pl-12 pr-12 py-3 text-sm border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-gray-50/50 focus:bg-white"
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => {
@@ -150,24 +159,21 @@ const LoginPage = () => {
                   />
                   <button
                     type="button"
-                    tabIndex={-1}
-                    className="absolute inset-y-0 right-2 flex items-center text-gray-400 hover:text-purple-600 transition-colors duration-200 p-1 rounded-full active:bg-gray-100"
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-purple-600 transition-colors duration-200"
                     onClick={() => setShowPassword((show) => !show)}
-                    aria-label={
-                      showPassword ? "Hide password" : "Show password"
-                    }
-                    style={{ background: "none", border: "none", padding: 0 }}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
+                      <EyeOff className="h-5 w-5" />
                     ) : (
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-5 w-5" />
                     )}
                   </button>
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              {/* Remember Me & Forgot Password */}
+              <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <input
                     id="remember-me"
@@ -175,11 +181,11 @@ const LoginPage = () => {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="h-3.5 w-3.5 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-orange-500 focus:ring-orange-500 border-gray-300 rounded"
                   />
                   <label
                     htmlFor="remember-me"
-                    className="ml-1.5 block text-xs text-gray-600"
+                    className="ml-2 block text-sm text-gray-600 text-left"
                   >
                     Remember me
                   </label>
@@ -187,17 +193,18 @@ const LoginPage = () => {
                 <button
                   type="button"
                   onClick={handleForgotPassword}
-                  className="text-xs font-medium text-purple-600 hover:text-purple-500 hover:underline transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-transparent border-none p-0 m-0"
+                  className="text-sm font-semibold text-orange-600 hover:text-orange-700 transition-colors duration-200"
                   disabled={isLoading}
                 >
                   Forgot password?
                 </button>
               </div>
 
+              {/* Sign In Button */}
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-[0.98]"
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl text-sm font-semibold text-white bg-gradient-to-br from-orange-500 to-red-600 focus:outline-none focus:ring-0 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 cursor-pointer"
               >
                 {isLoading ? (
                   <div className="flex items-center">
@@ -208,28 +215,28 @@ const LoginPage = () => {
                   "Sign in"
                 )}
               </button>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">
-                    Or sign in with
-                  </span>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleGoogleLogin}
-                disabled={isLoading}
-                className="w-full flex items-center justify-center gap-3 bg-white text-gray-700 border border-gray-300 rounded-xl py-3.5 px-4 font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-95"
-              >
-                <FcGoogle className="h-5 w-5" />
-                <span>Google</span>
-              </button>
             </form>
+
+            {/* Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-white text-gray-500 font-medium">Or continue with</span>
+              </div>
+            </div>
+
+            {/* Google Sign In */}
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              disabled={isLoading}
+              className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-200 rounded-xl py-3 px-4 font-semibold hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 cursor-pointer"
+            >
+              <FcGoogle className="h-5 w-5" />
+              <span className="text-gray-700">Continue with Google</span>
+            </button>
           </div>
         </div>
       </div>

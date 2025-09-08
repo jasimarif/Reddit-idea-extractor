@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Lock, AlertCircle, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Rocket, Lock, AlertCircle, Eye, EyeOff, Loader2 } from 'lucide-react';
 
 const ResetPasswordPage = () => {
   const [password, setPassword] = useState('');
@@ -104,10 +104,13 @@ const ResetPasswordPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">
+          <div className="mx-auto w-16 h-16 flex items-center justify-center bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl mb-4">
+            <Rocket className="h-8 w-8 text-white" />
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
             Reset Your Password
           </h2>
           <p className="mt-2 text-sm text-gray-600">
@@ -115,7 +118,7 @@ const ResetPasswordPage = () => {
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-white/20 p-6 sm:p-8">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {(error || success) && (
               <div 
@@ -204,7 +207,7 @@ const ResetPasswordPage = () => {
               <button
                 type="submit"
                 disabled={!password || !confirmPassword || success}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium !text-black bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg text-sm font-medium !text-black bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
               >
                 {success ? (
                   'Password Updated!'
