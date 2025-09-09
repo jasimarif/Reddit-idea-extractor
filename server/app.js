@@ -29,8 +29,8 @@ app.use(express.urlencoded({ extended: true }));
 // Configure CORS with multiple allowed origins
 const allowedOrigins = [
   'http://localhost:5173',  // Local development
-  'https://reddit-idea-extractor-frontend.onrender.com',  // Production frontend
-  'https://reddit-idea-extractor-backend.onrender.com'   // Production backend (for direct API access if needed)
+  'https://reddit-idea-extractor-1.onrender.com',  // Production frontend
+  'https://reddit-idea-extractor.onrender.com'   // Production backend (for direct API access if needed)
 ];
 
 app.use(
