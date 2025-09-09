@@ -21,6 +21,7 @@ import GoogleCallback from "./pages/googleCallback.jsx";
 import VerifyEmailPage from "./pages/verify-email.jsx";
 import { AnimatePresence } from "framer-motion";
 import AnimatedPage from "./components/AnimatedPage";
+import EnhancedAnimatedNavbar from "./components/Navbar.jsx";
 
 const queryClient = new QueryClient();
 
@@ -39,7 +40,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
-      {!isAuthPage && <Navbar />}
+      {!isAuthPage && <EnhancedAnimatedNavbar />}
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<HomePage />} />

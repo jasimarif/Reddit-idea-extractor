@@ -171,9 +171,9 @@ const EnhancedAnimatedNavbar = () => {
 
       {/* Desktop Navbar */}
       <nav className="fixed top-0 left-1/2 transform -translate-x-1/2 z-50 hidden md:block mt-3">
-        <div className="bg-white backdrop-blur-xl rounded-4xl px-6 py-3 shad border border-gray-200/50">
+        <div className="bg-white/50 backdrop-blur-xl rounded-4xl px-6 py-3 shad border border-gray-200/50 min-w-max">
 
-          <div className="flex items-center justify-between min-w-0 gap-8 relative z-10">
+          <div className="flex items-center justify-between min-w-max gap-6 relative z-10 whitespace-nowrap">
             {/* Logo */}
             <div className="flex items-center space-x-3">
               <Link to="/" className="flex items-center space-x-3 group">
@@ -187,7 +187,7 @@ const EnhancedAnimatedNavbar = () => {
             </div>
 
             {/* Navigation Items */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1">
               {shouldShowUserMenu ? (
                 // Authenticated user navigation
                 <>
@@ -204,7 +204,7 @@ const EnhancedAnimatedNavbar = () => {
                       <Link
                         key={item.path}
                         to={item.path}
-                        className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors duration-200 ${
+                        className={`flex items-center space-x-2 px-3 py-2 rounded-xl text-sm font-semibold transition-colors duration-200 ${
                           isActive(item.path)
                             ? "bg-gray-100 text-gray-900"
                             : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
@@ -222,7 +222,7 @@ const EnhancedAnimatedNavbar = () => {
                       <Link
                         key={item.id}
                         onClick={() => scrollToSection(item.id)}
-                        className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors duration-200 ${
+                        className={`flex items-center space-x-2 px-3 py-2 rounded-xl text-sm font-semibold transition-colors duration-200 ${
                           isActive(item.id)
                             ? "bg-gray-100 text-gray-900"
                             : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
@@ -251,7 +251,7 @@ const EnhancedAnimatedNavbar = () => {
                       <Link
                         key={item.id}
                         onClick={() => scrollToSection(item.id)}
-                        className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors duration-200 ${
+                        className={`flex items-center space-x-2 px-3 py-2 rounded-xl text-sm font-semibold transition-colors duration-200 ${
                           isActive(item.id)
                             ? "bg-gray-100 text-gray-900"
                             : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"

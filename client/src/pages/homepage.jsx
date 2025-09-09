@@ -24,6 +24,7 @@ import {
   Cpu,
 } from 'lucide-react';
 import ScrollAnimationWrapper from '@/components/ScrollAnimationWrapper';
+import EnhancedAnimatedNavbar from '../components/Navbar';
 
 const HomePage = () => {
 
@@ -228,7 +229,7 @@ const HomePage = () => {
     <div className="min-h-screen bg-[#e6ebef] momentum-scroll">
       {/* Hero Section */}
       <section id="hero" className="relative pt-20 md:pt-32 pb-16 md:pb-20 scroll-section bg-[#e6ebef] px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="relative max-w-6xl mx-auto">
+        <div className="relative max-w-7xl mx-auto">
           {/* Hero Section Clouds */}
           <CloudBackground className="top-[15%] -translate-y-1/2" left size="lg" opacity={30} />
           <CloudBackground className="top-[60%] -translate-y-1/2" right size="base" opacity={35} delay={2} />
