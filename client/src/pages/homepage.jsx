@@ -22,9 +22,16 @@ import {
   LayoutTemplate,
   Bot,
   Cpu,
+  Target,
+  Sparkles,
+  FileText,
+  Network,
+  Activity,
+  Settings,
 } from 'lucide-react';
 import ScrollAnimationWrapper from '@/components/ScrollAnimationWrapper';
 import EnhancedAnimatedNavbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 const HomePage = () => {
 
@@ -36,37 +43,43 @@ const HomePage = () => {
 
   const features = [
     {
-      icon: <Search className="h-6 w-6 text-indigo-600" />,
+      icon: <Target className="h-6 w-6 text-blue-500 fill-blue-500" />,
+      bgColor: "bg-blue-100",
       title: "Pain Point Extractor",
       description:
         "Extract pain points from Reddit posts using NLP-powered agents trained on real-world frustrations.",
     },
     {
-      icon: <Lightbulb className="h-6 w-6 text-indigo-600" />,
+      icon: <Sparkles className="h-6 w-6 text-purple-500 fill-purple-500" />,
+      bgColor: "bg-purple-100",
       title: "Market Gap Generator",
       description:
         "Create validated startup ideas by analyzing extracted pain points and identifying untapped market opportunities.",
     },
     {
-      icon: <LayoutTemplate className="h-6 w-6 text-indigo-600" />,
+      icon: <FileText className="h-6 w-6 text-green-500 fill-green-500" />,
+      bgColor: "bg-green-100",
       title: "Landing Page Builder",
       description:
         "Automatically generate clean, effective landing pages from business ideas using context-aware AI.",
     },
     {
-      icon: <Bot className="h-6 w-6 text-indigo-600" />,
+      icon: <Network className="h-6 w-6 text-orange-500 fill-orange-500" />,
+      bgColor: "bg-orange-100",
       title: "Autonomous Agent Workflow",
       description:
         "Multi-agent pipeline where each stage extraction, ideation, and generation is handled by a dedicated AI agent.",
     },
     {
-      icon: <TrendingUp className="h-6 w-6 text-indigo-600" />,
+      icon: <Activity className="h-6 w-6 text-red-500 fill-red-500" />,
+      bgColor: "bg-red-100",
       title: "Real-Time Trend Monitoring",
       description:
         "Continuously fetch and analyze Reddit content to surface emerging trends and evolving user pain points.",
     },
     {
-      icon: <Cpu className="h-6 w-6 text-indigo-600" />,
+      icon: <Settings className="h-6 w-6 text-teal-500 fill-teal-500" />,
+      bgColor: "bg-teal-100",
       title: "Modular + Scalable Stack",
       description:
         "Built using OpenAI Assistants API and a composable serverless backend for easy customization and scale.",
@@ -297,14 +310,14 @@ const HomePage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {features.map((feature, index) => (
                 <ScrollAnimationWrapper key={index} delay={index * 0.1}>
-                  <div className="flex text-left flex-col rounded-2xl bg-white p-6 md:p-8 shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 h-full">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-50 mb-4 md:mb-6">
+                  <div className="flex text-left flex-col rounded-2xl bg-white/20 p-6 md:p-8 border border-gray-200 transition-all duration-300 h-full">
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${feature.bgColor} mb-4 md:mb-6`}>
                       {feature.icon}
                     </div>
-                    <h3 className="text-lg md:text-xl font-medium text-gray-900 mb-3 md:mb-4">
+                    <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-3 md:mb-4 leading-tight">
                       {feature.title}
                     </h3>
-                    <p className="text-sm md:text-base text-gray-600 leading-relaxed flex-1">
+                    <p className="text-sm md:text-base text-gray-700 leading-relaxed flex-1 font-medium">
                       {feature.description}
                     </p>
                   </div>
@@ -593,57 +606,7 @@ const HomePage = () => {
       </section>
 
       {/* Footer */}
-      <footer id="footer" className="border-t border-gray-200 py-8 md:py-12 px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8">
-            <div className="flex items-center mb-6 md:mb-0">
-              <div className="h-8 w-8 rounded-lg bg-gray-900 flex items-center justify-center mr-3">
-                <Brain className="h-4 w-4 text-white" />
-              </div>
-              <span className="text-lg font-semibold text-gray-900">Reddit Idea Extractor</span>
-            </div>
-
-            <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors p-2">
-                <Instagram size={20} />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors p-2">
-                <Linkedin size={20} />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors p-2">
-                <Youtube size={20} />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors p-2">
-                <Twitter size={20} />
-              </a>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-900 pt-6 mb-6">
-            <nav className="flex flex-wrap gap-4 md:gap-8">
-              {['Features', 'Pricing', 'Faqs', 'Contact', 'Privacy', 'Terms'].map((item) => (
-                <a
-                  key={item}
-                  href="#"
-                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  {item}
-                </a>
-              ))}
-            </nav>
-          </div>
-
-          <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-500 gap-2">
-            <p>© 2025 Reddit Idea Extractor</p>
-            <a
-              href="mailto:ideaextractor@support.com"
-              className="hover:text-gray-700 transition-colors"
-            >
-              ideaextractor@support.com
-            </a>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

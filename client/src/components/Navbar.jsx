@@ -12,8 +12,8 @@ import {
   ChevronDown,
   Zap,
   DollarSign,
-  Clock,
-  Mail,
+  HelpCircle,
+  Phone,
   Sparkles,
   Rocket,
   Star,
@@ -137,8 +137,8 @@ const EnhancedAnimatedNavbar = () => {
     ? [
         { label: "Features", id: "features", icon: Zap },
         { label: "Pricing", id: "pricing", icon: DollarSign },
-        { label: "Faqs", id: "Faqs", icon: Clock },
-        { label: "Contact", id: "footer", icon: Mail },
+        { label: "Faqs", id: "Faqs", icon: HelpCircle },
+        { label: "Contact", id: "footer", icon: Phone },
       ]
     : [];
 
@@ -155,8 +155,8 @@ const EnhancedAnimatedNavbar = () => {
     ? [
         { label: "Features", id: "features", icon: Zap },
         { label: "Pricing", id: "pricing", icon: DollarSign },
-        { label: "Faqs", id: "Faqs", icon: Clock },
-        { label: "Contact", id: "footer", icon: Mail },
+        { label: "Faqs", id: "Faqs", icon: HelpCircle },
+        { label: "Contact", id: "footer", icon: Phone },
       ]
     : [];
   return (
@@ -218,6 +218,16 @@ const EnhancedAnimatedNavbar = () => {
 
                   {/* Homepage navigation for authenticated users */}
                   {homepageNavItems.map((item) => {
+                    const IconComponent = item.icon;
+                    const getHomepageIconColor = (id) => {
+                      switch (id) {
+                        case 'features': return 'text-yellow-300';
+                        case 'pricing': return 'text-emerald-400';
+                        case 'Faqs': return 'text-orange-400';
+                        case 'footer': return 'text-pink-400';
+                        default: return 'text-purple-300';
+                      }
+                    };
                     return (
                       <Link
                         key={item.id}
@@ -228,6 +238,7 @@ const EnhancedAnimatedNavbar = () => {
                             : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
                         }`}
                       >
+                        <IconComponent className={`h-4 w-4 ${getHomepageIconColor(item.id)}`} fill="currentColor" />
                         <span>{item.label}</span>
                       </Link>
                     );
@@ -240,9 +251,9 @@ const EnhancedAnimatedNavbar = () => {
                     const getIcon = (id) => {
                       switch (id) {
                         case 'features': return <Sparkles className="h-4 w-4 text-yellow-300 drop-shadow-lg" />;
-                        case 'pricing': return <Crown className="h-4 w-4 text-purple-300 drop-shadow-lg" />;
-                        case 'Faqs': return <Lightbulb className="h-4 w-4 text-blue-300 drop-shadow-lg" />;
-                        case 'footer': return <Mail className="h-4 w-4 text-green-300 drop-shadow-lg" />;
+                        case 'pricing': return <Crown className="h-4 w-4 text-emerald-400 drop-shadow-lg" />;
+                        case 'Faqs': return <HelpCircle className="h-4 w-4 text-orange-400 drop-shadow-lg" />;
+                        case 'footer': return <Phone className="h-4 w-4 text-pink-400 drop-shadow-lg" />;
                         default: return <Star className="h-4 w-4 text-pink-300 drop-shadow-lg" />;
                       }
                     };
@@ -395,12 +406,23 @@ const EnhancedAnimatedNavbar = () => {
                       {/* Homepage navigation for authenticated users in mobile */}
                       <div className="pt-2 border-t border-gray-100 mt-2">
                         {homepageNavItems.map((item) => {
+                          const IconComponent = item.icon;
+                          const getMobileHomepageIconColor = (id) => {
+                            switch (id) {
+                              case 'features': return 'text-yellow-300';
+                              case 'pricing': return 'text-emerald-400';
+                              case 'Faqs': return 'text-orange-400';
+                              case 'footer': return 'text-pink-400';
+                              default: return 'text-purple-300';
+                            }
+                          };
                           return (
                             <button
                               key={item.id}
                               onClick={() => scrollToSection(item.id)}
                               className="flex items-center space-x-3 w-full text-left py-2.5 px-3 text-base !font-medium !text-gray-900 hover:text-purple-600 hover:bg-gray-50 rounded-lg transition-colors"
                             >
+                              <IconComponent className={`h-5 w-5 ${getMobileHomepageIconColor(item.id)}`} fill="currentColor" />
                               <span>{item.label}</span>
                             </button>
                           );
