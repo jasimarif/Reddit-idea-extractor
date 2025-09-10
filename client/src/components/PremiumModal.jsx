@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Star, Check, Crown, Zap } from 'lucide-react';
 import { usePayment } from '../contexts/PaymentContext';
 
@@ -22,11 +22,30 @@ const PremiumModal = ({ isOpen, onClose }) => {
     }
   };
 
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+
+    // Cleanup function to restore scrollbar when component unmounts
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4 overflow-hidden">
+      <div 
+        className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto premium-modal-scroll"
+        style={{
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none'
+        }}
+      >
         {/* Header */}
         <div className="p-6 border-b border-gray-100">
           <div className="flex items-center justify-between">
@@ -66,10 +85,7 @@ const PremiumModal = ({ isOpen, onClose }) => {
             {[
               'Unlimited landing page creation',
               'Professional templates',
-              'One-click deployment to Vercel',
-              'Custom domain support',
-              'Priority support',
-              'Advanced analytics',
+              
             ].map((feature, index) => (
               <div key={index} className="flex items-center space-x-3">
                 <Check className="h-5 w-5 text-green-500 flex-shrink-0" />

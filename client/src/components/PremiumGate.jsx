@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Lock, Crown, Star } from 'lucide-react';
 import { usePayment } from '../contexts/PaymentContext';
 import PremiumModal from './PremiumModal';
 
 const PremiumGate = ({ children, feature = "this feature" }) => {
-  const { isPremium, isLoading } = usePayment();
-  const [showModal, setShowModal] = useState(false);
+  const { isPremium, isLoading, isModalOpen, setIsModalOpen } = usePayment();
 
   if (isLoading) {
     return (
@@ -37,7 +36,7 @@ const PremiumGate = ({ children, feature = "this feature" }) => {
             </div>
             
             <button
-              onClick={() => setShowModal(true)}
+              onClick={() => setIsModalOpen(true)}
               className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-200 flex items-center space-x-2 mx-auto"
             >
               <Star className="h-4 w-4" />
@@ -52,7 +51,7 @@ const PremiumGate = ({ children, feature = "this feature" }) => {
         </div>
       </div>
 
-      <PremiumModal isOpen={showModal} onClose={() => setShowModal(false)} />
+      <PremiumModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </>
   );
 };

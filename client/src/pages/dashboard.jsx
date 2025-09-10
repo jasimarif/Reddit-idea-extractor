@@ -375,7 +375,6 @@ useEffect(() => {
           {/* Sidebar */}
           <div className="w-full lg:w-64 flex-shrink-0 space-y-4">
             {/* Premium Status Card */}
-            <PremiumStatusCard />
             
             {/* Categories Card */}
             <div className="sticky top-6 bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 -xl border border-white/20">

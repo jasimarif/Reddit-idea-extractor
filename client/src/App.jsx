@@ -10,7 +10,7 @@ import HomePage from "./pages/homepage.jsx";
 import Navbar from "./components/Navbar.jsx";
 import { AuthProvider } from "./contexts/AuthContext.jsx";
 import { ThemeProvider } from "./contexts/ThemeContext.jsx";
-import { PaymentProvider } from "./contexts/PaymentContext.jsx";
+import { PaymentProvider, usePayment } from "./contexts/PaymentContext.jsx";
 import DashboardPage from "./pages/dashboard.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import UserProfilePage from "./pages/UserProfilePage.jsx";
@@ -30,8 +30,9 @@ const queryClient = new QueryClient();
 
 function AppContent() {
   const location = useLocation();
+  const { isModalOpen } = usePayment();
 
-  // Hide navbar on auth pages
+  // Hide navbar on auth pages or when modal is open
   const isAuthPage = [
     "/login",
     "/signup",
@@ -41,9 +42,11 @@ function AppContent() {
     "/google/callback"
   ].includes(location.pathname);
 
+  const shouldHideNavbar = isAuthPage || isModalOpen;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
-      {!isAuthPage && <EnhancedAnimatedNavbar />}
+      {!shouldHideNavbar && <EnhancedAnimatedNavbar />}
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<HomePage />} />

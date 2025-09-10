@@ -11,6 +11,7 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 export const PaymentProvider = ({ children }) => {
   const [isPremium, setIsPremium] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { user } = useAuth();
 
   // Check premium status when user changes
@@ -99,6 +100,8 @@ export const PaymentProvider = ({ children }) => {
   const value = {
     isPremium,
     isLoading,
+    isModalOpen,
+    setIsModalOpen,
     createPaymentSession,
     handlePaymentSuccess,
     openBillingPortal,

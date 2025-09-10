@@ -4,8 +4,7 @@ import { usePayment } from '../contexts/PaymentContext';
 import PremiumModal from './PremiumModal';
 
 const PremiumStatusCard = () => {
-  const { isPremium, isLoading, openBillingPortal } = usePayment();
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const { isPremium, isLoading, openBillingPortal, isModalOpen, setIsModalOpen } = usePayment();
   const [isOpeningBilling, setIsOpeningBilling] = useState(false);
 
   const handleManageBilling = async () => {
@@ -69,7 +68,7 @@ const PremiumStatusCard = () => {
             </button>
           ) : (
             <button
-              onClick={() => setShowUpgradeModal(true)}
+              onClick={() => setIsModalOpen(true)}
               className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200"
             >
               <Star className="h-4 w-4" />
@@ -95,8 +94,8 @@ const PremiumStatusCard = () => {
       </div>
 
       <PremiumModal 
-        isOpen={showUpgradeModal} 
-        onClose={() => setShowUpgradeModal(false)} 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
       />
     </>
   );
