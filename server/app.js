@@ -29,7 +29,7 @@ app.use(express.urlencoded({ extended: true }));
 // Configure CORS with multiple allowed origins
 const allowedOrigins = [
   'http://localhost:5173',
-  process.env.CLIENT_URL,  // Local development or from .env
+  process.env.CLIENT_URL,  // Local  or from .env
   process.env.SERVER_URL // Production backend or from .env
 ];
 
