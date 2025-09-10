@@ -53,6 +53,27 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  // Stripe and payment related fields
+  stripeCustomerId: {
+    type: String,
+    unique: true,
+    sparse: true,
+  },
+  isPremium: {
+    type: Boolean,
+    default: false,
+  },
+  premiumPurchaseDate: {
+    type: Date,
+  },
+  subscriptionId: {
+    type: String,
+  },
+  subscriptionStatus: {
+    type: String,
+    enum: ['active', 'inactive', 'canceled', 'past_due'],
+    default: 'inactive',
+  },
 });
 
 // Hash password before saving

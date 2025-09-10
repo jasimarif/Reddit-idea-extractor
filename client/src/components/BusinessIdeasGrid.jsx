@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Badge } from '../components/ui/badge';
-import { Lightbulb, Plus, ChevronDown, ChevronUp, Users, DollarSign, Target, TrendingUp, Building2 } from 'lucide-react';const BusinessIdeasGrid = ({ businessIdeas, isGeneratingIdeas }) => {
+import { Lightbulb, Plus, ChevronDown, ChevronUp, Users, DollarSign, Target, TrendingUp, Building2 } from 'lucide-react';
+import PremiumGate from './PremiumGate';
+import { usePayment } from '../contexts/PaymentContext';const BusinessIdeasGrid = ({ businessIdeas, isGeneratingIdeas }) => {
   const [expandedItems, setExpandedItems] = useState(new Set());
+  const { isPremium } = usePayment();
 
   const toggleExpanded = (ideaId) => {
     const newExpanded = new Set(expandedItems);
@@ -53,14 +56,21 @@ import { Lightbulb, Plus, ChevronDown, ChevronUp, Users, DollarSign, Target, Tre
                 className="bg-white rounded-2xl  transition-all duration-300 group relative w-full overflow-hidden border border-gray-100/50"
               >
                 {/* Plus icon and text for creating landing page */}
-                <Link
-                  to={`/landingPage/${businessIdea.id || businessIdea._id}`}
-                  className="absolute top-4 right-4 flex items-center space-x-1 px-3 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors text-xs text-blue-600 hover:text-blue-800 z-10"
-                  title="Create landing page"
-                >
-                  <Plus className="h-4 w-4" />
-                  <span>Create Landing Page</span>
-                </Link>
+                <PremiumGate feature="landing page creation">
+                  <Link
+                    to={`/landingPage/${businessIdea.id || businessIdea._id}`}
+                    className={`absolute top-4 right-4 flex items-center space-x-1 px-3 py-1.5 rounded-md transition-colors text-xs z-10 ${
+                      isPremium 
+                        ? 'bg-blue-50 hover:bg-blue-100 text-blue-600 hover:text-blue-800' 
+                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    }`}
+                    title={isPremium ? "Create landing page" : "Premium feature - Upgrade to unlock"}
+                    onClick={!isPremium ? (e) => e.preventDefault() : undefined}
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span>Create Landing Page</span>
+                  </Link>
+                </PremiumGate>
 
                 <div className="p-6">
                   {/* Always visible content */}

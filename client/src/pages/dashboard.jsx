@@ -27,6 +27,7 @@ import {
 } from "../components/ui/select";
 import { Badge } from "../components/ui/badge";
 import Footer from "../components/Footer";
+import PremiumStatusCard from "../components/PremiumStatusCard";
 
 const useDebounce = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -372,7 +373,11 @@ useEffect(() => {
         <div className="flex flex-col lg:flex-row gap-3 sm:gap-4">
           
           {/* Sidebar */}
-          <div className="w-full lg:w-64 flex-shrink-0">
+          <div className="w-full lg:w-64 flex-shrink-0 space-y-4">
+            {/* Premium Status Card */}
+            <PremiumStatusCard />
+            
+            {/* Categories Card */}
             <div className="sticky top-6 bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 -xl border border-white/20">
               <div className="flex items-center mb-4 sm:mb-6">
                 <Layers className="h-6 w-6 text-btn mr-3 drop-shadow-lg transform hover:scale-110 hover:-rotate-6 transition-all duration-300" />

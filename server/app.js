@@ -9,7 +9,8 @@ const favoriteRoutes = require("./routes/favorite.route");
 const painpointRoutes = require("./routes/painpoint.route");
 const marketGapRoutes = require("./routes/marketGap.route");
 const landingPageRoutes = require("./routes/landingPage.route");
-const adminRoutes = require("./routes/admin.route")
+const adminRoutes = require("./routes/admin.route");
+const paymentRoutes = require("./routes/payment.route");
 const cookieParser = require("cookie-parser");
 const passport = require("passport");
 const { initializeRedis } = require("./utils/redisClient");
@@ -21,6 +22,9 @@ const app = express();
 initializeRedis().catch(err => {
   console.error(`Failed to initialize Redis: ${err.message}`);
 });
+
+// Raw body parser for Stripe webhooks (must be before express.json())
+app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
 
 app.use(express.json());
 
@@ -66,5 +70,6 @@ app.use("/api/painpoints", painpointRoutes);
 app.use("/api/marketgaps", marketGapRoutes);
 app.use("/api/landingpages", landingPageRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/payments", paymentRoutes);
 
 module.exports = app;

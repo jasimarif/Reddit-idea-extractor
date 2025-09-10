@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { usePayment } from "../contexts/PaymentContext";
 import {
   Brain,
   Menu,
@@ -40,6 +41,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const EnhancedAnimatedNavbar = () => {
   const { user, logout, isLoading } = useAuth();
+  const { isPremium } = usePayment();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -297,12 +299,24 @@ const EnhancedAnimatedNavbar = () => {
                   <DropdownMenuContent align="end" className="w-64 bg-white/95 backdrop-blur-xl border border-white/20 shadow-2xl">
                     <DropdownMenuLabel className="font-semibold">
                       <div className="flex flex-col space-y-1">
-                        <p className="text-base font-bold leading-none bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                          {user?.name}
-                        </p>
+                        <div className="flex items-center space-x-2">
+                          <p className="text-base font-bold leading-none bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                            {user?.name}
+                          </p>
+                          {isPremium && (
+                            <Crown className="h-4 w-4 text-yellow-500" title="Premium User" />
+                          )}
+                        </div>
                         <p className="text-sm leading-none text-gray-600">
                           {user?.email}
                         </p>
+                        {isPremium && (
+                          <div className="flex items-center space-x-1 mt-1">
+                            <span className="text-xs bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-2 py-1 rounded-full font-medium">
+                              Premium
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </DropdownMenuLabel>
 

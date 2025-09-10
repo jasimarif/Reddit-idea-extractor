@@ -10,6 +10,7 @@ import HomePage from "./pages/homepage.jsx";
 import Navbar from "./components/Navbar.jsx";
 import { AuthProvider } from "./contexts/AuthContext.jsx";
 import { ThemeProvider } from "./contexts/ThemeContext.jsx";
+import { PaymentProvider } from "./contexts/PaymentContext.jsx";
 import DashboardPage from "./pages/dashboard.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import UserProfilePage from "./pages/UserProfilePage.jsx";
@@ -19,6 +20,8 @@ import LandingPageViewer from "./pages/landingPage.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import GoogleCallback from "./pages/googleCallback.jsx";
 import VerifyEmailPage from "./pages/verify-email.jsx";
+import PaymentSuccessPage from "./pages/PaymentSuccessPage.jsx";
+import PaymentCancelPage from "./pages/PaymentCancelPage.jsx";
 import { AnimatePresence } from "framer-motion";
 import AnimatedPage from "./components/AnimatedPage";
 import EnhancedAnimatedNavbar from "./components/Navbar.jsx";
@@ -50,6 +53,8 @@ function AppContent() {
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/oauth-test" element={<OAuthTestPage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/payment/success" element={<PaymentSuccessPage />} />
+          <Route path="/payment/cancel" element={<PaymentCancelPage />} />
 
           <Route
             path="/dashboard"
@@ -115,9 +120,11 @@ function App() {
       <TooltipProvider>
         <ThemeProvider>
           <AuthProvider>
-            <BrowserRouter>
-              <AppContent />
-            </BrowserRouter>
+            <PaymentProvider>
+              <BrowserRouter>
+                <AppContent />
+              </BrowserRouter>
+            </PaymentProvider>
           </AuthProvider>
         </ThemeProvider>
       </TooltipProvider>
