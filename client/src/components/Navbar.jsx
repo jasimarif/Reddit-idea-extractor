@@ -183,7 +183,7 @@ const EnhancedAnimatedNavbar = () => {
                   <Rocket className="h-4 w-4 text-white" />
                 </div>
                 <span className="text-lg font-bold text-gray-900">
-                  Reddit Idea Extractor
+                  Nextaiidea
                 </span>
               </Link>
             </div>
@@ -373,7 +373,7 @@ const EnhancedAnimatedNavbar = () => {
               <Rocket className="h-4 w-4 text-white" />
             </div>
             <span className="text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-              Reddit Idea Extractor
+              Nextaiidea
             </span>
           </Link>
 
@@ -390,7 +390,7 @@ const EnhancedAnimatedNavbar = () => {
                     <Rocket className="h-5 w-5 text-white" />
                   </div>
                   <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                    Reddit Idea Extractor
+                    Nextaiidea
                   </span>
                 </div>
 

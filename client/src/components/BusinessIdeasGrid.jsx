@@ -69,11 +69,11 @@ const BusinessIdeasGrid = ({ businessIdeas, isGeneratingIdeas }) => {
                   ) : (
                     <button
                       onClick={() => setIsModalOpen(true)}
-                      className="absolute top-4 right-4 flex items-center space-x-1 px-3 py-1.5 rounded-md transition-colors text-xs z-10 bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700"
+                      className="absolute top-4 right-4 flex items-center space-x-1 px-3 py-1.5 rounded-md transition-colors text-xs z-10 bg-btn text-white hover:bg-btn-hover cursor-pointer"
                       title="Unlock to create landing page"
                     >
                       <Lock className="h-4 w-4" />
-                      <span>Unlock to Create</span>
+                      <span>Unlock to Create Landing Page</span>
                     </button>
                   )}
 
@@ -83,11 +83,11 @@ const BusinessIdeasGrid = ({ businessIdeas, isGeneratingIdeas }) => {
                       {/* Header with Score and Create Landing Page */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3 text-left">
-                          <div className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-3 py-1.5 rounded-full text-xs font-medium shadow-sm">
+                          <div className="flex items-center space-x-2 bg-btn text-white px-3 py-1.5 rounded-full text-xs font-medium shadow-sm">
                             <Target className="h-3.5 w-3.5" />
                             <span>Score: {businessIdea.feasibilityScore || businessIdea.score || "N/A"}</span>
                           </div>
-                          <div className="flex items-center space-x-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-3 py-1.5 rounded-full text-xs font-medium shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-105">
+                          <div className="flex items-center space-x-2 bg-teal-600 text-white px-3 py-1.5 rounded-full text-xs font-medium shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-105">
                             <span>{businessIdea.businessModel || "SaaS"}</span>
                           </div>
                         </div>
@@ -123,7 +123,7 @@ const BusinessIdeasGrid = ({ businessIdeas, isGeneratingIdeas }) => {
                         </div>
                         <button
                           onClick={() => toggleExpanded(businessIdea.id)}
-                          className="flex items-center space-x-2 text-xs font-medium text-blue-600 hover:text-blue-700 transition-all duration-200 focus:outline-none focus:ring-0 focus:border-none active:border-none active:outline-none border-none bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-lg"
+                          className="flex items-center space-x-2 text-xs font-medium cursor-pointer text-blue-600 hover:text-blue-700 transition-all duration-200 focus:outline-none focus:ring-0 focus:border-none active:border-none active:outline-none border-none bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-lg"
                           style={{ border: 'none', outline: 'none', boxShadow: 'none' }}
                         >
                           <span>{isExpanded ? 'Show Less' : 'Show More'}</span>

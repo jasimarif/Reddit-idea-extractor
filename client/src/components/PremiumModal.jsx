@@ -40,72 +40,73 @@ const PremiumModal = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4 overflow-hidden">
       <div 
-        className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto premium-modal-scroll"
+        className="bg-white rounded-2xl max-w-sm w-full max-h-[85vh] overflow-y-auto premium-modal-scroll"
         style={{
           scrollbarWidth: 'none',
           msOverflowStyle: 'none'
         }}
       >
         {/* Header */}
-        <div className="p-6 border-b border-gray-100">
+        <div className="p-4 border-b border-gray-100">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Crown className="h-6 w-6 text-yellow-500" />
-              <h2 className="text-xl font-bold text-gray-900">Upgrade to Premium</h2>
+              <Crown className="h-5 w-5 text-yellow-500" fill="currentColor" />
+              <h2 className="text-lg font-bold text-gray-900">Upgrade to Premium</h2>
             </div>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4" />
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-4">
           {/* Hero Section */}
-          <div className="text-center mb-6">
-            <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 rounded-xl mb-4">
-              <Zap className="h-8 w-8 mx-auto mb-2" />
-              <h3 className="text-lg font-semibold">Unlock Landing Page Creation</h3>
-              <p className="text-sm opacity-90">Create professional landing pages for your business ideas</p>
+          <div className="text-center mb-4">
+            <div className="bg-btn text-white p-3 rounded-xl mb-3">
+              <Zap className="h-6 w-6 mx-auto mb-2" />
+              <h3 className="text-base font-semibold">Unlock Landing Page Creation</h3>
+              <p className="text-xs opacity-90">Create professional landing pages for your business ideas</p>
             </div>
           </div>
 
           {/* Price */}
-          <div className="text-center mb-6">
-            <div className="text-3xl font-bold text-gray-900 mb-1">$29.99</div>
-            <div className="text-sm text-gray-500">One-time payment</div>
+          <div className="text-center mb-4">
+            <div className="text-2xl font-bold text-gray-900 mb-1">$29.99</div>
+            <div className="text-xs text-gray-500">One-time payment</div>
           </div>
 
           {/* Features */}
-          <div className="space-y-3 mb-6">
-            <h4 className="font-semibold text-gray-900 mb-3">What you get:</h4>
+          <div className="space-y-2 mb-4">
+            <h4 className="font-semibold text-gray-900 mb-2 text-sm">What you get:</h4>
             {[
               'Unlimited landing page creation',
               'Professional templates',
+              'One-click deployment to Vercel',
               
             ].map((feature, index) => (
-              <div key={index} className="flex items-center space-x-3">
-                <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
-                <span className="text-gray-700">{feature}</span>
+              <div key={index} className="flex items-center space-x-2">
+                <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                <span className="text-gray-700 text-sm">{feature}</span>
               </div>
             ))}
           </div>
 
           {/* CTA Buttons */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             <button
               onClick={handleUpgrade}
               disabled={isProcessing}
-              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-4 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              className="w-full bg-btn text-white py-2.5 px-3 rounded-lg font-semibold hover:opacity-90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 text-sm cursor-pointer"
             >
               {isProcessing ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
               ) : (
                 <>
-                  <Star className="h-5 w-5" />
+                  <Star className="h-4 w-4" />
                   <span>Upgrade Now</span>
                 </>
               )}
@@ -113,14 +114,14 @@ const PremiumModal = ({ isOpen, onClose }) => {
             
             <button
               onClick={onClose}
-              className="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+              className="w-full bg-gray-100 text-gray-700 py-2.5 px-3 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm cursor-pointer"
             >
               Maybe Later
             </button>
           </div>
 
           {/* Trust Indicators */}
-          <div className="mt-6 pt-4 border-t border-gray-100">
+          <div className="mt-4 pt-3 border-t border-gray-100">
             <div className="flex items-center justify-center space-x-4 text-xs text-gray-500">
               <div className="flex items-center space-x-1">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>

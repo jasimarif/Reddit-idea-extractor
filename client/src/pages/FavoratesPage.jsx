@@ -288,7 +288,7 @@ const FavoritesPage = () => {
                           <div className="h-8 w-8 rounded-lg bg-gray-900 flex items-center justify-center mr-3">
                             <Brain className="h-4 w-4 text-white" />
                           </div>
-                          <span className="text-lg font-semibold text-gray-900">Reddit Idea Extractor</span>
+                          <span className="text-lg font-semibold text-gray-900">Nextaiidea</span>
                         </div>
             
                         <div className="flex space-x-4">
@@ -322,7 +322,7 @@ const FavoritesPage = () => {
                       </div>
             
                       <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-500 gap-2">
-                        <p>© 2025 Reddit Idea Extractor</p>
+                        <p>© 2025 Nextaiidea</p>
                         <a
                           href="mailto:ideaextractor@support.com"
                           className="hover:text-gray-700 transition-colors"

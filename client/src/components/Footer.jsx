@@ -1,5 +1,5 @@
 import React from 'react';
-import { Brain, Instagram, Linkedin, Youtube, Twitter } from 'lucide-react';
+import { Rocket, Instagram, Linkedin, Youtube, Twitter } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -7,12 +7,12 @@ const Footer = () => {
       <div className="mx-auto max-w-[1300px]">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 md:mb-10">
           <div className="flex items-center mb-8 md:mb-0">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center mr-4">
-              <Brain className="h-5 w-5 text-white" />
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center mr-4 shadow-lg">
+              <Rocket className="h-5 w-5 text-white" />
             </div>
-            <div>
-              <span className="text-xl font-bold text-gray-900">Reddit Idea Extractor</span>
-              <p className="text-sm text-gray-600 mt-1">Transforming ideas into solutions</p>
+            <div className="flex flex-col">
+              <p className="text-xl font-bold text-gray-900 m-0 p-0 leading-tight text-left">Nextaiidea</p>
+              <p className="text-sm text-gray-600 mt-1 m-0 p-0 text-left">Transforming ideas into solutions</p>
             </div>
           </div>
 
@@ -66,7 +66,7 @@ const Footer = () => {
         </div>
 
         <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-500 gap-4 pt-4 border-t border-gray-200/30">
-          <p className="font-medium">© 2025 Reddit Idea Extractor. All rights reserved.</p>
+          <p className="font-medium">© 2025 Nextaiidea. All rights reserved.</p>
           <a
             href="mailto:ideaextractor@support.com"
             className="hover:text-blue-600 transition-colors duration-200 font-medium hover:underline"

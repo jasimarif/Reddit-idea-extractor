@@ -5,7 +5,7 @@ import {
   Target,
   Clock,
   Lightbulb,
-  Brain,
+  AlertTriangle,
   Plus,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
@@ -248,12 +248,12 @@ const IdeaDetailPage = () => {
         <div className="mb-8">
           <div className="flex items-center space-x-3 mb-4">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center relative overflow-hidden">
-              {/* 3D Brain Effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-400 via-blue-500 to-indigo-600 rounded-lg"></div>
-              <div className="absolute inset-0 bg-gradient-to-t from-purple-300/30 to-transparent rounded-lg"></div>
+              {/* 3D Pain Point Effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-red-400 via-orange-500 to-pink-600 rounded-lg"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-red-300/30 to-transparent rounded-lg"></div>
               <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 bg-white/70 rounded-full"></div>
               <div className="relative z-10">
-                <Brain className="h-4 w-4 text-white" />
+                <AlertTriangle className="h-4 w-4 text-white" />
               </div>
             </div>
             <h2 className="text-2xl font-bold text-foreground">Pain Points</h2>
@@ -293,7 +293,7 @@ const IdeaDetailPage = () => {
                   </div>
                 </div>
                 <div className="flex flex-col items-end space-y-1">
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-xl font-bold text-lg">
+                  <div className="bg-blue-100  text-btn px-4 py-2 rounded-xl font-bold text-lg">
                     {idea.rankScore}
                   </div>
                   <div className="text-xs text-muted-foreground font-medium">AI Score</div>
