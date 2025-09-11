@@ -28,6 +28,7 @@ import {
   Network,
   Activity,
   Settings,
+  Rocket,
 } from 'lucide-react';
 import ScrollAnimationWrapper from '@/components/ScrollAnimationWrapper';
 import EnhancedAnimatedNavbar from '../components/Navbar';
@@ -243,41 +244,57 @@ const HomePage = () => {
       {/* Hero Section */}
       <section id="hero" className="relative pt-20 md:pt-32 pb-16 md:pb-20 scroll-section bg-[#e6ebef] px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="relative max-w-7xl mx-auto">
+          {/* Enhanced Background Elements */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-purple-200/30 to-pink-200/30 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-br from-blue-200/20 to-purple-200/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-pink-100/10 to-purple-100/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+          </div>
+
           {/* Hero Section Clouds */}
-          <CloudBackground className="top-[15%] -translate-y-1/2" left size="lg" opacity={30} />
-          <CloudBackground className="top-[60%] -translate-y-1/2" right size="base" opacity={35} delay={2} />
-          <CloudBackground className="top-[85%] -translate-y-1/2" left size="sm" opacity={25} delay={4} />
+          <CloudBackground className="top-[15%] -translate-y-1/2" left size="lg" opacity={20} />
+          <CloudBackground className="top-[60%] -translate-y-1/2" right size="base" opacity={25} delay={2} />
+          <CloudBackground className="top-[85%] -translate-y-1/2" left size="sm" opacity={15} delay={4} />
           <ScrollAnimationWrapper>
             <div className="text-center max-w-4xl mx-auto">
-              {/* Icon */}
+              {/* Enhanced Icon */}
               <div className="flex justify-center mb-6 md:mb-8">
-                <div className="h-16 w-16 md:h-20 md:w-20 rounded-2xl bg-gray-900 flex items-center justify-center shadow-lg">
-                  <Brain className="h-8 w-8 md:h-10 md:w-10 text-white" />
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-3xl blur-xl opacity-30 animate-pulse"></div>
+                  <div className="relative h-20 w-20 md:h-24 md:w-24 rounded-3xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center transform hover:scale-110 transition-all duration-500">
+                    <Rocket className="h-10 w-10 md:h-12 md:w-12 text-white " />
+                  </div>
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center animate-bounce">
+                    <span className="text-white text-xs font-bold">✨</span>
+                  </div>
                 </div>
               </div>
               
-              {/* Main heading */}
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-normal tracking-tight text-gray-900 mb-4 md:mb-6 leading-tight px-2">
-              Discover, Analyze, and
-              Extract Valuable Insights
+              {/* Enhanced Main heading */}
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-gray-900 bg-clip-text text-transparent mb-4 md:mb-6 leading-tight px-2 drop-shadow-sm">
+              Discover,<span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600"> Analyze </span>
+              and Extract Valuable Insights
               </h1>
-              <h2 className="text-xl sm:text-2xl md:text-3xl text-gray-900 font-normal mb-6 md:mb-8">
+              <h2 className="text-xl sm:text-2xl md:text-3xl bg-gradient-to-r from-purple-900 to-orange-500 bg-clip-text text-transparent font-semibold mb-6 md:mb-8 drop-shadow-sm">
                 Powered by AI.
               </h2>
               
-              {/* Subtitle */}
-              <p className="text-base md:text-lg text-gray-600 mb-8 md:mb-12 max-w-2xl mx-auto px-2">
+              {/* Enhanced Subtitle */}
+              <p className="text-base md:text-lg text-gray-700 mb-8 md:mb-12 max-w-2xl mx-auto px-2 leading-relaxed font-medium">
               Unlock the power of Reddit's communities with our AI-powered platform that helps you find and organize the most valuable discussions and ideas.
               </p>
               
-              {/* CTA Buttons */}
+              {/* Enhanced CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center px-4">
-                <Link to="/dashboard" className="w-full sm:w-auto px-6 md:px-8 py-3 bg-gradient-to-r from-purple-700 to-purple-900 !text-white rounded-lg font-medium hover:from-purple-700 hover:to-purple-800 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center">
-                  Get Started
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                <Link to="/dashboard" className="group w-full sm:w-auto px-8 md:px-10 py-4 bg-gradient-to-br from-orange-500 to-red-600 text-white rounded-xl font-semibold hover:from-orange-500  hover:to-red-600 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 flex items-center justify-center border border-white/20">
+                  <span className="mr-2">Get Started</span>
+                  <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
                 </Link>
-                <Link className="w-full sm:w-auto px-6 md:px-8 py-3 bg-gray-900 rounded-lg !text-white font-medium hover:bg-[#2E3B58] transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center">
-                  Learn More
+                <Link className="group w-full sm:w-auto px-8 md:px-10 py-4 bg-white/90 backdrop-blur-sm rounded-xl text-gray-800 font-semibold hover:bg-white transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center border border-gray-200">
+                  <span className="mr-2">Learn More</span>
+                  <svg className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  </svg>
                 </Link>
               </div>
             </div>
@@ -296,8 +313,8 @@ const HomePage = () => {
           
           <ScrollAnimationWrapper>
             <div className="mx-auto max-w-2xl text-center mb-12 md:mb-16">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-medium tracking-tight text-gray-900 mb-4 md:mb-6 px-2">
-              AI-Powered Business Idea Engine
+              <h2 className="text-3xl sm:text-4xl md:text-4xl font-bold tracking-tight text-gray-900 mb-4 md:mb-6 px-2">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600">AI-Powered</span> Business Idea Engine
               </h2>
               <p className="text-base md:text-lg text-gray-600 px-2">
               Turn Reddit pain points into startup-ready ideas with an automated multi-agent AI pipeline.

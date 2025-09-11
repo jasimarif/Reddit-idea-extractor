@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
-import { ArrowLeft, ExternalLink, Edit, Share, Download, Eye } from "lucide-react";
+import { ArrowLeft, ExternalLink, Download, Eye } from "lucide-react";
 import BackButton from "../components/BackButton";
 import apiRequest from "../lib/apiRequest";
 
@@ -39,17 +39,6 @@ const LandingPageView = () => {
     }
   }, [landingPageId]);
 
-  const handleEdit = () => {
-    // Navigate back to template selector for editing
-    navigate('/templates');
-  };
-
-  const handleShare = () => {
-    // Copy link to clipboard
-    navigator.clipboard.writeText(window.location.href);
-    alert('Link copied to clipboard!');
-  };
-
   const handleDownload = () => {
     // Download HTML file
     if (landingPage?.generatedHtml) {
@@ -73,6 +62,18 @@ const LandingPageView = () => {
     }
   };
 
+  const handleBackToTemplates = () => {
+    // Try to get business idea ID from landing page data
+    const businessIdeaId = landingPage?.businessIdeaId || landingPage?.ideaId;
+    
+    if (businessIdeaId) {
+      navigate(`/templates/${businessIdeaId}`);
+    } else {
+      // Fallback to dashboard if no business idea ID is available
+      navigate('/dashboard');
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#e6ebef] pt-16 sm:pt-20 flex items-center justify-center">
@@ -91,7 +92,7 @@ const LandingPageView = () => {
           <div className="text-red-500 text-xl mb-4">⚠️</div>
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Oops! Something went wrong</h2>
           <p className="text-gray-600 mb-4">{error}</p>
-          <Button onClick={() => navigate('/templates')} variant="outline">
+          <Button onClick={handleBackToTemplates} variant="outline">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Templates
           </Button>
@@ -107,27 +108,18 @@ const LandingPageView = () => {
         <div className="w-full max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between mb-4">
             <BackButton 
-              onClick={() => navigate('/templates')}
+              onClick={handleBackToTemplates}
               className="text-gray-600 hover:text-gray-800 text-sm font-medium"
             >
-              <ArrowLeft className="h-4 w-4 mr-1" />
               Back to Templates
             </BackButton>
             
             <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm" onClick={handleEdit}>
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleShare}>
-                <Share className="h-4 w-4 mr-2" />
-                Share
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleDownload}>
+              <Button variant="outline" size="sm" onClick={handleDownload} className="bg-green-500 text-white hover:bg-green-600 border-0">
                 <Download className="h-4 w-4 mr-2" />
                 Download
               </Button>
-              <Button size="sm" onClick={openInNewTab}>
+              <Button size="sm" onClick={openInNewTab} className="bg-btn text-white hover:bg-btn-hover">
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Open in New Tab
               </Button>
@@ -135,7 +127,7 @@ const LandingPageView = () => {
           </div>
           
           <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Your Landing Page is Ready!</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Your <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-red-500">Landing Page</span> is Ready!</h1>
             <p className="text-gray-600 max-w-2xl mx-auto">
               Your AI-generated landing page has been created successfully. You can preview it below, make edits, or deploy it.
             </p>
@@ -155,71 +147,20 @@ const LandingPageView = () => {
 
       {/* Main Content */}
       <main className="w-full max-w-7xl mx-auto px-4 pb-8">
-        <div className="grid lg:grid-cols-4 gap-6">
-          {/* Content Overview - Left Sidebar */}
-          <div className="lg:col-span-1">
-            <Card className="sticky top-4">
-              <CardHeader>
-                <CardTitle className="text-lg">Content Overview</CardTitle>
-                <CardDescription>Generated content for your landing page</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {landingPage?.templateContent && (
-                  <>
-                    <div>
-                      <h4 className="font-medium text-sm text-gray-700 mb-1">Title</h4>
-                      <p className="text-sm text-gray-900">{landingPage.templateContent.TITLE}</p>
-                    </div>
-                    
-                    <div>
-                      <h4 className="font-medium text-sm text-gray-700 mb-1">Headline</h4>
-                      <p className="text-sm font-medium text-gray-900">{landingPage.templateContent.HEADLINE}</p>
-                    </div>
-                    
-                    <div>
-                      <h4 className="font-medium text-sm text-gray-700 mb-1">Key Features</h4>
-                      <ul className="text-sm space-y-1">
-                        {landingPage.templateContent.KEY_FEATURES?.map((feature, index) => (
-                          <li key={index} className="flex items-start">
-                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 mr-2 flex-shrink-0"></span>
-                            <span className="text-gray-700">{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    
-                    <div>
-                      <h4 className="font-medium text-sm text-gray-700 mb-1">CTA</h4>
-                      <Badge variant="outline" className="text-xs">
-                        {landingPage.templateContent.CTA_TEXT}
-                      </Badge>
-                    </div>
-                  </>
-                )}
-                
-                <div className="pt-4 border-t">
-                  <div className="text-xs text-gray-500 space-y-1">
-                    <p>Created: {landingPage?.createdAt ? new Date(landingPage.createdAt).toLocaleDateString() : 'Today'}</p>
-                    <p>Status: {landingPage?.status || 'Generated'}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
+        <div className="w-full">
           {/* Landing Page Preview - Main Content */}
-          <div className="lg:col-span-3">
-            <Card>
-              <CardHeader className="pb-3">
+          <div className="w-full">
+            <Card className="rounded border-2 border-gray-200 bg-gradient-to-br from-white to-gray-50">
+              <CardHeader className="pb-3 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-lg flex items-center">
-                      <Eye className="h-5 w-5 mr-2" />
+                    <CardTitle className="text-xl flex items-center text-gray-800">
+                      <Eye className="h-6 w-6 mr-2 text-blue-600" />
                       Live Preview
                     </CardTitle>
-                    <CardDescription>Your generated landing page</CardDescription>
+                    <CardDescription className="text-gray-600">Your generated landing page</CardDescription>
                   </div>
-                  <Button size="sm" variant="outline" onClick={openInNewTab}>
+                  <Button size="sm" onClick={openInNewTab} className="bg-indigo-500 text-white hover:bg-indigo-600 shadow-md">
                     <ExternalLink className="h-4 w-4 mr-2" />
                     Full Screen
                   </Button>
@@ -227,15 +168,15 @@ const LandingPageView = () => {
               </CardHeader>
               <CardContent className="p-0">
                 {landingPage?.generatedHtml ? (
-                  <div className="border rounded-lg overflow-hidden bg-white">
+                  <div className="rounded-lg overflow-hidden bg-white shadow-lg">
                     {/* Browser mockup header */}
-                    <div className="bg-gray-100 px-4 py-3 border-b flex items-center space-x-2">
+                    <div className="bg-gradient-to-r from-gray-100 to-gray-200 px-4 py-3 flex items-center space-x-2">
                       <div className="flex space-x-1.5">
-                        <div className="w-3 h-3 bg-red-400 rounded-full"></div>
-                        <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                        <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                        <div className="w-3 h-3 bg-red-500 rounded-full shadow-sm"></div>
+                        <div className="w-3 h-3 bg-yellow-500 rounded-full shadow-sm"></div>
+                        <div className="w-3 h-3 bg-green-500 rounded-full shadow-sm"></div>
                       </div>
-                      <div className="bg-white px-3 py-1.5 rounded-md text-sm text-gray-600 flex-1 max-w-md">
+                      <div className="bg-white px-3 py-1.5 rounded-md text-sm text-gray-600 flex-1 max-w-md shadow-sm">
                         https://your-landing-page.com
                       </div>
                     </div>
