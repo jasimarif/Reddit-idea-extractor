@@ -1,6 +1,9 @@
 const { 
   generateLandingPage,
   getLandingPageByBusinessIdeaId,
+  getTemplates,
+  generateLandingPageWithTemplate,
+  previewTemplate
 } = require("../services/landingPage.service");
 const landingPageService = require("../services/landingPage.service");
 
@@ -37,6 +40,69 @@ async function getLandingPageByBusinessIdeaIdHandler(req, res) {
     res.status(200).json({ landingPage });
   } catch (error) {
     console.error('Error fetching/creating landing page:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Get all available templates
+async function getTemplatesHandler(req, res) {
+  try {
+    const templates = getTemplates();
+    res.status(200).json({ templates });
+  } catch (error) {
+    console.error('Error fetching templates:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Generate landing page with specific template
+async function generateLandingPageWithTemplateHandler(req, res) {
+  try {
+    console.log('generateLandingPageWithTemplateHandler called with:', req.body);
+    const { businessIdeaId, templateId } = req.body;
+    
+    if (!businessIdeaId) {
+      console.log('Missing businessIdeaId');
+      return res.status(400).json({ error: "businessIdeaId is required" });
+    }
+    
+    if (!templateId) {
+      console.log('Missing templateId');
+      return res.status(400).json({ error: "templateId is required" });
+    }
+    
+    const userId = req.user?._id || '67875b6e5f3d8b17b8c2e944'; // Use test user ID if no auth
+    console.log('Generating landing page with template for userId:', userId);
+    
+    const landingPage = await generateLandingPageWithTemplate(businessIdeaId, userId, templateId);
+    
+    console.log('Successfully generated landing page with template');
+    res.status(201).json({ landingPage });
+  } catch (error) {
+    console.error('Error in generateLandingPageWithTemplateHandler:', error);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Preview template with business idea content
+async function previewTemplateHandler(req, res) {
+  try {
+    const { businessIdeaId, templateId } = req.params;
+    
+    if (!businessIdeaId) {
+      return res.status(400).json({ error: "businessIdeaId is required" });
+    }
+    
+    if (!templateId) {
+      return res.status(400).json({ error: "templateId is required" });
+    }
+    
+    const preview = await previewTemplate(businessIdeaId, templateId);
+    
+    res.status(200).json({ preview });
+  } catch (error) {
+    console.error('Error generating template preview:', error);
     res.status(500).json({ error: error.message });
   }
 }
@@ -84,12 +150,12 @@ async function generateAndDeployLandingPageHandler(req, res) {
   }
 }
 
-
-
 module.exports = {
   generateLandingPageHandler,
   getLandingPageByBusinessIdeaIdHandler,
+  getTemplatesHandler,
+  generateLandingPageWithTemplateHandler,
+  previewTemplateHandler,
   deployLandingPageHandler,
   generateAndDeployLandingPageHandler,
-
 };

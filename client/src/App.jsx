@@ -17,6 +17,9 @@ import UserProfilePage from "./pages/UserProfilePage.jsx";
 import FavoritesPage from "./pages/FavoratesPage.jsx";
 import IdeaDetailPage from "./pages/IdeaDetailPage.jsx";
 import LandingPageViewer from "./pages/landingPage.jsx";
+import LandingPageView from "./pages/LandingPageView.jsx";
+import TemplateSelector from "./pages/TemplateSelector.jsx";
+import TestTemplatePreview from "./pages/TestTemplatePreview.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import GoogleCallback from "./pages/googleCallback.jsx";
 import VerifyEmailPage from "./pages/verify-email.jsx";
@@ -86,6 +89,40 @@ function AppContent() {
               <ProtectedRoute>
                 <AnimatedPage>
                   <LandingPageViewer />
+                </AnimatedPage>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/landing-page/:landingPageId"
+            element={
+              <ProtectedRoute>
+                <AnimatedPage>
+                  <LandingPageView />
+                </AnimatedPage>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/templates/:businessIdeaId"
+            element={
+              <ProtectedRoute>
+                <AnimatedPage>
+                  <TemplateSelector />
+                </AnimatedPage>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/test-template"
+            element={<TestTemplatePreview />}
+          />
+          <Route
+            path="/templates/:businessIdeaId"
+            element={
+              <ProtectedRoute>
+                <AnimatedPage>
+                  <TemplateSelector />
                 </AnimatedPage>
               </ProtectedRoute>
             }

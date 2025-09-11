@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Badge } from '../components/ui/badge';
 import { Lightbulb, Plus, ChevronDown, ChevronUp, Users, DollarSign, Target, TrendingUp, Building2, Lock } from 'lucide-react';
 import PremiumModal from './PremiumModal';import { usePayment } from '../contexts/PaymentContext';
 const BusinessIdeasGrid = ({ businessIdeas, isGeneratingIdeas }) => {
@@ -59,7 +58,7 @@ const BusinessIdeasGrid = ({ businessIdeas, isGeneratingIdeas }) => {
                   {/* Plus icon and text for creating landing page */}
                   {isPremium ? (
                     <Link
-                      to={`/landingPage/${businessIdea.id || businessIdea._id}`}
+                      to={`/templates/${businessIdea.id || businessIdea._id}`}
                       className="absolute top-4 right-4 flex items-center space-x-1 px-3 py-1.5 rounded-md transition-colors text-xs z-10 bg-blue-50 hover:bg-blue-100 text-blue-600 hover:text-blue-800"
                       title="Create landing page"
                     >

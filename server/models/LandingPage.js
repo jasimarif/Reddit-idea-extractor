@@ -16,6 +16,21 @@ const LandingPageSchema = new mongoose.Schema({
     required: true
   },
 
+  // Template information
+  templateId: {
+    type: String,
+    enum: ['saas', 'corporate', 'ecommerce', 'startup'],
+    default: null
+  },
+  templateContent: {
+    type: mongoose.Schema.Types.Mixed,
+    default: null
+  },
+  generatedHtml: {
+    type: String,
+    default: null
+  },
+
   // Core content
   headline: {
     type: String,
@@ -61,6 +76,26 @@ const LandingPageSchema = new mongoose.Schema({
   },
   lovablePrompt: {
     type: String
+  },
+
+  // Deployment fields
+  deploymentTarget: {
+    type: String,
+    enum: ['vercel', 'netlify'],
+    default: null
+  },
+  deploymentStatus: {
+    type: String,
+    enum: ['pending', 'deployed', 'failed'],
+    default: 'pending'
+  },
+  lastDeployedAt: {
+    type: Date,
+    default: null
+  },
+  lastError: {
+    type: String,
+    default: null
   },
 
   // Generation metadata
