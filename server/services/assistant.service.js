@@ -19,7 +19,7 @@ const assistantConfigs = {
     name: "Landing Page Generator (Page Craft)",
     description:
       "Expert React/Tailwind AI agent that converts business ideas into fully functional, production-ready landing pages by customizing a base landing page template.",
-    model: "gpt-4",
+    model: "gpt-4o-mini",
     instructions: `## System Role
 You are an expert React developer specializing in generating production-ready landing pages using Tailwind CSS. You are given a base landing page code as your template.
 

@@ -25,36 +25,57 @@ const getTemplates = () => {
 const generateTemplateContent = async (businessIdea, templateId) => {
   try {
     console.log('Generating template content for template:', templateId);
-    
+    console.log('Business idea data:', {
+      ideaName: businessIdea.ideaName,
+      description: businessIdea.description,
+      problemStatement: businessIdea.problemStatement,
+      solutionOverview: businessIdea.solutionOverview,
+      targetAudience: businessIdea.targetAudience,
+      keyFeatures: businessIdea.keyFeatures,
+      uniqueValueProposition: businessIdea.uniqueValueProposition,
+      differentiators: businessIdea.differentiators,
+      marketCategory: businessIdea.marketCategory,
+      businessModel: businessIdea.businessModel,
+      useCase: businessIdea.useCase
+    });
+
     const template = landingPageTemplates[templateId];
     if (!template) {
       throw new Error(`Template ${templateId} not found`);
     }
 
     const prompt = `
-    Based on this business idea, generate content for a landing page template:
-    
-    Business Idea: ${businessIdea.description || businessIdea.ideaName}
-    Problem: ${businessIdea.problemStatement ? (Array.isArray(businessIdea.problemStatement) ? businessIdea.problemStatement.join(', ') : businessIdea.problemStatement) : businessIdea.problem || 'Various business challenges'}
-    Solution: ${businessIdea.solutionOverview || businessIdea.solution || 'Innovative solution to address business needs'}
-    Target Market: ${businessIdea.targetAudience || businessIdea.targetMarket || 'Business professionals'}
-    Key Features: ${businessIdea.keyFeatures ? (Array.isArray(businessIdea.keyFeatures) ? businessIdea.keyFeatures.join(', ') : businessIdea.keyFeatures) : 'Advanced features and capabilities'}
-    
-    Generate content for these placeholders (return as JSON):
+    You are creating a compelling landing page for this specific business idea. Use ALL the provided information to generate highly targeted, conversion-focused content.
+
+    BUSINESS IDEA DETAILS:
+    - Product/Service Name: ${businessIdea.ideaName || 'Product Name'}
+    - Description: ${businessIdea.description || 'Product description'}
+    - Problem Statement: ${businessIdea.problemStatement || 'Business challenges'}
+    - Solution Overview: ${businessIdea.solutionOverview || 'How the product solves problems'}
+    - Target Audience: ${businessIdea.targetAudience || 'Target customers'}
+    - Key Features: ${Array.isArray(businessIdea.keyFeatures) ? businessIdea.keyFeatures.join(', ') : businessIdea.keyFeatures || 'Core features'}
+    - Unique Value Proposition: ${Array.isArray(businessIdea.uniqueValueProposition) ? businessIdea.uniqueValueProposition.join(', ') : businessIdea.uniqueValueProposition || 'What makes this unique'}
+    - Differentiators: ${businessIdea.differentiators || businessIdea.differentiator || 'What sets this apart'}
+    - Market Category: ${businessIdea.marketCategory || 'Industry category'}
+    - Business Model: ${businessIdea.businessModel || 'How it makes money'}
+    - Use Cases: ${businessIdea.useCase || 'How customers will use it'}
+
+    Generate content for these placeholders (return as JSON). Make sure the content is SPECIFIC to this business idea and uses the actual data provided above:
+
     {
-      "TITLE": "Short catchy product/company name (2-3 words)",
-      "TAGLINE": "Brief one-liner describing what it does",
-      "HEADLINE": "Compelling main headline for hero section",
-      "SUBHEADLINE": "Supporting description for hero section",
-      "CTA_TEXT": "Call-to-action button text (like 'Get Started' or 'Try Now')",
-      "KEY_FEATURES": ["Feature 1", "Feature 2", "Feature 3"],
-      "FEATURE_DESCRIPTIONS": ["Description for feature 1", "Description for feature 2", "Description for feature 3"],
-      "PAIN_POINTS": ["Pain point 1", "Pain point 2", "Pain point 3"],
-      "OUTCOMES": ["Positive outcome 1", "Positive outcome 2", "Positive outcome 3"],
-      "FOUNDER_MESSAGE": "A personal message from the founder about the vision/mission"
+      "TITLE": "${businessIdea.ideaName || 'Product Name'}",
+      "TAGLINE": "Create a compelling tagline that highlights the main benefit for ${businessIdea.targetAudience || 'target customers'}",
+      "HEADLINE": "Create a powerful headline based on the solution overview: ${businessIdea.solutionOverview || 'solution description'}",
+      "SUBHEADLINE": "Expand on the description: ${businessIdea.description || 'product description'} to create an engaging subheadline",
+      "CTA_TEXT": "Create a specific call-to-action based on the business model: ${businessIdea.businessModel || 'business model'}",
+      "KEY_FEATURES": ${Array.isArray(businessIdea.keyFeatures) ? JSON.stringify(businessIdea.keyFeatures) : JSON.stringify(["Feature 1", "Feature 2", "Feature 3"])},
+      "FEATURE_DESCRIPTIONS": ${Array.isArray(businessIdea.keyFeatures) ? JSON.stringify(businessIdea.keyFeatures.map(feature => `How ${feature} helps ${businessIdea.targetAudience || 'customers'}`)) : JSON.stringify(["Description for feature 1", "Description for feature 2", "Description for feature 3"])},
+      "PAIN_POINTS": ${businessIdea.problemStatement ? (Array.isArray(businessIdea.problemStatement) ? JSON.stringify(businessIdea.problemStatement.split(/[,.]/).map(p => p.trim()).filter(p => p.length > 0)) : JSON.stringify([businessIdea.problemStatement])) : JSON.stringify(["Pain point 1", "Pain point 2", "Pain point 3"])},
+      "OUTCOMES": ${businessIdea.useCase ? (Array.isArray(businessIdea.useCase) ? JSON.stringify(businessIdea.useCase.split(/[,.]/).map(u => u.trim()).filter(u => u.length > 0)) : JSON.stringify([businessIdea.useCase])) : JSON.stringify(["Positive outcome 1", "Positive outcome 2", "Positive outcome 3"])},
+      "FOUNDER_MESSAGE": "Write a personal message from the founder about creating this solution for ${businessIdea.targetAudience || 'customers'} to solve ${businessIdea.problemStatement || 'business challenges'}"
     }
-    
-    Make the content compelling, professional, and tailored to the business idea.
+
+    IMPORTANT: Use the actual business idea data provided above. Do NOT make up generic content. Make the content highly specific and tailored to this exact business idea.
     `;
 
     const completion = await openai.chat.completions.create({
@@ -62,7 +83,7 @@ const generateTemplateContent = async (businessIdea, templateId) => {
       messages: [
         {
           role: "system",
-          content: "You are a professional copywriter specializing in landing page content. Generate compelling, conversion-focused content that matches the business idea. Return only valid JSON."
+          content: "You are a professional copywriter specializing in landing page content. Generate compelling, conversion-focused content that is SPECIFICALLY tailored to the business idea provided. Use ALL the data given to create highly targeted content. Return only valid JSON."
         },
         {
           role: "user",
@@ -74,8 +95,8 @@ const generateTemplateContent = async (businessIdea, templateId) => {
     });
 
     const content = JSON.parse(completion.choices[0].message.content);
-    console.log('Generated template content successfully');
-    
+    console.log('Generated template content successfully:', content);
+
     return content;
   } catch (error) {
     console.error('Error generating template content:', error);
@@ -195,7 +216,7 @@ const generateLandingPageWithTemplate = async (businessIdeaId, userId, templateI
 const previewTemplate = async (businessIdeaId, templateId) => {
   try {
     console.log(`Generating preview for template ${templateId} with business idea ${businessIdeaId}`);
-    
+
     // Fetch business idea
     const idea = await BusinessIdea.findById(businessIdeaId);
     if (!idea) {
@@ -204,7 +225,7 @@ const previewTemplate = async (businessIdeaId, templateId) => {
 
     // Generate content for the template
     const templateContent = await generateTemplateContent(idea, templateId);
-    
+
     // Get the template
     const template = landingPageTemplates[templateId];
     if (!template) {
@@ -225,8 +246,6 @@ const previewTemplate = async (businessIdeaId, templateId) => {
     throw error;
   }
 };
-
-
 async function generateLandingPage(businessIdeaId, userId) {
   try {
     console.log(`Starting landing page generation for businessIdeaId: ${businessIdeaId}, userId: ${userId}`);
