@@ -123,28 +123,28 @@ const extractPainPointsFromThread = async (thread) => {
     threadProcessingCache.set(cacheKey, true);
     
     try {
-      console.debug(`Calling Claude agent for thread ${threadId}...`);
+      console.debug(`Calling ChatGPT agent for thread ${threadId}...`);
       
       // Get or create agent with conversation context
-      const { invoke } = await langchain.getClaudePainPointAgent({ conversationId });
+      const { invoke } = await langchain.getPainPointAgent();
       
       // Only send the thread content - system prompt is handled by the agent
-      console.debug('Sending request to Claude agent...');
+      console.debug('Sending request to ChatGPT agent...');
       let response;
       try {
-        response = await invoke(threadContent);
-        console.debug('Received response from Claude agent');
+        response = await invoke({ input: threadContent });
+        console.debug('Received response from ChatGPT agent');
       } catch (error) {
-        console.error('Error from Claude agent invocation:', error);
-        throw new Error(`Claude agent invocation failed: ${error.message}`);
+        console.error('Error from ChatGPT agent invocation:', error);
+        throw new Error(`ChatGPT agent invocation failed: ${error.message}`);
       }
       
       let extracted;
       try {
         // let content = response.response || response.text || response;
         // Handle the response format from the agent
-        console.debug('Processing Claude agent response...');
-        const content = response;
+        console.debug('Processing ChatGPT agent response...');
+        const content = response.response || response;
         
         try {
           extracted = typeof content === "string" ? JSON.parse(content) : content;
@@ -204,10 +204,10 @@ const extractPainPointsFromThread = async (thread) => {
         url: thread.url || thread.permalink || "",
         postDate: thread.createdAt || new Date(),
         extractedAt: new Date(),
-        extractedBy: "anthropic-langchain",
+        extractedBy: "openai-langchain",
       }));
     } catch (error) {
-      console.error(`Error in Claude agent for thread ${threadId}:`, error);
+      console.error(`Error in ChatGPT agent for thread ${threadId}:`, error);
       throw error;
     } finally {
       // Ensure we always clean up the processing cache

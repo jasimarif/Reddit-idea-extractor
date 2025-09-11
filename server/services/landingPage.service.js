@@ -5,63 +5,84 @@ const landingPageDeployer = require('./landingPageDeploy.service');
 
 
 async function generateLandingPage(businessIdeaId, userId) {
-  // Fetch business idea and customer insights
-  const idea = await BusinessIdea.findById(businessIdeaId);
-  if (!idea) throw new Error('Business idea not found');
+  try {
+    console.log(`Starting landing page generation for businessIdeaId: ${businessIdeaId}, userId: ${userId}`);
+    
+    // Fetch business idea and customer insights
+    const idea = await BusinessIdea.findById(businessIdeaId);
+    if (!idea) {
+      console.error(`Business idea not found for ID: ${businessIdeaId}`);
+      throw new Error('Business idea not found');
+    }
 
-  const {
-    ideaName,
-    tagline,
-    description,
-    keyFeatures = [],
-    problemStatement = [],
-    solutionOverview,
-    implementationSteps,
-    potentialChallenges,
-    differentiators,
-    successMetrics,
-    targetAudience,
-    useCase,
-  } = idea;
+    console.log(`Found business idea: ${idea.ideaName}`);
 
-  const headline = ideaName || 'Untitled Landing Page';
-  const subheadline = description || '';
-  const bulletPoints = keyFeatures;
-  const painPointsSection = problemStatement;
-  const outcomeSection = useCase;
+    const {
+      ideaName,
+      tagline,
+      description,
+      keyFeatures = [],
+      problemStatement = [],
+      solutionOverview,
+      implementationSteps,
+      potentialChallenges,
+      differentiators,
+      successMetrics,
+      targetAudience,
+      useCase,
+    } = idea;
 
-  // Generate the lovable prompt and get AI-generated values
-  const { prompt: lovablePrompt, generatedValues } = await generateLovablePromptBAB({
-    title: headline,
-    description: subheadline,
-    painPoints: painPointsSection,
-    outcomes: outcomeSection,
-    founderMessage: '', // Let the AI generate this
-    ctaText: '' // Let the AI generate this
-  });
-  
-  // Use AI-generated values or fallback to defaults
-  const founderMessage = generatedValues.founderMessage || 
-    `Hi, I'm the founder behind ${ideaName}. I created this solution because I understand the challenges of ${problemStatement[0] || 'this problem'} and wanted to build something that truly helps people like you.`;
-  
-  const ctaText = generatedValues.ctaText || `Get Started with ${ideaName} Today`;
+    const headline = ideaName || 'Untitled Landing Page';
+    const subheadline = description || '';
+    const bulletPoints = keyFeatures;
+    const painPointsSection = problemStatement;
+    const outcomeSection = useCase;
 
-  const landingPage = new LandingPage({
-    userId,
-    businessIdeaId,
-    headline,
-    subheadline,
-    bulletPoints,
-    painPointsSection,
-    outcomeSection,
-    founderMessage,
-    ctaText,
-    lovablePrompt,
-    status: 'generated',
-    isPublic: false
-  });
-  await landingPage.save();
-  return landingPage;
+    console.log('Calling generateLovablePromptBAB...');
+    
+    // Generate the lovable prompt and get AI-generated values
+    const { prompt: lovablePrompt, generatedValues } = await generateLovablePromptBAB({
+      title: headline,
+      description: subheadline,
+      painPoints: painPointsSection,
+      outcomes: outcomeSection,
+      founderMessage: '', // Let the AI generate this
+      ctaText: '' // Let the AI generate this
+    });
+    
+    console.log('Successfully generated lovable prompt');
+    
+    // Use AI-generated values or fallback to defaults
+    const founderMessage = generatedValues.founderMessage || 
+      `Hi, I'm the founder behind ${ideaName}. I created this solution because I understand the challenges of ${problemStatement[0] || 'this problem'} and wanted to build something that truly helps people like you.`;
+    
+    const ctaText = generatedValues.ctaText || `Get Started with ${ideaName} Today`;
+
+    console.log('Creating landing page document...');
+    
+    const landingPage = new LandingPage({
+      userId,
+      businessIdeaId,
+      headline,
+      subheadline,
+      bulletPoints,
+      painPointsSection,
+      outcomeSection,
+      founderMessage,
+      ctaText,
+      lovablePrompt,
+      status: 'generated',
+      isPublic: false
+    });
+    
+    await landingPage.save();
+    console.log(`Successfully created landing page with ID: ${landingPage._id}`);
+    
+    return landingPage;
+  } catch (error) {
+    console.error('Error in generateLandingPage:', error);
+    throw error;
+  }
 }
 
 
@@ -118,13 +139,16 @@ async function deployLandingPage(landingPageId, options = {}) {
 
 async function getLandingPageByBusinessIdeaId(businessIdeaId, userId) {
   try {
-    return await LandingPage.findOne({ 
+    const landingPage = await LandingPage.findOne({ 
       businessIdeaId,
       userId 
     })
       .select('-__v')
       .lean()
       .exec();
+    
+    // Return null if no landing page exists (this is not an error condition)
+    return landingPage;
   } catch (error) {
     console.error('Error fetching landing page:', error);
     throw new Error('Failed to fetch landing page');

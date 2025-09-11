@@ -1,6 +1,5 @@
 // LangChain integration using initialized assistants
 const { ChatOpenAI } = require("@langchain/openai");
-const { ChatAnthropic } = require("@langchain/anthropic");
 const { ConversationChain } = require("langchain/chains");
 const { BufferMemory } = require("langchain/memory");
 const { RunnableSequence } = require("@langchain/core/runnables");
@@ -9,8 +8,8 @@ const { v4: uuidv4 } = require('uuid');
 const {
   getOrCreateLandingPageAssistant,
   getOrCreatePageCraftAssistant,
-  getOrCreateClaudePainPointAgent,
-  getOrCreateClaudeMarketGapAgent,
+  getOrCreatePainPointAssistant,
+  getOrCreateMarketGapAssistant,
   ensureInitialized,
 } = require("./assistant.service");
 const { getOrCreateConversation } = require('./conversation.service');
@@ -31,8 +30,7 @@ const { OpenAI } = require("openai");
 
 // Agent types
 const AGENT_TYPES = {
-  OPENAI: 'openai',
-  CLAUDE: 'claude'
+  OPENAI: 'openai'
 };
 
 // Cache for agent configurations (not conversation state)
@@ -42,7 +40,7 @@ const agentConfigCache = new Map();
  * Helper function to get agent configuration
  * @param {string} type - The type of agent (e.g., 'painPoint', 'marketGap')
  * @param {Function} getAssistantFn - Function to get the assistant configuration
- * @param {string} [agentType=AGENT_TYPES.OPENAI] - Type of agent (openai or claude)
+ * @param {string} [agentType=AGENT_TYPES.OPENAI] - Type of agent (openai only)
  * @returns {Promise<Object>} The agent configuration and LLM instance
  */
 const getAgentConfig = async (type, getAssistantFn, agentType = AGENT_TYPES.OPENAI) => {
@@ -58,56 +56,27 @@ const getAgentConfig = async (type, getAssistantFn, agentType = AGENT_TYPES.OPEN
   
   let config;
   
-  if (agentType === AGENT_TYPES.CLAUDE) {
-    // Handle Claude agent
-    const claudeConfig = await getAssistantFn();
-    
-    const claude = new ChatAnthropic({
-      anthropicApiKey: process.env.ANTHROPIC_API_KEY,
-      modelName: claudeConfig.model,
-      temperature: type === "marketGap" ? 0.7 : 0.3,
-      maxTokens: 3000,
-    });
-    
-    config = {
-      type: agentType,
-      llm: claude,
-      systemPrompt: claudeConfig.system || '',
-      model: claudeConfig.model
-    };
-    
-    console.log(`Loaded Claude agent config for ${type} with model ${claudeConfig.model}`);
-  } else {
-    // Handle OpenAI agent (default)
-    const assistant = await getAssistantFn();
-    
-    const openai = new ChatOpenAI({
-      openAIApiKey: process.env.OPENAI_API_KEY,
-      modelName: assistant.model,
-      configuration: {
-        baseURL: "https://api.openai.com/v1",
-      },
-      temperature: type === "marketGap" ? 0.7 : 0.3,
-      maxTokens: 3000,
-    });
+  // Handle OpenAI agent (only option now)
+  const assistant = await getAssistantFn();
+  
+  const openai = new ChatOpenAI({
+    openAIApiKey: process.env.OPENAI_API_KEY,
+    modelName: assistant.model,
+    configuration: {
+      baseURL: "https://api.openai.com/v1",
+    },
+    temperature: type === "marketGap" ? 0.7 : 0.3,
+    maxTokens: 3000,
+  });
 
-  //     // Create and cache the agent
-  // const memory = new BufferMemory();
-  // const agent = new ConversationChain({
-  //   llm: openai,
-  //   memory,
-  //   // Add any assistant-specific configuration here
-  // });
-    
-    config = {
-      type: agentType,
-      llm: openai,
-      systemPrompt: assistant.instructions || '',
-      model: assistant.model
-    };
-    
-    console.log(`Loaded OpenAI agent config for ${type} with model ${assistant.model}`);
-  }
+  config = {
+    type: agentType,
+    llm: openai,
+    systemPrompt: assistant.instructions || '',
+    model: assistant.model
+  };
+  
+  console.log(`Loaded OpenAI agent config for ${type} with model ${assistant.model}`);
   
   // Cache the config
   agentConfigCache.set(cacheKey, config);
@@ -119,7 +88,7 @@ const getAgentConfig = async (type, getAssistantFn, agentType = AGENT_TYPES.OPEN
  * @param {string} type - The type of agent (e.g., 'painPoint', 'marketGap')
  * @param {Object} options - Options for the agent
  * @param {string} [options.conversationId] - Optional conversation ID for maintaining context
- * @param {string} [options.agentType=AGENT_TYPES.OPENAI] - Type of agent (openai or claude)
+ * @param {string} [options.agentType=AGENT_TYPES.OPENAI] - Type of agent (openai only)
  * @param {Function} getAssistantFn - Function to get the assistant configuration
  * @returns {Promise<Object>} Object with agent and conversation info
  */
@@ -182,170 +151,6 @@ const getAgent = async (type, options, getAssistantFn) => {
 
 // Cache for initialized agents
 const agentCache = new Map();
-
-// --- Claude PainPoint Agent ---
-const getClaudePainPointAgent = async (options = {}) => {
-  const { conversationId = `conv_${uuidv4()}` } = options;
-  const cacheKey = `claude_painpoint_${conversationId}`;
-  
-  // Return cached agent if available
-  if (agentCache.has(cacheKey)) {
-    return agentCache.get(cacheKey);
-  }
-  
-  // Get or create the Claude agent config (without system prompt)
-  const config = await getAgentConfig(
-    'painPoint', 
-    getOrCreateClaudePainPointAgent, 
-    AGENT_TYPES.CLAUDE
-  );
-  
-  // Get or create conversation with the system prompt
-  const conversation = await getOrCreateConversation(conversationId, {
-    systemPrompt: config.systemPrompt
-  });
-  
-  // Initialize the agent with system prompt once
-  const agent = {
-    invoke: async (input) => {
-      try {
-        // Only include the system prompt if this is the first message
-        const messages = [];
-        const memoryVariables = await conversation.memory.loadMemoryVariables({});
-        
-        if (!memoryVariables.chat_history?.length) {
-          // First message - include system prompt
-          messages.push({
-            role: "system",
-            content: conversation.systemPrompt,
-          });
-        } else {
-          // Subsequent messages - only include chat history
-          messages.push(...memoryVariables.chat_history);
-        }
-        
-        // Add user input
-        messages.push({
-          role: "user",
-          content: JSON.stringify(input),
-        });
-        
-        // Get response from Claude
-        const response = await config.llm.invoke(messages);
-        
-        // Save to conversation memory
-        await conversation.memory.saveContext(
-          { input: JSON.stringify(input) },
-          { output: response.content }
-        );
-        
-        return response.content;
-      } catch (error) {
-        console.error('Error in Claude PainPoint agent:', error);
-        throw error;
-      }
-    },
-    conversationId,
-    clear: () => {
-      agentCache.delete(cacheKey);
-      conversation.memory.clear();
-    }
-  };
-  
-  // Cache the agent
-  agentCache.set(cacheKey, agent);
-  
-  // Clean up old agents periodically
-  setTimeout(() => {
-    if (agentCache.has(cacheKey)) {
-      agentCache.delete(cacheKey);
-    }
-  }, 60 * 60 * 1000); // 1 hour TTL
-  
-  return agent;
-};
-
-// --- Claude MarketGap Agent ---
-const getClaudeMarketGapAgent = async (options = {}) => {
-  const { conversationId = `conv_${uuidv4()}` } = options;
-  const cacheKey = `claude_marketgap_${conversationId}`;
-  
-  // Return cached agent if available
-  if (agentCache.has(cacheKey)) {
-    return agentCache.get(cacheKey);
-  }
-  
-  // Get or create the Claude agent config (without system prompt)
-  const config = await getAgentConfig(
-    'marketGap', 
-    getOrCreateClaudeMarketGapAgent, 
-    AGENT_TYPES.CLAUDE
-  );
-  
-  // Get or create conversation with the system prompt
-  const conversation = await getOrCreateConversation(conversationId, {
-    systemPrompt: config.systemPrompt
-  });
-  
-  // Initialize the agent with system prompt once
-  const agent = {
-    invoke: async (input) => {
-      try {
-        // Only include the system prompt if this is the first message
-        const messages = [];
-        const memoryVariables = await conversation.memory.loadMemoryVariables({});
-        
-        if (!memoryVariables.chat_history?.length) {
-          // First message - include system prompt
-          messages.push({
-            role: "system",
-            content: conversation.systemPrompt,
-          });
-        } else {
-          // Subsequent messages - only include chat history
-          messages.push(...memoryVariables.chat_history);
-        }
-        
-        // Add user input
-        messages.push({
-          role: "user",
-          content: JSON.stringify(input),
-        });
-        
-        // Get response from Claude
-        const response = await config.llm.invoke(messages);
-        
-        // Save to conversation memory
-        await conversation.memory.saveContext(
-          { input: JSON.stringify(input) },
-          { output: response.content }
-        );
-        
-        return response.content;
-      } catch (error) {
-        console.error('Error in Claude MarketGap agent:', error);
-        throw error;
-      }
-    },
-    conversationId,
-    clear: () => {
-      agentCache.delete(cacheKey);
-      conversation.memory.clear();
-    }
-  };
-  
-  // Cache the agent
-  agentCache.set(cacheKey, agent);
-  
-  // Clean up old agents periodically
-  setTimeout(() => {
-    if (agentCache.has(cacheKey)) {
-      agentCache.delete(cacheKey);
-    }
-  }, 60 * 60 * 1000); // 1 hour TTL
-  
-  return agent;
-};
 
 // --- PainPoint Agent ---
 async function getPainPointAgent() {
@@ -709,7 +514,19 @@ async function getMarketGapAgent() {
 
 // --- PageCraft Agent ---
 async function getPageCraftAgent() {
-  return getOrCreateAgent("pageCraft", getOrCreatePageCraftAssistant);
+  const assistant = await getOrCreatePageCraftAssistant();
+  return {
+    llm: new ChatOpenAI({
+      openAIApiKey: process.env.OPENAI_API_KEY,
+      modelName: assistant.model,
+      configuration: {
+        baseURL: "https://api.openai.com/v1",
+      },
+      temperature: 0.7,
+      maxTokens: 3000,
+    }),
+    assistant
+  };
 }
 
 async function generateLovablePromptBAB({
@@ -726,29 +543,21 @@ async function generateLovablePromptBAB({
   potentialChallenges = [],
   differentiators = [],
   successMetrics = [],
-  agentType = 'claude', // 'openai' or 'claude'
+  agentType = 'openai', // 'openai' only now
 }) {
   let llm;
   
-  if (agentType === 'claude') {
-    // Get Claude agent for landing page
-    const { getOrCreateClaudeLandingPageAgent } = require('./assistant.service');
-    const claudeAgent = await getOrCreateClaudeLandingPageAgent();
-    
-    // Initialize Claude LLM
-    llm = new ChatAnthropic({
-      anthropicApiKey: process.env.ANTHROPIC_API_KEY,
-      modelName: claudeAgent.model || 'claude-3-haiku-20240307',
-      temperature: 0.7,
-    });
-  } else {
-    // Get or create the landing page agent (OpenAI)
-    const agent = await getOrCreateAgent(
-      "landingPage",
-      getOrCreateLandingPageAssistant
-    );
-    llm = agent.llm;
-  }
+  // Get the OpenAI landing page assistant directly
+  const assistant = await getOrCreateLandingPageAssistant();
+  llm = new ChatOpenAI({
+    openAIApiKey: process.env.OPENAI_API_KEY,
+    modelName: assistant.model,
+    configuration: {
+      baseURL: "https://api.openai.com/v1",
+    },
+    temperature: 0.7,
+    maxTokens: 3000,
+  });
 
   // Helper functions for intelligent analysis
   function generateSmartCTA(title, description, industry) {
@@ -1089,10 +898,6 @@ module.exports = {
   getPainPointAgent,
   getMarketGapAgent,
   getPageCraftAgent,
-  
-  // Claude Agents
-  getClaudePainPointAgent,
-  getClaudeMarketGapAgent,
   
   // Common functions
   generateLovablePromptBAB,

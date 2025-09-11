@@ -9,12 +9,8 @@ if (!process.env.OPENAI_API_KEY) {
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// Initialize Claude client if API key is available
-let anthropic;
-if (process.env.ANTHROPIC_API_KEY) {
-  const { Anthropic } = require('@anthropic-ai/sdk');
-  anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-}
+// Removed Claude/Anthropic SDK as we're now using ChatGPT only
+let anthropic = null;
 
 const CONFIG_FILE = path.join(process.cwd(), "openai.config.json");
 
@@ -855,8 +851,9 @@ Now, generate the best possible Lovable.dev prompt! 🚀
   },
 };
 
-// Configuration for Claude agents
-const claudeAgentConfigs = {
+// Configuration for Claude agents - DISABLED (moved to ChatGPT)
+/*
+// const claudeAgentConfigs = {
   // Claude agent for landing page generation
   claudeLandingPage: {
     name: "Claude Landing Page Generator",
@@ -1149,6 +1146,7 @@ If Not Viable:
     temperature: 0.7,
   },
 };
+// */
 
 const cache = {};
 
@@ -1175,47 +1173,30 @@ async function initializeAssistants() {
     const initializationPromises = [];
     
     // Initialize OpenAI assistants if API key is available
-    // if (process.env.OPENAI_API_KEY) {
-    //   initializationPromises.push(
-    //     getOrCreateAssistant('painPoint').catch(err =>
-    //       console.error('Failed to initialize painPoint assistant:', err)
-    //     ),
-    //     getOrCreateAssistant('marketGap').catch(err =>
-    //       console.error('Failed to initialize marketGap assistant:', err)
-    //     ),
-    //     getOrCreateAssistant('landingPage').catch(err =>
-    //       console.error('Failed to initialize landingPage assistant:', err)
-    //     ),
-    //     getOrCreateAssistant('pageCraft').catch(err =>
-    //       console.error('Failed to initialize pageCraft assistant:', err)
-    //     )
-    //   );
-    // } else {
-    //   console.warn('OPENAI_API_KEY not found. Skipping OpenAI assistants initialization.');
-    // }
+    if (process.env.OPENAI_API_KEY) {
+      initializationPromises.push(
+        getOrCreateAssistant('painPoint').catch(err =>
+          console.error('Failed to initialize painPoint assistant:', err)
+        ),
+        getOrCreateAssistant('marketGap').catch(err =>
+          console.error('Failed to initialize marketGap assistant:', err)
+        ),
+        getOrCreateAssistant('landingPage').catch(err =>
+          console.error('Failed to initialize landingPage assistant:', err)
+        ),
+        getOrCreateAssistant('pageCraft').catch(err =>
+          console.error('Failed to initialize pageCraft assistant:', err)
+        )
+      );
+    } else {
+      console.warn('OPENAI_API_KEY not found. Skipping OpenAI assistants initialization.');
+    }
 
-    // Initialize Claude agents if API key is available
-    // if (process.env.ANTHROPIC_API_KEY) {
-    //   initializationPromises.push(
-    //     getOrCreateClaudeAgent('claudePainPoint').catch(err =>
-    //       console.error('Failed to initialize Claude pain point agent:', err)
-    //     ),
-    //     getOrCreateClaudeAgent('claudeMarketGap').catch(err =>
-    //       console.error('Failed to initialize Claude market gap agent:', err)
-    //     ),
-    //     getOrCreateClaudeAgent('claudeLandingPage').catch(err =>
-    //       console.error('Failed to initialize Claude landing page agent:', err)
-    //     ),
-    //   );
-    // } else {
-    //   console.warn('ANTHROPIC_API_KEY not found. Skipping Claude agents initialization.');
-    // }
-
-    // // Wait for all initializations to complete
-    // await Promise.all(initializationPromises);
-    // console.log("All assistants and agents initialized successfully");
+    // Wait for all initializations to complete
+    await Promise.all(initializationPromises);
+    console.log("All assistants initialized successfully");
   } catch (error) {
-    // console.error("Error initializing assistants:", error);
+    console.error("Error initializing assistants:", error);
   }
 }
 
@@ -1269,9 +1250,7 @@ async function saveConfig(config) {
 
 async function getOrCreateAssistant(type) {
   console.log(`Getting or creating assistant of type: ${type}`);
-  // Ensure we're initialized
-  await ensureInitialized();
-
+  
   // Return from cache if available
   if (cache[type] && cache[type].id) {
     console.log(`Returning cached assistant: ${cache[type].id}`);
@@ -1347,9 +1326,10 @@ async function listAllAssistants() {
 }
 
 /**
- * Lists all initialized Claude agents
+ * Lists all initialized Claude agents - DISABLED
  * @returns {Promise<Array>} Array of initialized Claude agent configurations
  */
+/*
 async function listClaudeAgents() {
   const claudeAgentTypes = Object.keys(claudeAgentConfigs);
   const agents = [];
@@ -1371,12 +1351,14 @@ async function listClaudeAgents() {
   
   return agents;
 }
+*/
 
 /**
- * Gets or creates a Claude agent
+ * Gets or creates a Claude agent - DISABLED
  * @param {string} type - The type of Claude agent to get or create
  * @returns {Promise<Object>} The Claude agent configuration
  */
+/*
 async function getOrCreateClaudeAgent(type) {
   console.log(`Getting or creating Claude agent of type: ${type}`);
   
@@ -1412,6 +1394,7 @@ async function getOrCreateClaudeAgent(type) {
     throw error;
   }
 }
+*/
 
 async function deleteAssistantByType(type) {
   try {
@@ -1473,32 +1456,22 @@ async function deleteAllAssistants() {
 
 // Helper function to check if a string is a Claude agent type
 function isClaudeAgentType(type) {
-  return type.startsWith('claude');
+  return false; // Claude agents disabled - all using ChatGPT now
 }
 
 module.exports = {
-  // OpenAI Assistant functions(old)
+  // OpenAI Assistant functions
   getOrCreatePainPointAssistant: () => getOrCreateAssistant('painPoint'),
   getOrCreateMarketGapAssistant: () => getOrCreateAssistant('marketGap'),
   getOrCreateLandingPageAssistant: () => getOrCreateAssistant('landingPage'),
   getOrCreatePageCraftAssistant: () => getOrCreateAssistant('pageCraft'),
   
-  // Claude Agent functions
-  getOrCreateClaudePainPointAgent: () => getOrCreateClaudeAgent('claudePainPoint'),
-  getOrCreateClaudeMarketGapAgent: () => getOrCreateClaudeAgent('claudeMarketGap'),
-  getOrCreateClaudeLandingPageAgent: () => getOrCreateClaudeAgent('claudeLandingPage'),
-  
   // Common functions
   updateAssistant,
   listAllAssistants,
-  listClaudeAgents,  // Add this line to export the function
   deleteAssistantByType,
   deleteAllAssistants,
   initializeAssistants,
   isInitialized: () => isInitialized,
   ensureInitialized,
-  
-  // Internal helpers (exposed for testing)
-  _isClaudeAgentType: isClaudeAgentType,
-  _getOrCreateClaudeAgent: getOrCreateClaudeAgent,
 };

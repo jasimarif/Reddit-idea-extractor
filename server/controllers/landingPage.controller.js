@@ -1,5 +1,5 @@
-const { generateLandingPage } = require("../services/landingPage.service");
-const {
+const { 
+  generateLandingPage,
   getLandingPageByBusinessIdeaId,
 } = require("../services/landingPage.service");
 const landingPageService = require("../services/landingPage.service");
@@ -26,14 +26,17 @@ async function getLandingPageByBusinessIdeaIdHandler(req, res) {
     }
     
     const userId = req.user._id; // Get the authenticated user's ID
-    const landingPage = await getLandingPageByBusinessIdeaId(businessIdeaId, userId);
+    let landingPage = await getLandingPageByBusinessIdeaId(businessIdeaId, userId);
 
+    // If no landing page exists, create one automatically
     if (!landingPage) {
-      return res.status(404).json({ error: "Landing page not found" });
+      console.log(`No landing page found for business idea ${businessIdeaId}. Creating new landing page...`);
+      landingPage = await generateLandingPage(businessIdeaId, userId);
     }
 
     res.status(200).json({ landingPage });
   } catch (error) {
+    console.error('Error fetching/creating landing page:', error);
     res.status(500).json({ error: error.message });
   }
 }

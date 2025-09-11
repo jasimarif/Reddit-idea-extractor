@@ -30,20 +30,20 @@ async function generateBusinessIdeas(painPoints) {
       // const agent = await langchain.getMarketGapAgent();
       // const prompt = formattedPainPoints;
       // const response = await agent.invoke({ input: prompt });
-      const agent = await langchain.getClaudeMarketGapAgent();
+      const agent = await langchain.getMarketGapAgent();
       const prompt = formattedPainPoints;
       const response = await agent.invoke({ input: prompt });
-      console.log('OpenAI response:', JSON.stringify(response, null, 2));
+      console.log('ChatGPT response:', JSON.stringify(response, null, 2));
       let aiIdeas;
       try {
         const responseContent = response.response || response.text || response;
         aiIdeas = typeof responseContent === 'string' ? JSON.parse(responseContent) : responseContent;
       } catch (e) {
-        console.error('Failed to parse OpenAI response:', response.response);
-        throw new Error('Invalid JSON response from OpenAI agent');
+        console.error('Failed to parse ChatGPT response:', response.response);
+        throw new Error('Invalid JSON response from ChatGPT agent');
       }
       const ideasArr = Array.isArray(aiIdeas) ? aiIdeas : (aiIdeas.businessIdeas || aiIdeas.ideas || []);
-      if (!Array.isArray(ideasArr) || ideasArr.length === 0) throw new Error('No business ideas returned by OpenAI agent');
+      if (!Array.isArray(ideasArr) || ideasArr.length === 0) throw new Error('No business ideas returned by ChatGPT agent');
       const savedIdeas = [];
       let saveErrors = [];
       
