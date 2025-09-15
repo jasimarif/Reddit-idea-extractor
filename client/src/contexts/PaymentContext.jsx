@@ -12,14 +12,29 @@ export const PaymentProvider = ({ children }) => {
   const [isPremium, setIsPremium] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [landingPageUsage, setLandingPageUsage] = useState({
+    currentCount: 0,
+    limit: 2,
+    remaining: 2,
+    limitReached: false,
+    isPremium: false
+  });
   const { user } = useAuth();
 
   // Check premium status when user changes
   useEffect(() => {
     if (user) {
       checkPremiumStatus();
+      fetchLandingPageUsage();
     } else {
       setIsPremium(false);
+      setLandingPageUsage({
+        currentCount: 0,
+        limit: 2,
+        remaining: 2,
+        limitReached: false,
+        isPremium: false
+      });
       setIsLoading(false);
     }
   }, [user]);
@@ -34,6 +49,22 @@ export const PaymentProvider = ({ children }) => {
       setIsPremium(false);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchLandingPageUsage = async () => {
+    try {
+      const response = await apiRequest.get('/landing-pages/usage');
+      setLandingPageUsage(response.data);
+    } catch (error) {
+      console.error('Failed to fetch landing page usage:', error);
+      setLandingPageUsage({
+        currentCount: 0,
+        limit: 2,
+        remaining: 2,
+        limitReached: false,
+        isPremium: false
+      });
     }
   };
 
@@ -106,6 +137,8 @@ export const PaymentProvider = ({ children }) => {
     handlePaymentSuccess,
     openBillingPortal,
     checkPremiumStatus,
+    landingPageUsage,
+    fetchLandingPageUsage,
   };
 
   return (

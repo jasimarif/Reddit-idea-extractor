@@ -178,7 +178,7 @@ const EnhancedAnimatedNavbar = () => {
           <div className="flex items-center justify-between min-w-max gap-6 relative z-10 whitespace-nowrap">
             {/* Logo */}
             <div className="flex items-center space-x-3">
-              <Link to="/" className="flex items-center space-x-3 group">
+              <Link to="/dashboard" className="flex items-center space-x-3 group">
                 <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-orange-500 to-red-600  flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-all duration-300">
                   <Rocket className="h-4 w-4 text-white" />
                 </div>
@@ -368,7 +368,7 @@ const EnhancedAnimatedNavbar = () => {
       {/* Mobile Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 md:hidden bg-white/95 backdrop-blur-xl border-b border-gray-200/50">
         <div className="flex items-center justify-between px-4 py-3">
-          <Link to="/" className="flex items-center space-x-3">
+          <Link to="/dashboard" className="flex items-center space-x-3">
             <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center shadow-md">
               <Rocket className="h-4 w-4 text-white" />
             </div>

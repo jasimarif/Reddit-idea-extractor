@@ -28,6 +28,7 @@ import PaymentCancelPage from "./pages/PaymentCancelPage.jsx";
 import { AnimatePresence } from "framer-motion";
 import AnimatedPage from "./components/AnimatedPage";
 import EnhancedAnimatedNavbar from "./components/Navbar.jsx";
+import PublicRoute from "./components/PublicRoute.jsx";
 
 const queryClient = new QueryClient();
 
@@ -52,7 +53,11 @@ function AppContent() {
       {!shouldHideNavbar && <EnhancedAnimatedNavbar />}
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={
+            <PublicRoute>
+              <HomePage />
+            </PublicRoute>
+          } />
           <Route path="/google/callback" element={<GoogleCallback />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />

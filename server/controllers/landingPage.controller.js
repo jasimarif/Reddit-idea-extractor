@@ -6,6 +6,8 @@ const {
   previewTemplate
 } = require("../services/landingPage.service");
 const landingPageService = require("../services/landingPage.service");
+const LandingPage = require("../models/LandingPage");
+const User = require("../models/User");
 
 async function generateLandingPageHandler(req, res) {
   try {
@@ -14,14 +16,39 @@ async function generateLandingPageHandler(req, res) {
       return res.status(400).json({ error: "businessIdeaId is required" });
     }
     const userId = req.user._id; // Get the authenticated user's ID
+
+    // Check if user is premium
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Check if landing page already exists for this business idea and user
+    const existingLandingPage = await LandingPage.findOne({ businessIdeaId, userId });
+    if (existingLandingPage) {
+      return res.status(200).json({ landingPage: existingLandingPage });
+    }
+
+    // If user is not premium, check landing page limit
+    if (!user.isPremium) {
+      const existingLandingPagesCount = await LandingPage.countDocuments({ userId });
+      if (existingLandingPagesCount >= 2) {
+        return res.status(403).json({ 
+          error: "Free users can only create 2 landing pages. Upgrade to premium for unlimited access.",
+          limitReached: true,
+          currentCount: existingLandingPagesCount,
+          limit: 2
+        });
+      }
+    }
+
+    // Create new landing page if it doesn't exist
     const landingPage = await generateLandingPage(businessIdeaId, userId);
     res.status(201).json({ landingPage });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-}
-
-async function getLandingPageByBusinessIdeaIdHandler(req, res) {
+}async function getLandingPageByBusinessIdeaIdHandler(req, res) {
   try {
     const { businessIdeaId } = req.params;
     if (!businessIdeaId) {
@@ -72,6 +99,39 @@ async function generateLandingPageWithTemplateHandler(req, res) {
     }
     
     const userId = req.user?._id || '67875b6e5f3d8b17b8c2e944'; // Use test user ID if no auth
+
+    // Check if landing page with this template already exists for this business idea and user
+    const existingLandingPage = await LandingPage.findOne({ 
+      businessIdeaId, 
+      userId, 
+      templateId 
+    });
+    if (existingLandingPage) {
+      console.log('Returning existing landing page with template');
+      return res.status(200).json({ landingPage: existingLandingPage });
+    }
+
+    // Check if user is premium (skip check for test user)
+    if (userId !== '67875b6e5f3d8b17b8c2e944') {
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // If user is not premium, check landing page limit
+      if (!user.isPremium) {
+        const existingLandingPagesCount = await LandingPage.countDocuments({ userId });
+        if (existingLandingPagesCount >= 2) {
+          return res.status(403).json({ 
+            error: "Free users can only create 2 landing pages. Upgrade to premium for unlimited access.",
+            limitReached: true,
+            currentCount: existingLandingPagesCount,
+            limit: 2
+          });
+        }
+      }
+    }
+    
     console.log('Generating landing page with template for userId:', userId);
     
     const landingPage = await generateLandingPageWithTemplate(businessIdeaId, userId, templateId);
@@ -133,6 +193,39 @@ async function generateAndDeployLandingPageHandler(req, res) {
     const { target = 'vercel' } = req.body;
     
     const userId = req.user._id; // Get the authenticated user's ID
+
+    // Check if user is premium
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Check if landing page already exists for this business idea and user
+    const existingLandingPage = await LandingPage.findOne({ businessIdeaId, userId });
+    if (existingLandingPage) {
+      // If it exists, deploy the existing one
+      const result = await landingPageService.deployLandingPage(existingLandingPage._id, { target });
+      return res.json({
+        success: true,
+        landingPage: existingLandingPage,
+        deployment: result.deployment || result
+      });
+    }
+
+    // If user is not premium, check landing page limit
+    if (!user.isPremium) {
+      const existingLandingPagesCount = await LandingPage.countDocuments({ userId });
+      if (existingLandingPagesCount >= 2) {
+        return res.status(403).json({ 
+          error: "Free users can only create 2 landing pages. Upgrade to premium for unlimited access.",
+          limitReached: true,
+          currentCount: existingLandingPagesCount,
+          limit: 2
+        });
+      }
+    }
+
+    // Create and deploy new landing page if it doesn't exist
     const result = await landingPageService.generateAndDeployLandingPage(
       businessIdeaId,
       userId,
@@ -150,6 +243,36 @@ async function generateAndDeployLandingPageHandler(req, res) {
   }
 }
 
+// Get user's landing page usage and limits
+async function getLandingPageUsageHandler(req, res) {
+  try {
+    const userId = req.user._id;
+    
+    // Get user to check premium status
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Count existing landing pages
+    const currentCount = await LandingPage.countDocuments({ userId });
+    const limit = user.isPremium ? null : 2; // No limit for premium users
+    const remaining = user.isPremium ? null : Math.max(0, limit - currentCount);
+    const limitReached = !user.isPremium && currentCount >= limit;
+
+    res.status(200).json({
+      currentCount,
+      limit,
+      remaining,
+      limitReached,
+      isPremium: user.isPremium
+    });
+  } catch (error) {
+    console.error('Error fetching landing page usage:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
 module.exports = {
   generateLandingPageHandler,
   getLandingPageByBusinessIdeaIdHandler,
@@ -158,4 +281,5 @@ module.exports = {
   previewTemplateHandler,
   deployLandingPageHandler,
   generateAndDeployLandingPageHandler,
+  getLandingPageUsageHandler,
 };

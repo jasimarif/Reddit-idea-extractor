@@ -4,7 +4,7 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Modal } from "../components/ui/modal";
-import { Eye, Loader2, ArrowLeft, ExternalLink, Sparkles, Zap, Star } from "lucide-react";
+import { Eye, Loader2, ArrowLeft, ExternalLink, Sparkles, Zap, Star, Crown, Check, X } from "lucide-react";
 import BackButton from "../components/BackButton";
 import apiRequest from "../lib/apiRequest";
 import { usePayment } from "../contexts/PaymentContext";
@@ -12,13 +12,38 @@ import { usePayment } from "../contexts/PaymentContext";
 const TemplateSelector = () => {
     const { businessIdeaId } = useParams();
     const navigate = useNavigate();
-    const { isModalOpen, setIsModalOpen } = usePayment();
+    const { isModalOpen, setIsModalOpen, fetchLandingPageUsage, createPaymentSession } = usePayment();
     const [templates, setTemplates] = useState([]);
+    const [businessIdea, setBusinessIdea] = useState(null);
+    const [previewData, setPreviewData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [generatingTemplateId, setGeneratingTemplateId] = useState(null);
     const [previewingTemplateId, setPreviewingTemplateId] = useState(null);
-    const [previewData, setPreviewData] = useState(null);
-    const [businessIdea, setBusinessIdea] = useState(null);
+    const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+    const [errorModal, setErrorModal] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        isLimitError: false
+    });
+    const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
+    const handleDirectUpgrade = async () => {
+        try {
+            setIsProcessingPayment(true);
+            setErrorModal(prev => ({ ...prev, isOpen: false }));
+
+            const successUrl = `${window.location.origin}/payment/success?session_id={CHECKOUT_SESSION_ID}`;
+            const cancelUrl = `${window.location.origin}/templates/${businessIdeaId}`;
+
+            await createPaymentSession(successUrl, cancelUrl);
+        } catch (error) {
+            console.error('Payment error:', error);
+            alert('Failed to start payment process. Please try again.');
+        } finally {
+            setIsProcessingPayment(false);
+        }
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -136,7 +161,7 @@ const TemplateSelector = () => {
 
       console.log('Setting preview data:', previewDataObj);
       setPreviewData(previewDataObj);
-      setIsModalOpen(true);
+      setIsPreviewModalOpen(true);
 
     } catch (error) {
       console.error('Error generating preview:', error);
@@ -206,6 +231,9 @@ const TemplateSelector = () => {
                 const landingPageId = response.data.landingPage._id || `${businessIdeaId}-${templateId}-${Date.now()}`;
                 localStorage.setItem(`landingPage-${landingPageId}`, JSON.stringify(response.data.landingPage));
 
+                // Refresh landing page usage after successful creation
+                fetchLandingPageUsage();
+
                 // Navigate to the landing page view
                 navigate(`/landing-page/${landingPageId}`);
             }
@@ -213,7 +241,18 @@ const TemplateSelector = () => {
         } catch (error) {
             console.error('Error generating landing page:', error);
             console.error('Error response:', error.response?.data);
-            alert(`Failed to generate landing page: ${error.response?.data?.error || error.message}`);
+            
+            // Check if it's a limit error
+            if (error.response?.data?.limitReached) {
+                setErrorModal({
+                    isOpen: true,
+                    title: 'Landing Page Limit Reached',
+                    message: error.response.data.error || 'You have reached the maximum number of free landing pages.',
+                    isLimitError: true
+                });
+            } else {
+                alert(`Failed to generate landing page: ${error.response?.data?.error || error.message}`);
+            }
         } finally {
             setGeneratingTemplateId(null);
         }
@@ -283,8 +322,8 @@ const TemplateSelector = () => {
 
                 {/* Preview Modal */}
                 <Modal
-                    isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)}
+                    isOpen={isPreviewModalOpen}
+                    onClose={() => setIsPreviewModalOpen(false)}
                     title={previewData ? `${previewData.templateName} Preview` : "Template Preview"}
                     size="full"
                 >
@@ -292,13 +331,127 @@ const TemplateSelector = () => {
                         <PreviewModalContent
                             previewData={previewData}
                             onGenerate={() => {
-                                setIsModalOpen(false);
+                                setIsPreviewModalOpen(false);
                                 handleGenerateLandingPage(previewData.templateId);
                             }}
                             isGenerating={generatingTemplateId === previewData.templateId}
                         />
                     )}
                 </Modal>
+
+                {/* Error Modal */}
+                {errorModal.isOpen && (
+                    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4 overflow-hidden" onClick={() => setErrorModal(prev => ({ ...prev, isOpen: false }))}>
+                        <div
+                            className="bg-white rounded-2xl max-w-sm w-full max-h-[85vh] overflow-y-auto"
+                            style={{
+                                scrollbarWidth: 'none',
+                                msOverflowStyle: 'none'
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* Header */}
+                            <div className="p-4 border-b border-gray-100">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-2">
+                                        <Crown className="h-5 w-5 text-yellow-500" fill="currentColor" />
+                                        <h2 className="text-lg font-bold text-gray-900">
+                                            {errorModal.title}
+                                        </h2>
+                                    </div>
+                                    <button
+                                        onClick={() => setErrorModal(prev => ({ ...prev, isOpen: false }))}
+                                        className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Content */}
+                            <div className="p-4">
+                                {/* Hero Section */}
+                                <div className="text-center mb-4">
+                                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-3 rounded-xl mb-3">
+                                        <Zap className="h-6 w-6 mx-auto mb-2" />
+                                        <h3 className="text-base font-semibold">
+                                            Landing Page Limit Reached
+                                        </h3>
+                                        <p className="text-xs opacity-90">
+                                            You've created 2 landing pages with your free account
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Message */}
+                                <div className="text-center mb-4">
+                                    <p className="text-gray-700 text-sm leading-relaxed">
+                                        {errorModal.message}
+                                    </p>
+                                </div>
+
+                                {/* Features */}
+                                <div className="space-y-2 mb-4">
+                                    <h4 className="font-semibold text-gray-900 mb-2 text-sm">Upgrade to get:</h4>
+                                    {[
+                                        'Unlimited landing page creation',
+                                        'Professional templates',
+                                        'One-click deployment to Vercel',
+                                        'Priority support'
+                                    ].map((feature, index) => (
+                                        <div key={index} className="flex items-center space-x-2">
+                                            <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                                            <span className="text-gray-700 text-sm">{feature}</span>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* CTA Buttons */}
+                                <div className="space-y-2">
+                                    <Button
+                                        onClick={handleDirectUpgrade}
+                                        disabled={isProcessingPayment}
+                                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2.5 px-3 rounded-lg font-semibold hover:opacity-90 transition-all duration-200 flex items-center justify-center space-x-2 text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {isProcessingPayment ? (
+                                            <>
+                                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                                                <span>Processing...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Star className="h-4 w-4" />
+                                                <span>Upgrade to Premium</span>
+                                            </>
+                                        )}
+                                    </Button>
+
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setErrorModal(prev => ({ ...prev, isOpen: false }))}
+                                        className="w-full bg-gray-100 text-gray-700 py-2.5 px-3 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm cursor-pointer border-gray-300"
+                                    >
+                                        Maybe Later
+                                    </Button>
+                                </div>
+
+                                {/* Trust Indicators */}
+                                <div className="mt-4 pt-3 border-t border-gray-100">
+                                    <div className="flex items-center justify-center space-x-4 text-xs text-gray-500">
+                                        <div className="flex items-center space-x-1">
+                                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                            <span>Secure Payment</span>
+                                        </div>
+                                        <div className="flex items-center space-x-1">
+                                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                            <span>30-day Guarantee</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </main>
         </div>
     );

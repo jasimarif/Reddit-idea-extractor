@@ -113,17 +113,6 @@ const LandingPageView = () => {
             >
               Back to Templates
             </BackButton>
-            
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm" onClick={handleDownload} className="bg-green-500 text-white hover:bg-green-600 border-0">
-                <Download className="h-4 w-4 mr-2" />
-                Download
-              </Button>
-              <Button size="sm" onClick={openInNewTab} className="bg-btn text-white hover:bg-btn-hover">
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Open in New Tab
-              </Button>
-            </div>
           </div>
           
           <div className="text-center">
@@ -160,10 +149,16 @@ const LandingPageView = () => {
                     </CardTitle>
                     <CardDescription className="text-gray-600">Your generated landing page</CardDescription>
                   </div>
-                  <Button size="sm" onClick={openInNewTab} className="bg-indigo-500 text-white hover:bg-indigo-600 shadow-md">
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Full Screen
-                  </Button>
+                  <div className="flex items-center space-x-2">
+                    <Button variant="outline" size="sm" onClick={handleDownload} className="bg-green-500 text-white hover:bg-green-600 border-0">
+                      <Download className="h-4 w-4 mr-2" />
+                      Download
+                    </Button>
+                    <Button size="sm" onClick={openInNewTab} className="bg-indigo-500 text-white hover:bg-indigo-600 shadow-md">
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Open in New Tab
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="p-0">

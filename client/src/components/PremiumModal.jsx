@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { X, Star, Check, Crown, Zap } from 'lucide-react';
 import { usePayment } from '../contexts/PaymentContext';
 
-const PremiumModal = ({ isOpen, onClose }) => {
+const PremiumModal = ({ isOpen, onClose, limitReached = false }) => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const { createPaymentSession } = usePayment();
+  const { createPaymentSession, landingPageUsage } = usePayment();
 
   const handleUpgrade = async () => {
     try {
@@ -51,7 +51,9 @@ const PremiumModal = ({ isOpen, onClose }) => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Crown className="h-5 w-5 text-yellow-500" fill="currentColor" />
-              <h2 className="text-lg font-bold text-gray-900">Upgrade to Premium</h2>
+              <h2 className="text-lg font-bold text-gray-900">
+                {limitReached ? "Landing Page Limit Reached" : "Upgrade to Premium"}
+              </h2>
             </div>
             <button
               onClick={onClose}
@@ -68,8 +70,18 @@ const PremiumModal = ({ isOpen, onClose }) => {
           <div className="text-center mb-4">
             <div className="bg-btn text-white p-3 rounded-xl mb-3">
               <Zap className="h-6 w-6 mx-auto mb-2" />
-              <h3 className="text-base font-semibold">Unlock Landing Page Creation</h3>
-              <p className="text-xs opacity-90">Create professional landing pages for your business ideas</p>
+              <h3 className="text-base font-semibold">
+                {limitReached 
+                  ? `You've created ${landingPageUsage.currentCount} landing pages!` 
+                  : "Unlock Landing Page Creation"
+                }
+              </h3>
+              <p className="text-xs opacity-90">
+                {limitReached 
+                  ? "Upgrade to create unlimited landing pages for your business ideas" 
+                  : "Create professional landing pages for your business ideas"
+                }
+              </p>
             </div>
           </div>
 

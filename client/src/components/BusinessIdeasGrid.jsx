@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Lightbulb, Plus, ChevronDown, ChevronUp, Users, DollarSign, Target, TrendingUp, Building2, Lock } from 'lucide-react';
-import PremiumModal from './PremiumModal';import { usePayment } from '../contexts/PaymentContext';
+import PremiumModal from './PremiumModal';
+import { usePayment } from '../contexts/PaymentContext';
 const BusinessIdeasGrid = ({ businessIdeas, isGeneratingIdeas }) => {
   const [expandedItems, setExpandedItems] = useState(new Set());
-  const { isPremium, isModalOpen, setIsModalOpen } = usePayment();
+  const { isPremium, isModalOpen, setIsModalOpen, landingPageUsage } = usePayment();
 
   const toggleExpanded = (ideaId) => {
     const newExpanded = new Set(expandedItems);
@@ -65,15 +66,24 @@ const BusinessIdeasGrid = ({ businessIdeas, isGeneratingIdeas }) => {
                       <Plus className="h-4 w-4" />
                       <span>Create Landing Page</span>
                     </Link>
-                  ) : (
+                  ) : landingPageUsage.limitReached ? (
                     <button
                       onClick={() => setIsModalOpen(true)}
-                      className="absolute top-4 right-4 flex items-center space-x-1 px-3 py-1.5 rounded-md transition-colors text-xs z-10 bg-btn text-white hover:bg-btn-hover cursor-pointer"
-                      title="Unlock to create landing page"
+                      className="absolute top-4 right-4 flex items-center space-x-1 px-3 py-1.5 rounded-md transition-colors text-xs z-10 bg-gray-500 text-white cursor-pointer"
+                      title="Upgrade to create more landing pages"
                     >
                       <Lock className="h-4 w-4" />
-                      <span>Unlock to Create Landing Page</span>
+                      <span>Limit Reached - Upgrade</span>
                     </button>
+                  ) : (
+                    <Link
+                      to={`/templates/${businessIdea.id || businessIdea._id}`}
+                      className="absolute top-4 right-4 flex items-center space-x-1 px-3 py-1.5 rounded-md transition-colors text-xs bg-green-50 hover:bg-green-100 text-green-600 hover:text-green-800 z-10"
+                      title={`Create landing page (${landingPageUsage.remaining} remaining)`}
+                    >
+                      <Plus className="h-4 w-4" />
+                      <span>Create Landing Page</span>
+                    </Link>
                   )}
 
                   <div className="p-6">
@@ -346,7 +356,11 @@ const BusinessIdeasGrid = ({ businessIdeas, isGeneratingIdeas }) => {
           </div>
         )}
       </div>
-      <PremiumModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <PremiumModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        limitReached={landingPageUsage.limitReached}
+      />
     </>
   );
 };
