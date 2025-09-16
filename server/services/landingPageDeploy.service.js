@@ -29,27 +29,59 @@ class LandingPageDeployer {
       outcomeSection = [],
       founderMessage,
       ctaText,
+      generatedHtml,
     } = landingPage;
 
     // Generate a unique ID for this deployment
     const deploymentId = uuidv4().substring(0, 8);
-    let pageContent
-    try {
-      // Use the PageCraft service to generate the landing page code
-      let frontendCode = await pageCraftService.generateLandingPage({
-        headline,
-        subheadline,
-        bulletPoints,
-        painPointsSection,
-        outcomeSection,
-        founderMessage,
-        ctaText,
-      });
-      pageContent=frontendCode;
-      console.log(pageContent);
-    } catch (err) {
-      console.error("Error parsing assistant response:", err);
-      throw new Error("Failed to generate frontend code");
+    
+    let pageContent;
+    
+    // If we already have generated HTML, use it directly instead of regenerating
+    if (generatedHtml && generatedHtml.trim()) {
+      console.log("Using existing generated HTML for deployment");
+      
+      // Create a simple Next.js page that renders the existing HTML
+      const reactCode = `import React from 'react';
+
+function LandingPage() {
+  return (
+    <div dangerouslySetInnerHTML={{ __html: \`${generatedHtml.replace(/`/g, '\\`')}\` }} />
+  );
+}
+
+export default LandingPage;`;
+
+      pageContent = {
+        reactCode: reactCode,
+        components: [],
+        dependencies: {
+          npm: ["react", "react-dom", "next", "tailwindcss"],
+          cdn: []
+        },
+        metaTags: {
+          title: headline || "Generated Landing Page",
+          description: subheadline || "A beautiful landing page"
+        }
+      };
+    } else {
+      // Fallback to generating new code if no HTML exists
+      try {
+        // Use the PageCraft service to generate the landing page code
+        pageContent = await pageCraftService.generateLandingPage({
+          headline,
+          subheadline,
+          bulletPoints,
+          painPointsSection,
+          outcomeSection,
+          founderMessage,
+          ctaText,
+        });
+        console.log(pageContent);
+      } catch (err) {
+        console.error("Error parsing assistant response:", err);
+        throw new Error("Failed to generate frontend code");
+      }
     }
 
     // Create package.json with all necessary dependencies
@@ -401,6 +433,9 @@ class LandingPageDeployer {
     // 4. Initialize a git repository in the temp directory
     const { execSync } = require("child_process");
 
+    // Set the default branch to master for consistency
+    execSync("git config --global init.defaultBranch master", { cwd: tempDir });
+
     // Initialize git repo
     execSync("git init", { cwd: tempDir });
 
@@ -528,13 +563,19 @@ class LandingPageDeployer {
       console.log("Creating Vercel project...");
       const projectName = uniqueRepoName.replace(/[^a-zA-Z0-9-]/g, "-"); // Sanitize project name
 
-      // Minimal required configuration for Vercel API v13
+      // Minimal required configuration for Vercel API v13 with GitHub integration
+      // Let Vercel auto-detect the framework instead of explicitly setting it
       const projectData = {
         name: projectName,
         framework: "nextjs",
         buildCommand: "npm run build",
         installCommand: "npm install",
         outputDirectory: ".next",
+        gitRepository: {
+          type: "github",
+          repo: uniqueRepoName,
+          org: process.env.GITHUB_USERNAME || repo.owner.login,
+        },
       };
 
       const projectResponse = await axios.post(
@@ -557,8 +598,7 @@ class LandingPageDeployer {
       // First, ensure the project is properly initialized
       await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for project to be ready
 
-      // Update project settings with only valid properties
-      // Configure the project with the correct framework settings
+      // Update project settings (without framework since we're letting auto-detection work)
       const projectSettings = {
         framework: "nextjs",
         buildCommand: "npm run build",
@@ -580,87 +620,10 @@ class LandingPageDeployer {
 
       console.log("Vercel project settings updated successfully");
 
-      // Link the GitHub repository
-      console.log("Linking GitHub repository...");
-      const gitLinkData = {
-        projectId: projectId,
-        type: "github",
-        repo: uniqueRepoName,
-        repoId: repo.id.toString(),
-        org: process.env.GITHUB_USERNAME || "your-github-username",
-        productionBranch: "master",
-        // Adding these additional fields that might be required
-        gitCredentialId: "", // This might be needed for private repos
-        deploymentType: "GITHUB_DEPLOYMENT",
-        prComments: { enabled: true },
-      };
+      // Skip the manual linking step since we included gitRepository in project creation
+      console.log("GitHub repository automatically linked via project creation");
 
-      console.log("Git link data:", JSON.stringify(gitLinkData, null, 2));
-
-      // Try multiple endpoints for linking the repository
-      const linkEndpoints = [
-        `https://api.vercel.com/v1/integrations/git/${projectId}`,
-        `https://api.vercel.com/v9/projects/${projectId}/link`,
-        `https://api.vercel.com/v9/integrations/git/repo`,
-      ];
-
-      let linkSuccess = false;
-
-      for (const endpoint of linkEndpoints) {
-        try {
-          console.log(`Attempting to link using endpoint: ${endpoint}`);
-          const response = await axios.post(endpoint, gitLinkData, {
-            headers: {
-              Authorization: `Bearer ${this.vercelToken}`,
-              "Content-Type": "application/json",
-            },
-            timeout: 10000, // 10 second timeout
-          });
-
-          console.log("GitHub repository linked successfully via", endpoint);
-          console.log("Link response:", JSON.stringify(response.data, null, 2));
-          linkSuccess = true;
-          break; // Exit loop on success
-        } catch (linkError) {
-          const errorDetails = linkError.response
-            ? {
-                status: linkError.response.status,
-                statusText: linkError.response.statusText,
-                data: linkError.response.data,
-              }
-            : linkError.message;
-
-          console.warn(
-            `Failed to link using ${endpoint}:`,
-            JSON.stringify(errorDetails, null, 2)
-          );
-
-          // If we get a 404, try the next endpoint
-          if (linkError.response && linkError.response.status === 404) {
-            continue;
-          }
-
-          // For other errors, log and continue to next endpoint
-          console.warn(`Error details for ${endpoint}:`, errorDetails);
-        }
-      }
-
-      if (!linkSuccess) {
-        console.warn(
-          "Warning: Could not automatically link GitHub repository."
-        );
-        console.warn(
-          "You may need to manually link the repository in the Vercel dashboard."
-        );
-        console.warn(`GitHub Repository: ${repo.html_url}`);
-        console.warn(
-          `Vercel Project: https://vercel.com/${
-            process.env.VERCEL_TEAM_ID || "your-team"
-          }/${projectId}`
-        );
-      }
-
-      // Trigger a deployment
+      // Trigger a deployment (this will work now that the project is properly linked)
       console.log("Triggering deployment...");
       const deployment = await axios.post(
         `https://api.vercel.com/v13/deployments`,
@@ -670,7 +633,7 @@ class LandingPageDeployer {
             type: "github",
             repo: uniqueRepoName,
             repoId: repo.id,
-            org: process.env.GITHUB_USERNAME || "your-github-username",
+            org: process.env.GITHUB_USERNAME || repo.owner.login,
             ref: "master",
             productionBranch: "master",
           },

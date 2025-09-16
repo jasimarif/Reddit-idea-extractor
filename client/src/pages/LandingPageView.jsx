@@ -3,16 +3,20 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
-import { ArrowLeft, ExternalLink, Download, Eye } from "lucide-react";
+import { ArrowLeft, ExternalLink, Download, Eye, Rocket, Loader2 } from "lucide-react";
 import BackButton from "../components/BackButton";
 import apiRequest from "../lib/apiRequest";
+import { usePayment } from "../contexts/PaymentContext";
 
 const LandingPageView = () => {
   const { landingPageId } = useParams();
   const navigate = useNavigate();
+  const { isPremium, setIsModalOpen } = usePayment();
   const [landingPage, setLandingPage] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isDeploying, setIsDeploying] = useState(false);
+  const [deploymentUrl, setDeploymentUrl] = useState(null);
 
   useEffect(() => {
     const fetchLandingPage = async () => {
@@ -22,7 +26,12 @@ const LandingPageView = () => {
         // In the future, this would fetch from the API
         const storedLandingPage = localStorage.getItem(`landingPage-${landingPageId}`);
         if (storedLandingPage) {
-          setLandingPage(JSON.parse(storedLandingPage));
+          const parsed = JSON.parse(storedLandingPage);
+          setLandingPage(parsed);
+          // Check if already deployed
+          if (parsed.deploymentStatus === 'deployed' && parsed.landingPageUrl) {
+            setDeploymentUrl(parsed.landingPageUrl);
+          }
         } else {
           setError("Landing page not found");
         }
@@ -59,6 +68,41 @@ const LandingPageView = () => {
       const newWindow = window.open();
       newWindow.document.write(landingPage.generatedHtml);
       newWindow.document.close();
+    }
+  };
+
+  const handleDeploy = async () => {
+    if (!isPremium) {
+      setIsModalOpen(true);
+      return;
+    }
+
+    try {
+      setIsDeploying(true);
+      const response = await apiRequest.post(`/landingpages/deploy-landing-page/${landingPageId}`, {
+        target: 'vercel'
+      });
+      
+      if (response.data?.deployment?.url) {
+        setDeploymentUrl(response.data.deployment.url);
+        // Update localStorage with deployment info
+        const updatedLandingPage = { ...landingPage, deploymentStatus: 'deployed', landingPageUrl: response.data.deployment.url };
+        localStorage.setItem(`landingPage-${landingPageId}`, JSON.stringify(updatedLandingPage));
+        setLandingPage(updatedLandingPage);
+        // Show success message
+        alert(`🎉 Landing page deployed successfully!\n\nYour live site: ${response.data.deployment.url}`);
+      } else {
+        alert('Deployment completed! Check your email for the live URL.');
+      }
+    } catch (error) {
+      console.error('Deployment error:', error);
+      if (error.response?.status === 403) {
+        setIsModalOpen(true);
+      } else {
+        alert(`Failed to deploy landing page: ${error.response?.data?.message || error.message}`);
+      }
+    } finally {
+      setIsDeploying(false);
     }
   };
 
@@ -128,6 +172,16 @@ const LandingPageView = () => {
                 <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
                   Template: {landingPage.templateId?.toUpperCase()}
                 </Badge>
+                {landingPage.deploymentStatus === 'deployed' && (
+                  <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                    🚀 Deployed to GitHub
+                  </Badge>
+                )}
+                {deploymentUrl && (
+                  <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
+                    🌐 Live Site Ready
+                  </Badge>
+                )}
               </div>
             )}
           </div>
@@ -158,6 +212,37 @@ const LandingPageView = () => {
                       <ExternalLink className="h-4 w-4 mr-2" />
                       Open in New Tab
                     </Button>
+                    {/* Only show deploy button if not already deployed */}
+                    {(!landingPage?.deploymentStatus || landingPage.deploymentStatus !== 'deployed') && !deploymentUrl && (
+                      <Button 
+                        size="sm" 
+                        onClick={handleDeploy} 
+                        disabled={isDeploying}
+                        className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 shadow-md disabled:opacity-50"
+                      >
+                        {isDeploying ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Deploying...
+                          </>
+                        ) : (
+                          <>
+                            <Rocket className="h-4 w-4 mr-2" />
+                            Deploy 
+                          </>
+                        )}
+                      </Button>
+                    )}
+                    {deploymentUrl && (
+                      <Button 
+                        size="sm" 
+                        onClick={() => window.open(deploymentUrl, '_blank')}
+                        className="bg-emerald-500 text-white hover:bg-emerald-600 shadow-md"
+                      >
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        View Live Site
+                      </Button>
+                    )}
                   </div>
                 </div>
               </CardHeader>
