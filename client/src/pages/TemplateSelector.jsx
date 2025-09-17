@@ -283,7 +283,7 @@ const TemplateSelector = () => {
             <header className="mb-8 relative z-10">
                 <div className="w-full max-w-7xl mx-auto px-4">
                     <div className="flex items-center justify-between mb-6">
-                        <BackButton className="text-gray-600 hover:text-gray-800 text-sm font-medium transition-colors duration-200">
+                        <BackButton onClick={() => navigate(-1)} className="text-gray-600 cursor-pointer hover:text-gray-800 text-sm font-medium transition-colors duration-200">
                             Back to Ideas
                         </BackButton>
                     </div>

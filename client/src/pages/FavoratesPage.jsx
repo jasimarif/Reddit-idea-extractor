@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import IdeaCard from "../components/IdeaCard";
+import Footer from "../components/Footer";
 import { Heart, Search, Brain, Instagram, Linkedin, Youtube, Twitter } from "lucide-react";
 import apiRequest from "../lib/apiRequest";
 
@@ -112,16 +113,16 @@ const FavoritesPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#e6ebef] pt-16 sm:pt-20 momentum-scroll">
+    <div className="min-h-screen bg-gradient-to-br from-[#e6ebef] to-[#f0f4f8] pt-16 sm:pt-20 momentum-scroll">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6">
         {/* Enhanced Header */}
         <div className="mb-8 sm:mb-12 text-center sm:text-left">
           <div className="inline-flex flex-col sm:flex-row items-center sm:items-start sm:justify-start mt-8">
-            <div className="p-2 bg-pink-100 rounded-lg sm:rounded-xl mr-0 sm:mr-4 mb-2 sm:mb-0 shadow-inner">
-              <Heart className="h-6 w-6 sm:h-8 sm:w-8 text-pink-600" fill="currentColor" />
+            <div className="p-2 bg-red-100 rounded-lg sm:rounded-xl mr-0 sm:mr-4 mb-2 sm:mb-0 shadow-inner">
+              <Heart className="h-6 w-6 sm:h-8 sm:w-8 text-red-600" fill="currentColor" />
             </div>
             <div className="text-center sm:text-left">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
                 Your Favorite Ideas
               </h2>
               <p className="mt-1 text-gray-600 text-sm sm:text-base">
@@ -130,31 +131,71 @@ const FavoritesPage = () => {
             </div>
           </div>
           
-          {/* Stats Bar */}
-          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center sm:justify-start gap-3 sm:gap-4 mt-4 sm:mt-6">
-            <div className="bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-xl px-3 py-2 sm:px-5 sm:py-3 shadow-sm border border-gray-100 flex items-center w-full sm:w-auto">
-              <div className="p-1 sm:p-1.5 bg-blue-100 rounded-md sm:rounded-lg mr-2 sm:mr-3">
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-[10px] sm:text-xs text-gray-500">Total Saved</p>
-                <p className="text-sm sm:text-lg font-semibold text-gray-800">{favorites.length} {favorites.length === 1 ? 'Idea' : 'Ideas'}</p>
+          {/* Beautiful Stats Cards */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mt-6 sm:mt-8">
+            {/* Total Saved Card */}
+            <div className="relative group">
+              <div className="absolute  rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
+              <div className="relative bg-white rounded-2xl p-6 border border-gray-100 transition-all duration-300">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">Total Saved</p>
+                    <p className="text-3xl font-bold text-gray-900">{favorites.length}</p>
+                    <p className="text-xs text-gray-500 mt-1">{favorites.length === 1 ? 'Idea' : 'Ideas'}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
+                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                </div>
               </div>
             </div>
-            
-            <div className="bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-xl px-3 py-2 sm:px-5 sm:py-3 shadow-sm border border-gray-100 flex items-center w-full sm:w-auto">
-              <div className="p-1 sm:p-1.5 bg-purple-100 rounded-md sm:rounded-lg mr-2 sm:mr-3">
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
-                </svg>
+
+            {/* Categories Card */}
+            <div className="relative group">
+              <div className="absolute rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
+              <div className="relative bg-white rounded-2xl p-6 border border-gray-100 transition-all duration-300">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">Categories</p>
+                    <p className="text-3xl font-bold text-gray-900">{new Set(favorites.map(f => f.category)).size}</p>
+                    <p className="text-xs text-gray-500 mt-1">Unique topics</p>
+                  </div>
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
+                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
+                    </svg>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-[10px] sm:text-xs text-gray-500">Categories</p>
-                <p className="text-sm sm:text-lg font-semibold text-gray-800">
-                  {new Set(favorites.map(f => f.category)).size}
-                </p>
+            </div>
+
+            {/* Most Popular Category Card */}
+            <div className="relative group">
+              <div className="absolute  rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
+              <div className="relative bg-white rounded-2xl p-6 border border-gray-100 transition-all duration-300">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">Top Category</p>
+                    <p className="text-lg font-bold text-gray-900 truncate max-w-[120px]">
+                      {(() => {
+                        const categoryCounts = favorites.reduce((acc, idea) => {
+                          acc[idea.category] = (acc[idea.category] || 0) + 1;
+                          return acc;
+                        }, {});
+                        const topCategory = Object.entries(categoryCounts).sort(([,a], [,b]) => b - a)[0];
+                        return topCategory ? topCategory[0] : 'None';
+                      })()}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">Most saved</p>
+                  </div>
+                  <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center shadow-lg">
+                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -201,7 +242,7 @@ const FavoritesPage = () => {
             </p>
             <a
               href="/dashboard"
-              className="inline-flex items-center px-6 py-3 text-sm font-medium !text-white bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 transform hover:scale-105"
+              className="inline-flex items-center px-6 py-3 text-sm font-medium !text-white bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
             >
               Browse Ideas
             </a>
@@ -219,10 +260,10 @@ const FavoritesPage = () => {
                       <button
                         key={categoryName}
                         onClick={() => setSelectedCategory(categoryName === "All" ? "All" : categoryName)}
-                        className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-md sm:rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
+                        className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-md sm:rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                           selectedCategory === categoryName
-                            ? "bg-purple-100 text-purple-700"
-                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            ? "bg-purple-100 text-purple-700 shadow-sm"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-sm"
                         }`}
                       >
                         {categoryName}
@@ -241,7 +282,7 @@ const FavoritesPage = () => {
                     placeholder="Search favorites..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="block w-full pl-9 sm:pl-10 pr-3 py-1.5 sm:py-2 border border-gray-300 rounded-lg bg-white text-xs sm:text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="block w-full pl-9 sm:pl-10 pr-3 py-1.5 sm:py-2 border border-gray-300 rounded-lg bg-white text-xs sm:text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 focus:shadow-md"
                   />
                 </div>
               </div>
@@ -281,57 +322,7 @@ const FavoritesPage = () => {
         )}
       </div>
 
-      <footer className="border-t border-gray-200 py-8 md:py-12 px-4 sm:px-6 lg:px-8">
-                    <div className="mx-auto max-w-[1240px]">
-                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8">
-                        <div className="flex items-center mb-6 md:mb-0">
-                          <div className="h-8 w-8 rounded-lg bg-gray-900 flex items-center justify-center mr-3">
-                            <Brain className="h-4 w-4 text-white" />
-                          </div>
-                          <span className="text-lg font-semibold text-gray-900">Nextaiidea</span>
-                        </div>
-            
-                        <div className="flex space-x-4">
-                          <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors p-2">
-                            <Instagram size={20} />
-                          </a>
-                          <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors p-2">
-                            <Linkedin size={20} />
-                          </a>
-                          <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors p-2">
-                            <Youtube size={20} />
-                          </a>
-                          <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors p-2">
-                            <Twitter size={20} />
-                          </a>
-                        </div>
-                      </div>
-            
-                      <div className="border-t border-gray-900 pt-6 mb-6">
-                        <nav className="flex flex-wrap gap-4 md:gap-8">
-                          {['Features', 'Pricing', 'Faqs', 'Contact', 'Privacy', 'Terms'].map((item) => (
-                            <a
-                              key={item}
-                              href="#"
-                              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-                            >
-                              {item}
-                            </a>
-                          ))}
-                        </nav>
-                      </div>
-            
-                      <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-500 gap-2">
-                        <p>© 2025 Nextaiidea</p>
-                        <a
-                          href="mailto:ideaextractor@support.com"
-                          className="hover:text-gray-700 transition-colors"
-                        >
-                          ideaextractor@support.com
-                        </a>
-                      </div>
-                    </div>
-                  </footer>
+      <Footer />
     </div>
   );
 };

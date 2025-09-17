@@ -11,7 +11,8 @@ const {
   previewTemplateHandler,
   deployLandingPageHandler,
   generateAndDeployLandingPageHandler,
-  getLandingPageUsageHandler
+  getLandingPageUsageHandler,
+  checkDeploymentStatusHandler
 } = require('../controllers/landingPage.controller');
 
 // Public routes (no auth required)
@@ -23,13 +24,19 @@ router.get('/landing-page/:businessIdeaId', cacheRoute(3600, 'landingpage:'), pr
 // Get user's landing page usage (no premium required for reading usage)
 router.get('/usage', protect, getLandingPageUsageHandler);
 
+// Check deployment status
+router.get('/deployment-status/:landingPageId', protect, checkDeploymentStatusHandler);
+
 // Template preview (no premium required for preview)
 router.get('/preview/:businessIdeaId/:templateId', protect, previewTemplateHandler);
+
+// Check deployment status
+router.get('/deployment-status/:landingPageId', protect, checkDeploymentStatusHandler);
 
 // Premium required for write operations
 router.post('/generate-landing-page', protect, generateLandingPageHandler);
 router.post('/generate-landing-page-with-template', protect, generateLandingPageWithTemplateHandler);
-router.post('/deploy-landing-page/:landingPageId', protect, requirePremium, deployLandingPageHandler);
+router.post('/deploy-landing-page/:landingPageId', protect, deployLandingPageHandler);
 router.post('/generate-and-deploy-landing-page/:businessIdeaId', protect, generateAndDeployLandingPageHandler);
 
 module.exports = router;

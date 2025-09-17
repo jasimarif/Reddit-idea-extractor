@@ -670,11 +670,12 @@ export default LandingPage;`;
                             `${uniqueRepoName}.vercel.app`;
       const canonicalUrl = `https://${canonicalDomain}`;
 
-      // Update the landing page with deployment details
+      // Update the landing page with deployment details immediately
+      // Don't wait for site to go live during initial deployment to avoid timeouts
       const updatedLandingPage = await LandingPage.findByIdAndUpdate(
         landingPageId,
         {
-          deploymentStatus: "deployed",
+          deploymentStatus: "building", // Set as building initially
           landingPageUrl: canonicalUrl,
           githubRepoUrl: repo.html_url,
           vercelProjectId: projectId,
@@ -686,7 +687,7 @@ export default LandingPage;`;
 
       console.log("Landing page updated with deployment details");
 
-      // 9. Clean up the temporary directory
+      // 10. Clean up the temporary directory
       try {
         await fs.rm(tempDir, { recursive: true, force: true });
         console.log("Temporary directory cleaned up");
@@ -703,10 +704,11 @@ export default LandingPage;`;
         deployment: {
           id: deployment.data.id,
           url: canonicalUrl,
-          status: "queued",
+          status: "building",
           githubRepo: repo.html_url,
           vercelProjectId: projectId,
           domain: canonicalDomain,
+          isLive: false,
         },
         landingPage: updatedLandingPage,
       };
@@ -725,6 +727,83 @@ export default LandingPage;`;
       }
       throw new Error(`Failed to deploy to Vercel: ${error.message}`);
     }
+  }
+
+  /**
+   * Wait for a deployed site to become accessible
+   * @param {string} url - The URL to check
+   * @param {string} deploymentId - The Vercel deployment ID to check status
+   * @returns {Promise<boolean>} True if site is accessible, false if timeout
+   */
+  async waitForSiteToGoLive(url, deploymentId, maxWaitMinutes = 3) {
+    const maxAttempts = maxWaitMinutes * 6; // Check every 10 seconds for maxWaitMinutes
+    let attempts = 0;
+
+    const checkDeploymentStatus = async () => {
+      try {
+        // First check Vercel deployment status
+        const deploymentResponse = await axios.get(
+          `https://api.vercel.com/v13/deployments/${deploymentId}`,
+          {
+            headers: { Authorization: `Bearer ${this.vercelToken}` },
+            timeout: 10000
+          }
+        );
+
+        const deploymentStatus = deploymentResponse.data?.state || deploymentResponse.data?.status;
+        console.log(`Deployment status: ${deploymentStatus}`);
+
+        // If deployment is ready, check if site is actually accessible
+        if (deploymentStatus === 'READY' || deploymentStatus === 'ready') {
+          try {
+            const siteResponse = await axios.get(url, { 
+              timeout: 10000,
+              validateStatus: (status) => status >= 200 && status < 400
+            });
+            
+            if (siteResponse.status === 200) {
+              console.log(`Site is accessible at ${url}`);
+              return true;
+            }
+          } catch (siteError) {
+            console.log(`Site not yet accessible: ${siteError.message}`);
+          }
+        } else if (deploymentStatus === 'ERROR' || deploymentStatus === 'CANCELED') {
+          console.log(`Deployment failed with status: ${deploymentStatus}`);
+          return false;
+        }
+
+        return false;
+      } catch (error) {
+        console.log(`Error checking deployment: ${error.message}`);
+        return false;
+      }
+    };
+
+    // Check immediately first
+    if (await checkDeploymentStatus()) {
+      return true;
+    }
+
+    // Then check periodically
+    return new Promise((resolve) => {
+      const interval = setInterval(async () => {
+        attempts++;
+        console.log(`Checking site accessibility... attempt ${attempts}/${maxAttempts}`);
+
+        if (await checkDeploymentStatus()) {
+          clearInterval(interval);
+          resolve(true);
+          return;
+        }
+
+        if (attempts >= maxAttempts) {
+          clearInterval(interval);
+          console.log(`Site not accessible after ${maxWaitMinutes} minutes, but deployment may still be propagating`);
+          resolve(false);
+        }
+      }, 10000); // Check every 10 seconds
+    });
   }
 
   async deployToNetlify(landingPageId) {

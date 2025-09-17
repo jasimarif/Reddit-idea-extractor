@@ -273,6 +273,100 @@ async function getLandingPageUsageHandler(req, res) {
   }
 }
 
+// Check deployment status
+async function checkDeploymentStatusHandler(req, res) {
+  try {
+    const { landingPageId } = req.params;
+    
+    const landingPage = await LandingPage.findById(landingPageId);
+    if (!landingPage) {
+      return res.status(404).json({ error: 'Landing page not found' });
+    }
+
+    // If already deployed with URL, return immediately
+    if (landingPage.deploymentStatus === 'deployed' && landingPage.landingPageUrl) {
+      return res.json({
+        status: 'deployed',
+        url: landingPage.landingPageUrl,
+        isLive: true
+      });
+    }
+
+    // If has deployment info but not confirmed live, check if it's ready now
+    if (landingPage.vercelDeploymentId && landingPage.landingPageUrl) {
+      try {
+        const axios = require('axios');
+        const deploymentResponse = await axios.get(
+          `https://api.vercel.com/v13/deployments/${landingPage.vercelDeploymentId}`,
+          {
+            headers: { Authorization: `Bearer ${process.env.VERCEL_TOKEN}` },
+            timeout: 10000
+          }
+        );
+
+        const deploymentStatus = deploymentResponse.data?.state || deploymentResponse.data?.status;
+        console.log(`Checking deployment ${landingPage.vercelDeploymentId}, status: ${deploymentStatus}`);
+        
+        if (deploymentStatus === 'READY' || deploymentStatus === 'ready') {
+          // Check if site is accessible
+          try {
+            const siteResponse = await axios.get(landingPage.landingPageUrl, { 
+              timeout: 5000,
+              validateStatus: (status) => status >= 200 && status < 400
+            });
+            
+            if (siteResponse.status === 200) {
+              // Update status to deployed
+              await LandingPage.findByIdAndUpdate(landingPageId, {
+                deploymentStatus: 'deployed'
+              });
+              
+              return res.json({
+                status: 'deployed',
+                url: landingPage.landingPageUrl,
+                isLive: true
+              });
+            }
+          } catch (siteError) {
+            console.log(`Site not accessible yet: ${siteError.message}`);
+          }
+        } else if (deploymentStatus === 'ERROR' || deploymentStatus === 'CANCELED') {
+          return res.json({
+            status: 'failed',
+            url: landingPage.landingPageUrl,
+            isLive: false,
+            vercelStatus: deploymentStatus
+          });
+        }
+
+        return res.json({
+          status: 'building',
+          url: landingPage.landingPageUrl,
+          isLive: false,
+          vercelStatus: deploymentStatus || 'unknown'
+        });
+      } catch (error) {
+        console.error('Error checking deployment:', error);
+        return res.json({
+          status: 'building',
+          url: landingPage.landingPageUrl,
+          isLive: false,
+          error: error.message
+        });
+      }
+    }
+
+    return res.json({
+      status: landingPage.deploymentStatus || 'not-deployed',
+      url: landingPage.landingPageUrl,
+      isLive: false
+    });
+  } catch (error) {
+    console.error('Error checking deployment status:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
 module.exports = {
   generateLandingPageHandler,
   getLandingPageByBusinessIdeaIdHandler,
@@ -282,4 +376,5 @@ module.exports = {
   deployLandingPageHandler,
   generateAndDeployLandingPageHandler,
   getLandingPageUsageHandler,
+  checkDeploymentStatusHandler,
 };

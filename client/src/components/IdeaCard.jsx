@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Heart, Eye } from "lucide-react";
+import { Heart, Lightbulb } from "lucide-react";
 
 const IdeaCard = ({ idea, onToggleFavorite }) => {
   const [showShareMenu, setShowShareMenu] = useState(false);
@@ -27,7 +27,7 @@ const IdeaCard = ({ idea, onToggleFavorite }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg sm:rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300 border border-gray-100 overflow-hidden">
+    <Link to={`/idea/${idea.id}`} className="bg-gradient-to-br from-white to-gray-50 rounded-lg sm:rounded-xl border-l-4 border-l-red-500 border-t border-r border-b border-gray-200 overflow-hidden hover:from-red-50 hover:to-white transition-all duration-300 cursor-pointer block">
       <div className="p-4 sm:p-6">
         <div className="flex items-start justify-between mb-3 sm:mb-4">
           <div className="flex items-center space-x-1.5 sm:space-x-2">
@@ -36,7 +36,7 @@ const IdeaCard = ({ idea, onToggleFavorite }) => {
                 href={idea.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-2 py-1 rounded-full text-xs sm:text-sm font-medium text-green-800 hover:bg-green-200 hover:underline hover:brightness-110 transition-all duration-200 ease-in-out"
+                className="px-2 py-1 rounded-full text-xs sm:text-sm font-medium bg-green-100 text-green-800 hover:bg-green-200 hover:underline hover:brightness-110 transition-all duration-200 ease-in-out"
               >
                 r/{idea.subreddit}
               </a>
@@ -52,7 +52,7 @@ const IdeaCard = ({ idea, onToggleFavorite }) => {
           <div className="flex items-center space-x-0.5 sm:space-x-1">
             {/* Favorite Button */}
             <button
-              onClick={() => onToggleFavorite(idea.id)}
+              onClick={(e) => { e.stopPropagation(); onToggleFavorite(idea.id); }}
               title={idea.isFavorited ? "Unfavorite" : "Favorite"}
               className={`p-1.5 sm:p-2 rounded-full transition-colors ${
                 idea.isFavorited
@@ -70,47 +70,14 @@ const IdeaCard = ({ idea, onToggleFavorite }) => {
           </div>
         </div>
 
-        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1.5 sm:mb-2 line-clamp-2 leading-tight sm:leading-normal">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1.5 sm:mb-2 line-clamp-2 leading-tight sm:leading-normal flex items-center gap-2">
+          <Lightbulb className="h-5 w-5 text-red-500 flex-shrink-0" />
           {idea.title}
         </h3>
 
-        <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-3 leading-relaxed">
+        <p className="text-gray-600 text-xs text-left sm:text-sm mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-3 leading-relaxed">
           {idea.summary}
         </p>
-
-        {/* <div className="flex flex-wrap gap-1 mb-3 sm:mb-4">
-          {idea.tags.slice(0, 3).map((tag, index) => (
-            <span
-              key={index}
-              className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-gray-100 text-gray-600 text-[10px] sm:text-xs rounded sm:rounded-md hover:bg-gray-200 transition-colors cursor-pointer whitespace-nowrap overflow-hidden overflow-ellipsis max-w-[80px] sm:max-w-none"
-            >
-              #{tag}
-            </span>
-          ))}
-          {idea.tags.length > 3 && (
-            <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-gray-100 text-gray-600 text-[10px] sm:text-xs rounded sm:rounded-md">
-              +{idea.tags.length - 3}
-            </span>
-          )}
-        </div> */}
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2 sm:space-x-4 text-xs sm:text-sm text-gray-500">
-            <div className="flex items-center space-x-0.5 sm:space-x-1">
-              {/* <span>{idea.upvotes.toLocaleString()}</span> */}
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-1 sm:space-x-2">
-            <Link
-              to={`/idea/${idea.id}`}
-              className="flex items-center space-x-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded transition-colors"
-            >
-              <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              <span className="hidden xs:inline">View</span>
-            </Link>
-          </div>
-        </div>
       </div>
 
       {showShareMenu && (
@@ -119,7 +86,7 @@ const IdeaCard = ({ idea, onToggleFavorite }) => {
           onClick={() => setShowShareMenu(false)}
         />
       )}
-    </div>
+    </Link>
   );
 };
 
