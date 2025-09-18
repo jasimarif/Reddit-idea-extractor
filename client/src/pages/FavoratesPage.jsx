@@ -113,7 +113,7 @@ const FavoritesPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#e6ebef] to-[#f0f4f8] pt-16 sm:pt-20 momentum-scroll">
+    <div className="min-h-screen bg-[#e6ebef] pt-16 sm:pt-20 momentum-scroll">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6">
         {/* Enhanced Header */}
         <div className="mb-8 sm:mb-12 text-center sm:text-left">
@@ -122,8 +122,8 @@ const FavoritesPage = () => {
               <Heart className="h-6 w-6 sm:h-8 sm:w-8 text-red-600" fill="currentColor" />
             </div>
             <div className="text-center sm:text-left">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
-                Your Favorite Ideas
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
+                Your <span className="bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">Favorite Ideas</span>  
               </h2>
               <p className="mt-1 text-gray-600 text-sm sm:text-base">
                 {window.innerWidth < 640 ? 'All your saved ideas' : 'All your saved ideas in one place • Quickly find what inspired you'}
@@ -136,14 +136,14 @@ const FavoritesPage = () => {
             {/* Total Saved Card */}
             <div className="relative group">
               <div className="absolute  rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
-              <div className="relative bg-white rounded-2xl p-6 border border-gray-100 transition-all duration-300">
+              <div className="relative bg-white/40 backdrop-blur-sm rounded-2xl p-6 border border-gray-100 transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600 mb-1">Total Saved</p>
                     <p className="text-3xl font-bold text-gray-900">{favorites.length}</p>
                     <p className="text-xs text-gray-500 mt-1">{favorites.length === 1 ? 'Idea' : 'Ideas'}</p>
                   </div>
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
                     <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -155,14 +155,14 @@ const FavoritesPage = () => {
             {/* Categories Card */}
             <div className="relative group">
               <div className="absolute rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
-              <div className="relative bg-white rounded-2xl p-6 border border-gray-100 transition-all duration-300">
+              <div className="relative bg-white/40 backdrop-blur-sm rounded-2xl p-6 border border-gray-100 transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600 mb-1">Categories</p>
                     <p className="text-3xl font-bold text-gray-900">{new Set(favorites.map(f => f.category)).size}</p>
                     <p className="text-xs text-gray-500 mt-1">Unique topics</p>
                   </div>
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center ">
                     <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
                     </svg>
@@ -174,7 +174,7 @@ const FavoritesPage = () => {
             {/* Most Popular Category Card */}
             <div className="relative group">
               <div className="absolute  rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
-              <div className="relative bg-white rounded-2xl p-6 border border-gray-100 transition-all duration-300">
+              <div className="relative bg-white/40 backdrop-blur-sm rounded-2xl p-6 border border-gray-100 transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600 mb-1">Top Category</p>
@@ -190,7 +190,7 @@ const FavoritesPage = () => {
                     </p>
                     <p className="text-xs text-gray-500 mt-1">Most saved</p>
                   </div>
-                  <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center shadow-lg">
+                  <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center ">
                     <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                     </svg>
@@ -242,7 +242,7 @@ const FavoritesPage = () => {
             </p>
             <a
               href="/dashboard"
-              className="inline-flex items-center px-6 py-3 text-sm font-medium !text-white bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+              className="inline-flex items-center px-6 py-3 text-sm font-medium !text-white bg-gradient-to-r from-orange-500 to-red-500 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
             >
               Browse Ideas
             </a>
@@ -250,7 +250,7 @@ const FavoritesPage = () => {
         ) : (
           <>
             {/* Filters and Search */}
-            <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-6 sm:mb-8">
+            <div className="bg-white/40 backdrop-blur-sm rounded-lg sm:rounded-xl  p-4 sm:p-6 mb-6 sm:mb-8">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
                 {/* Category Filters */}
                 <div className="flex flex-wrap gap-1.5 sm:gap-2 overflow-x-auto pb-1 -mx-1 sm:mx-0">

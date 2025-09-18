@@ -1,6 +1,6 @@
 import apiRequest from "../lib/apiRequest";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { Search, RefreshCw, Calendar, ExternalLink, Heart, Brain, Instagram, Linkedin, Youtube, Twitter, Filter, Sparkles, TrendingUp, Zap, Rocket, Layers } from "lucide-react";
+import { Search, RefreshCw, Calendar, ExternalLink, Heart, Brain, Instagram, Linkedin, Youtube, Twitter, Filter, Sparkles, TrendingUp, Zap, Rocket, Layers, Lightbulb } from "lucide-react";
 import { FaBrain } from "react-icons/fa";
 import {
   Card,
@@ -308,7 +308,7 @@ useEffect(() => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-[#e6ebef]">
       <div className="pt-28 sm:pt-28 px-2 sm:px-4 lg:px-6">
         <div className="max-w-screen-2xl mx-auto">
           {/* Header */}
@@ -319,17 +319,25 @@ useEffect(() => {
                   <Rocket className="h-6 w-6 text-white" />
                 </div>
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold  text-gray-900">
-                  Idea Dashboard
+                  Idea <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-600">Dashboard</span>
                 </h1>
               </div>
               <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
                 Discover and organize the most innovative business ideas from Reddit communities
               </p>
-              <div className="mt-6 flex items-center justify-center space-x-2">
-                <TrendingUp className="h-5 w-5 text-green-500" />
-                <span className="text-sm font-medium text-gray-700">
-                  {totalIdeas} ideas available
-                </span>
+              <div className="mt-8 flex items-center justify-center space-x-4">
+                <div className="flex items-center space-x-2 bg-white/40 backdrop-blur-sm border border-gray-200 rounded-2xl px-6 py-3  ">
+                  <TrendingUp className="h-5 w-5 text-green-500 fill-green-500" />
+                  <span className="text-sm font-semibold text-gray-700">
+                    {totalIdeas} ideas available
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2 bg-white/40 backdrop-blur-sm border border-gray-200 rounded-2xl px-6 py-3 ">
+                  <Sparkles className="h-5 w-5 text-purple-500 fill-purple-500" />
+                  <span className="text-sm font-semibold text-gray-700">
+                    AI-Powered Insights
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -377,7 +385,7 @@ useEffect(() => {
             {/* Premium Status Card */}
             
             {/* Categories Card */}
-            <div className="sticky top-6 bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 -xl border border-white/20">
+            <div className="sticky top-6 bg-white/40 backdrop-blur-sm border border-gray-200 rounded-2xl p-4 sm:p-6 x">
               <div className="flex items-center mb-4 sm:mb-6">
                 <Layers className="h-6 w-6 text-btn mr-3 drop-shadow-lg transform hover:scale-110 hover:-rotate-6 transition-all duration-300" />
                 <h3 className="text-lg font-bold text-gray-900">Categories</h3>
@@ -415,14 +423,14 @@ useEffect(() => {
           {/* Main Content */}
           <div className="flex-1">
         {/* Search and Sort */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl -xl border border-white/20 p-4 mb-4">
+        <div className="bg-white/40 backdrop-blur-sm border border-gray-200 rounded-2xl -xx p-4 mb-4">
           <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
             {/* Search */}
             <div className="flex-1">
               <div className="relative">
                 <input
                   type="text"
-                  className="w-full text-sm sm:text-base pl-12 pr-4 py-3  rounded-xl focus:outline-none bg-gray-100 transition-all duration-200"
+                  className="w-full text-sm sm:text-base pl-12 pr-4 py-3  rounded-xl focus:outline-none bg-white/40 transition-all duration-200"
                   placeholder="Search innovative ideas..."
                   value={searchTerm}
                   onChange={(e) => {
@@ -442,7 +450,7 @@ useEffect(() => {
                 Sort by:
               </span>
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-48 text-sm bg-gray-100 cursor-pointer focus:ring-0 focus:ring-offset-0 border-none">
+                <SelectTrigger className="w-48 text-sm bg-white/40 border-none cursor-pointer focus:ring-0 focus:ring-offset-0 ">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border border-gray-200 rounded-xl">
@@ -457,7 +465,7 @@ useEffect(() => {
         </div>
 
         {/* Ideas Grid */}
-        <Card className="bg-white/80 backdrop-blur-sm rounded-2xl -xl border border-white/20 overflow-hidden shadow-none">
+        <div className="bg-white/40 backdrop-blur-sm border border-gray-200 rounded-2xl  overflow-hidden ">
           <CardHeader className="pb-4 px-4 sm:px-6 pt-4 sm:pt-6 bg-gradient-to-r from-gray-50/50 to-blue-50/30">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0">
               <div className="flex items-center space-x-3">
@@ -487,10 +495,10 @@ useEffect(() => {
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-            <Table className="min-w-full">
-                <TableHeader className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-200">
+          <CardContent className="p-0 rounded-xl overflow-hidden mt-5 ">
+            <div className="overflow-x-auto rounded-xl">
+            <div className="min-w-full rounded-xl">
+                <TableHeader className="bg-white/30  backdrop-blur-sm rounded-xl">
                   <TableRow className="border-b border-gray-200 h-10">
                     <TableHead className="px-2 sm:px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-6 sm:w-8">
                       <Heart className="h-4 w-4 mx-auto text-gray-500" />
@@ -540,7 +548,7 @@ useEffect(() => {
                     </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody className="bg-white divide-y divide-gray-100">
+                <TableBody className="bg-white/40 backdrop-blur-sm divide-y divide-gray-100 rounded-xl">
                   {ideas.map((idea) => (
                     <TableRow
                       key={idea._id}
@@ -578,20 +586,22 @@ useEffect(() => {
                               href={idea.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="px-3 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
+                              className="inline-flex items-center px-3 py-1.5 text-xs font-semibold bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
                             >
+                              <ExternalLink className="h-3 w-3 mr-1" />
                               {idea.platform || "reddit"}
                             </a>
                           </div>
                         </div>
                         <div className="flex items-center space-x-3">
-                          <Badge className={`text-xs font-medium py-1 px-2 rounded-md ${
+                          <Badge className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-full  transition-all duration-200 transform hover:scale-105 ${
                             idea.businessPotential === 'High'
-                              ? 'bg-green-50 text-green-700 border border-green-200'
+                              ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white   hover:from-green-600 hover:to-emerald-700'
                               : idea.businessPotential === 'Medium'
-                              ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
-                              : 'bg-gray-50 text-gray-600 border border-gray-200'
+                              ? 'bg-gradient-to-r from-yellow-500 to-amber-600 text-white   hover:from-yellow-600 hover:to-amber-700'
+                              : 'bg-gradient-to-r from-gray-500 to-slate-600 text-white border border-gray-400 hover:from-gray-600 hover:to-slate-700'
                           }`}>
+                            <TrendingUp className="h-3 w-3 mr-1" />
                             {idea.businessPotential}
                           </Badge>
                           <Link to={`/idea/${idea._id}`}>
@@ -634,7 +644,7 @@ useEffect(() => {
                         <div className="sm:hidden text-xs font-medium text-gray-700 mb-2">Business Idea</div>
                         <Link
                           to={`/idea/${idea._id}`}
-                          className="text-btn hover:text-blue-800 hover:underline font-medium block mb-2 sm:mb-0 transition-colors"
+                          className="text-btn hover:btn-hover font-medium block mb-2 sm:mb-0 transition-colors"
                         >
                           {idea.title || idea.summary}
                         </Link>
@@ -656,8 +666,9 @@ useEffect(() => {
                             href={idea.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="px-3 py-1.5 text-xs font-medium bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
+                            className="inline-flex items-center px-3 py-1.5 text-xs font-semibold bg-btn text-white rounded-full  transition-all duration-200 transform hover:scale-105"
                           >
+                            <ExternalLink className="h-3 w-3 mr-1" />
                             {idea.platform || "reddit"}
                           </a>
                         </div>
@@ -667,14 +678,15 @@ useEffect(() => {
                         <div className="sm:hidden text-xs font-medium text-gray-700 mb-2">Category</div>
                         <Badge
                           variant="outline"
-                          className={`text-xs font-medium rounded-md px-2 py-1 ${
+                          className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-full  transition-all duration-200 transform hover:scale-105 ${
                             idea.category === 'tech'
-                              ? 'bg-blue-50 text-blue-700 border-blue-200'
+                              ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700  hover:from-blue-100 hover:to-blue-200'
                               : idea.category === 'business'
-                              ? 'bg-orange-50 text-orange-700 border-orange-200'
-                              : 'bg-gray-50 text-gray-600 border-gray-200'
+                              ? 'bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700  hover:from-orange-100 hover:to-orange-200'
+                              : 'bg-gradient-to-r from-gray-50 to-gray-100 text-gray-600 border-gray-300 hover:from-gray-100 hover:to-gray-200'
                           }`}
                         >
+                          <Layers className="h-3 w-3 mr-1" />
                           {idea.category || "General"}
                         </Badge>
                       </TableCell>
@@ -682,7 +694,8 @@ useEffect(() => {
                       <TableCell className="px-6 py-4 whitespace-nowrap ">
                         <div className="flex flex-col sm:block space-y-2 sm:space-y-0">
                           <div className="flex items-center gap-2">
-                            <span className="px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-md">
+                            <span className="inline-flex items-center px-2.5 py-1 bg-btn   text-white text-xs font-semibold rounded-full  transition-all duration-200 transform hover:scale-105">
+                              <Zap className="h-3 w-3 mr-1" />
                               {idea.rankScore?.toFixed(2) || "N/A"}
                             </span>
                             <span className="sm:hidden text-xs text-gray-500 flex items-center">
@@ -712,20 +725,21 @@ useEffect(() => {
 
                       <TableCell className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm">
                         <div className="sm:hidden text-xs font-medium text-gray-700 mb-2">Potential</div>
-                        <Badge className={`text-xs font-medium py-1 px-2 rounded-md ${
+                        <Badge className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-full  transition-all duration-200 transform hover:scale-105 ${
                           idea.businessPotential === 'High'
-                            ? 'bg-green-50 text-green-700 border border-green-200'
+                            ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white   hover:from-green-600 hover:to-emerald-700'
                             : idea.businessPotential === 'Medium'
-                            ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
-                            : 'bg-gray-50 text-gray-600 border border-gray-200'
+                            ? 'bg-gradient-to-r from-yellow-500 to-amber-600 text-white   hover:from-yellow-600 hover:to-amber-700'
+                            : 'bg-gradient-to-r from-gray-500 to-slate-600 text-white  hover:from-gray-600 hover:to-slate-700'
                         }`}>
+                          <TrendingUp className="h-3 w-3 mr-1" />
                           {idea.businessPotential}
                         </Badge>
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
-              </Table>
+              </div>
             </div>
 
             {isLoading ? (
@@ -769,7 +783,7 @@ useEffect(() => {
               </div>
             ) : null}
           </CardContent>
-        </Card>
+        </div>
 
             </div>
           </div>

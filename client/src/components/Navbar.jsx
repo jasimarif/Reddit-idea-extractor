@@ -353,7 +353,7 @@ const EnhancedAnimatedNavbar = () => {
                     Login
                   </Link>
                   <button
-                    className="px-6 py-2 rounded-xl text-sm font-bold bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md hover:shadow-lg transition-all duration-200"
+                    className="px-6 py-2 rounded-xl text-sm font-bold bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md hover:shadow-lg transition-all duration-200"
                     onClick={() => navigate("/signup")}
                   >
                     Get Started

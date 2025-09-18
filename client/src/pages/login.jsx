@@ -80,7 +80,7 @@ const LoginPage = () => {
             <Rocket className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">
-            Welcome back
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-red-500">Welcome</span> back
           </h1>
           <p className="text-gray-600 text-sm">
             Don't have an account?{" "}
@@ -94,7 +94,7 @@ const LoginPage = () => {
         </div>
 
         {/* Login Form Card */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-white/20 p-8 transition-all duration-300">
+        <div className="bg-white/50 backdrop-blur-sm  rounded-3xl border border-white/20 p-8 transition-all duration-300">
           <div className="space-y-6">
             {/* Error Message */}
             {error && (
@@ -123,7 +123,7 @@ const LoginPage = () => {
                     type="email"
                     autoComplete="email"
                     required
-                    className="block w-full pl-12 pr-4 py-3 text-sm border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-gray-50/50 focus:bg-white"
+                    className="block w-full pl-12 pr-4 py-3 text-sm border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none  transition-all duration-200 "
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -149,7 +149,7 @@ const LoginPage = () => {
                     type={showPassword ? "text" : "password"}
                     autoComplete="current-password"
                     required
-                    className="block w-full pl-12 pr-12 py-3 text-sm border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-gray-50/50 focus:bg-white"
+                    className="block w-full pl-12 pr-12 py-3 text-sm border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none  transition-all duration-200 "
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => {
@@ -159,7 +159,7 @@ const LoginPage = () => {
                   />
                   <button
                     type="button"
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-purple-600 transition-colors duration-200"
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400  transition-colors duration-200 cursor-pointer"
                     onClick={() => setShowPassword((show) => !show)}
                     aria-label={showPassword ? "Hide password" : "Show password"}
                   >
@@ -181,11 +181,11 @@ const LoginPage = () => {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="h-4 w-4 text-orange-500 focus:ring-orange-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-orange-500 focus:ring-orange-500 border-gray-300 rounded cursor-pointer"
                   />
                   <label
                     htmlFor="remember-me"
-                    className="ml-2 block text-sm text-gray-600 text-left"
+                    className="ml-2 block text-sm text-gray-600 text-left cursor-pointer"
                   >
                     Remember me
                   </label>
@@ -193,7 +193,7 @@ const LoginPage = () => {
                 <button
                   type="button"
                   onClick={handleForgotPassword}
-                  className="text-sm font-semibold text-orange-600 hover:text-orange-700 transition-colors duration-200"
+                  className="text-sm font-semibold text-orange-600 hover:text-orange-700 transition-colors duration-200 cursor-pointer"
                   disabled={isLoading}
                 >
                   Forgot password?
@@ -223,7 +223,7 @@ const LoginPage = () => {
                 <div className="w-full border-t border-gray-200" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500 font-medium">Or continue with</span>
+                <span className="px-4  text-gray-500 font-medium">Or continue with</span>
               </div>
             </div>
 
@@ -232,7 +232,7 @@ const LoginPage = () => {
               type="button"
               onClick={handleGoogleLogin}
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-200 rounded-xl py-3 px-4 font-semibold hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 cursor-pointer"
+              className="w-full flex items-center justify-center gap-3 bg-white/30 border-2 border-gray-200 rounded-xl py-3 px-4 font-semibold hover:bg-gray-50 focus:outline-none f  disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 cursor-pointer"
             >
               <FcGoogle className="h-5 w-5" />
               <span className="text-gray-700">Continue with Google</span>

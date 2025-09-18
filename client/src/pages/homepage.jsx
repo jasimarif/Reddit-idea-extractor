@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -11,6 +11,7 @@ import {
   CheckCircle,
   ChevronDown,
   Mail,
+  MailCheck,
   Brain,
   Instagram,
   Linkedin,
@@ -29,6 +30,11 @@ import {
   Activity,
   Settings,
   Rocket,
+  HelpCircle,
+  MessageCircle,
+  Info,
+  CircleDot,
+  AlertCircle,
 } from 'lucide-react';
 import ScrollAnimationWrapper from '@/components/ScrollAnimationWrapper';
 import EnhancedAnimatedNavbar from '../components/Navbar';
@@ -149,28 +155,44 @@ const HomePage = () => {
 
   const faqs = [
     {
+      icon: <Lightbulb className="h-5 w-5 text-blue-500 fill-blue-500" />,
+      bgColor: "bg-blue-100",
       question: "What does the platform do?",
       answer: "We extract pain points from Reddit threads and turn them into startup ideas, complete with auto-generated landing pages.",
     },
     {
+      icon: <MessageCircle className="h-5 w-5 text-purple-500 fill-purple-500" />,
+      bgColor: "bg-purple-100",
       question: "How many agents are working behind the scenes?",
       answer: "We use 5 agents to extract pain points from Reddit threads and turn them into startup ideas, complete with auto-generated landing pages. Each operates independently and passes structured output to the next stage.",
     },
     {
+      icon: <Target className="h-5 w-5 text-green-500 fill-green-500" />,
+      bgColor: "bg-green-100",
       question: "How often is Reddit data updated?",
       answer: "We monitor trending subreddits in near real-time, updating your dashboard with fresh pain points and market gaps daily.",
     },
     {
+      icon: <Settings className="h-5 w-5 text-orange-500 fill-orange-500" />,
+      bgColor: "bg-orange-100",
       question: "Can I train the agents for my own niche?",
       answer: "Currently in beta. Enterprise users can request custom tuning or niche-specific agent workflows.",
     },
     {
+      icon: <Activity className="h-5 w-5 text-red-500 fill-red-500" />,
+      bgColor: "bg-red-100",
       question: "Do I get analytics?",
       answer: "Yes, Pro and Enterprise plans include usage stats, engagement insights, and trend forecasting.",
     },
+    {
+      icon: <Shield className="h-5 w-5 text-teal-500 fill-teal-500" />,
+      bgColor: "bg-teal-100",
+      question: "Is my data secure?",
+      answer: "We use enterprise-grade encryption and never share your data. All Reddit analysis is performed anonymously, and your account information is protected with industry-standard security measures.",
+    },
   ];
 
-  const CloudBackground = ({ 
+  const CloudBackground = ({
     className = '', 
     left = false, 
     right = false,
@@ -275,7 +297,7 @@ const HomePage = () => {
               Discover,<span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600"> Analyze </span>
               and Extract Valuable Insights
               </h1>
-              <h2 className="text-xl sm:text-2xl md:text-3xl bg-gradient-to-r from-purple-900 to-orange-500 bg-clip-text text-transparent font-semibold mb-6 md:mb-8 drop-shadow-sm">
+              <h2 className="text-xl sm:text-2xl md:text-3xl bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent font-semibold mb-6 md:mb-8 drop-shadow-sm">
                 Powered by AI.
               </h2>
               
@@ -290,7 +312,7 @@ const HomePage = () => {
                   <span className="mr-2">Get Started</span>
                   <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
                 </Link>
-                <Link className="group w-full sm:w-auto px-8 md:px-10 py-4 bg-white/90 backdrop-blur-sm rounded-xl text-gray-800 font-semibold hover:bg-white transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center border border-gray-200">
+                <Link className="group w-full sm:w-auto px-8 md:px-10 py-4 bg-white/30 backdrop-blur-sm  rounded-xl text-gray-800 font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center border border-gray-200">
                   <span className="mr-2">Learn More</span>
                   <svg className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
@@ -347,15 +369,15 @@ const HomePage = () => {
           <div className="mx-auto mt-12 md:mt-16 max-w-4xl">
             <div className="flex flex-wrap justify-center gap-6 md:gap-12">
               <div className="flex items-center gap-3 text-gray-700">
-                <Shield className="h-4 w-4 md:h-5 md:w-5" />
+                <Shield className="h-4 w-4 md:h-5 md:w-5 text-purple-500 fill-purple-500" />
                 <span className="text-xs md:text-sm font-medium">Multi-Agent AI</span>
               </div>
               <div className="flex items-center gap-3 text-gray-700">
-                <Zap className="h-4 w-4 md:h-5 md:w-5" />
+                <Cpu className="h-4 w-4 md:h-5 md:w-5 text-green-500 fill-green-500" />
                 <span className="text-xs md:text-sm font-medium">Modular Integration</span>
               </div>
               <div className="flex items-center gap-3 text-gray-700">
-                <Layers className="h-4 w-4 md:h-5 md:w-5" />
+                <Zap className="h-4 w-4 md:h-5 md:w-5 text-orange-500 fill-orange-500" />
                 <span className="text-xs md:text-sm font-medium">Scalable Innovation</span>
               </div>
             </div>
@@ -364,203 +386,193 @@ const HomePage = () => {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="relative py-16 md:py-24 scroll-section bg-[#e6ebef] px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section id="pricing" className="relative py-16 md:py-24 scroll-section  px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Enhanced Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-10 left-10 w-96 h-96 bg-gradient-to-br from-orange-200/20 to-red-200/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-10 right-10 w-80 h-80 bg-gradient-to-br from-red-200/15 to-pink-200/15 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-br from-orange-100/10 to-red-100/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+        </div>
+
         {/* Pricing Section Clouds */}
-        <CloudBackground className="top-[15%] -translate-y-1/2" left size="lg" opacity={35} delay={2} />
-        <CloudBackground className="top-[50%] -translate-y-1/2" right size="sm" opacity={25} delay={4} />
-        <CloudBackground className="top-[85%] -translate-y-1/2" left size="base" opacity={20} delay={1} />
+        <CloudBackground className="top-[15%] -translate-y-1/2" left size="lg" opacity={25} delay={2} />
+        <CloudBackground className="top-[50%] -translate-y-1/2" right size="sm" opacity={20} delay={4} />
+        <CloudBackground className="top-[85%] -translate-y-1/2" left size="base" opacity={15} delay={1} />
+
         <div className="relative mx-auto max-w-7xl z-10">
           <ScrollAnimationWrapper>
             <div className="mx-auto max-w-2xl text-center mb-12 md:mb-16">
-              <div className="inline-flex items-center bg-gray-100 text-gray-700 rounded-full px-4 py-2 mb-4 md:mb-6">
-                <span className="text-sm font-medium">💰 Transparent Pricing, No Surprises</span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-medium tracking-tight text-gray-900 mb-4 md:mb-6 px-2">
-                Flexible Plans for All
+              {/* <div className="inline-flex items-center bg-gradient-to-r from-orange-100 to-red-100 text-orange-700 rounded-full px-6 py-3 mb-6 shadow-sm border border-orange-200/50">
+                <Sparkles className="h-4 w-4 mr-2" />
+                <span className="text-sm font-semibold">Premium AI-Powered Solution</span>
+              </div> */}
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-gray-900 mb-4 md:mb-6 px-2">
+                Simple,<span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600"> Transparent Pricing</span>
               </h2>
-              <p className="text-base md:text-lg text-gray-600 mb-6 md:mb-8 px-2">
-                Choose a plan that fits your goals and scale as you grow
+              <p className="text-base md:text-lg text-gray-600 mb-8 md:mb-12 px-2 max-w-xl mx-auto">
+                Unlock the power of AI-driven business insights with our comprehensive platform
               </p>
-              
-              {/* Toggle */}
-              <div className="inline-flex items-center bg-white rounded-lg p-1 shadow-sm border border-gray-200">
-                <button className="px-4 md:px-6 py-2 rounded-md bg-gray-100 text-gray-900 font-medium text-sm">
-                  Monthly
-                </button>
-                <button className="px-4 md:px-6 py-2 rounded-md text-gray-600 font-medium text-sm">
-                  Yearly
-                </button>
-                <span className="ml-2 mr-2 text-sm text-gray-500 font-medium hidden sm:inline">Save 20%</span>
-              </div>
             </div>
           </ScrollAnimationWrapper>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto">
-            {/* Starter Plan */}
+          <div className="flex justify-center">
+            {/* Beautiful Single Pricing Plan */}
             <ScrollAnimationWrapper delay={0.1}>
-              <div className="flex flex-col rounded-2xl bg-white p-6 md:p-8 shadow-sm border border-gray-200 relative h-full">
-                <div className="flex-1">
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Starter</h3>
-                  <div className="flex items-baseline mb-6">
-                    <span className="text-3xl md:text-4xl font-bold text-gray-900">$12</span>
-                    <span className="text-sm text-gray-500 ml-1">user/month</span>
-                  </div>
-                  <button className="w-full py-3 px-4 rounded-lg border-2 border-gray-200 text-gray-700 font-medium hover:border-gray-300 transition-colors mb-6 md:mb-8">
-                    Get Started
-                  </button>
-                  
-                  <div className="space-y-4">
-                    <p className="text-sm font-medium text-gray-900 mb-4">Everything in starter plan</p>
-                    {[
-                      'Unlimited AI usage here',
-                      'Premium support',
-                      'Customer care on point',
-                      'Collaboration tools'
-                    ].map((feature, index) => (
-                      <div key={index} className="flex items-center">
-                        <CheckCircle className="h-4 w-4 text-gray-400 mr-3 flex-shrink-0" />
-                        <span className="text-sm text-gray-600">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </ScrollAnimationWrapper>
+              <div className="relative group">
+                {/* Glow Effect */}
+                <div className="absolute  rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200 "></div>
 
-            {/* Pro Plan */}
-            <ScrollAnimationWrapper delay={0.2}>
-              <div className="flex flex-col rounded-2xl bg-white p-6 md:p-8 shadow-sm border border-gray-200 relative h-full">
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Pro</h3>
-                  <div className="flex items-baseline mb-6">
-                    <span className="text-3xl md:text-4xl font-bold text-gray-900">$17</span>
-                    <span className="text-sm text-gray-500 ml-1">user/month</span>
+                <div className="relative flex flex-col rounded-3xl bg-white/30 backdrop-blur-sm p-8 md:p-10 l border border-gray-200 w-full max-w-lg transform hover:scale-105 transition-all duration-500 ">
+                  {/* Popular Badge */}
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <div className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-2 rounded-full text-sm font-semibold shadow-lg">
+                      ✨ Most Popular
+                    </div>
                   </div>
-                  <button className="w-full py-3 px-4 rounded-lg bg-[#3B4A6B] text-gray-700 font-medium hover:bg-[#2E3B58] transition-colors mb-6 md:mb-8">
-                    Get Started
-                  </button>
-                  
-                  <div className="space-y-4">
-                    <p className="text-sm font-medium text-gray-900 mb-4">Everything in Pro plan</p>
-                    {[
-                      'Integrations with 3rd-party',
-                      'Advanced analytics',
-                      'Team performance tracking',
-                      'Top grade security',
-                      'Customizable Solutions'
-                    ].map((feature, index) => (
-                      <div key={index} className="flex items-center">
-                        <CheckCircle className="h-4 w-4 text-gray-400 mr-3 flex-shrink-0" />
-                        <span className="text-sm text-gray-600">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </ScrollAnimationWrapper>
 
-            {/* Enterprise Plan */}
-            <ScrollAnimationWrapper delay={0.3}>
-              <div className="flex flex-col rounded-2xl bg-white p-6 md:p-8 shadow-sm border border-gray-200 relative h-full">
-                <div className="flex-1">
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Enterprise</h3>
-                  <div className="flex items-baseline mb-6">
-                    <span className="text-3xl md:text-4xl font-bold text-gray-900">$97</span>
-                    <span className="text-sm text-gray-500 ml-1">user/month</span>
-                  </div>
-                  <button className="w-full py-3 px-4 rounded-lg border-2 border-gray-200 text-gray-700 font-medium hover:border-gray-300 transition-colors mb-6 md:mb-8">
-                    Get Started
-                  </button>
-                  
-                  <div className="space-y-4">
-                    <p className="text-sm font-medium text-gray-900 mb-4">Dedicated account manager</p>
-                    {[
-                      'Custom reports & dashboards',
-                      'Most performance usage',
-                      'Enterprise-grade security',
-                      'Customizable Solutions',
-                      'Seamless Integration',
-                      'Dedicated account manager'
-                    ].map((feature, index) => (
-                      <div key={index} className="flex items-center">
-                        <CheckCircle className="h-4 w-4 text-gray-400 mr-3 flex-shrink-0" />
-                        <span className="text-sm text-gray-600">{feature}</span>
+                  <div className="flex-1 text-center">
+                    {/* Plan Icon */}
+                    <div className="flex justify-center mb-6">
+                      <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg">
+                        <Rocket className="h-8 w-8 text-white" />
                       </div>
-                    ))}
+                    </div>
+
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">Pro Plan</h3>
+                    <p className="text-gray-600 mb-8">Everything you need to transform ideas into reality</p>
+
+                    <div className="flex items-baseline justify-center mb-8">
+                      <span className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">$29</span>
+                      <span className="text-lg text-gray-500 ml-2">/month</span>
+                    </div>
+
+                    <button className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold hover:from-orange-500 hover:to-red-500 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105 mb-8 flex items-center justify-center group">
+                      <span className="mr-2">Get Started Now</span>
+                      <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
+                    </button>
+
+                    <div className="space-y-4">
+                      <p className="text-sm font-semibold text-gray-900 mb-6 text-left">🚀 Everything included:</p>
+                      {[
+                        { text: 'Unlimited AI-powered analysis', icon: '🤖' },
+                        { text: 'Real-time Reddit monitoring', icon: '📊' },
+                        { text: 'Automated business idea generation', icon: '💡' },
+                        { text: 'Landing page creation tools', icon: '🎨' },
+                        { text: 'Priority customer support', icon: '🎯' },
+                        { text: 'Advanced analytics dashboard', icon: '📈' }
+                      ].map((feature, index) => (
+                        <div key={index} className="flex items-center group/item">
+                          <div className="flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-r from-orange-100 to-red-100 mr-4 group-hover/item:from-orange-200 group-hover/item:to-red-200 transition-colors duration-200">
+                            <span className="text-sm">{feature.icon}</span>
+                          </div>
+                          <span className="text-sm text-gray-700 group-hover/item:text-gray-900 transition-colors duration-200">{feature.text}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Bottom decorative element */}
+                  <div className="mt-8 pt-6 border-t border-gray-100">
+                    <div className="flex items-center justify-center text-xs text-gray-500">
+                      <Shield className="h-4 w-4 mr-2 text-green-500" />
+                      <span>30-day money-back guarantee</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </ScrollAnimationWrapper>
           </div>
 
-          <div className="mt-12 md:mt-16 text-center">
-            <p className="text-sm text-gray-500 flex items-center justify-center">
-              <Heart className="h-4 w-4 mr-2" />
-              We donate 2% of your membership to pediatric wellbeing
-            </p>
-          </div>
+          {/* <div className="mt-16 md:mt-20 text-center">
+            <div className="inline-flex items-center bg-white/80 backdrop-blur-sm rounded-2xl px-6 py-4 shadow-lg border border-white/50">
+              <Heart className="h-5 w-5 mr-3 text-red-500" />
+              <span className="text-sm text-gray-600 font-medium">
+                We donate <strong className="text-red-600">2%</strong> of your membership to pediatric wellbeing
+              </span>
+            </div>
+          </div> */}
         </div>
       </section>
 
       {/* FAQ Section */}
-      <section id="Faqs" className="relative py-16 md:py-24 scroll-section bg-[#e6ebef] px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section id="Faqs" className="relative py-16 md:py-24 scroll-section  px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Enhanced Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-10 left-10 w-96 h-96 bg-gradient-to-br from-orange-200/10 to-red-200/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-10 right-10 w-80 h-80 bg-gradient-to-br from-red-200/8 to-pink-200/8 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-br from-orange-100/5 to-red-100/5 rounded-full blur-3xl animate-pulse delay-500"></div>
+        </div>
+
         {/* FAQ Section Clouds */}
-        <CloudBackground className="top-[20%] -translate-y-1/2" left size="base" opacity={25} delay={3} />
-        <CloudBackground className="top-[60%] -translate-y-1/2" right size="lg" opacity={20} delay={1} />
-        <CloudBackground className="top-[90%] -translate-y-1/2" left size="sm" opacity={15} delay={5} />
-        <div className="relative mx-auto max-w-4xl z-10">
+        <CloudBackground className="top-[20%] -translate-y-1/2" left size="base" opacity={15} delay={3} />
+        <CloudBackground className="top-[60%] -translate-y-1/2" right size="lg" opacity={10} delay={1} />
+        <CloudBackground className="top-[90%] -translate-y-1/2" left size="sm" opacity={8} delay={5} />
+
+        <div className="relative mx-auto max-w-5xl z-10">
           <ScrollAnimationWrapper>
             <div className="mx-auto max-w-2xl text-center mb-12 md:mb-16">
-              <div className="inline-flex items-center bg-gray-100 text-gray-700 rounded-full px-4 py-2 mb-4 md:mb-6">
-                <span className="text-sm font-medium">❓ Your Queries, Simplified</span>
+              <div className="inline-flex items-center bg-gradient-to-r from-orange-500 to-red-500 text-orange-700 rounded-full px-6 py-3 mb-6 border border-orange-200/50">
+                <HelpCircle className="h-4 w-4 mr-2 text-white" />
+                <span className="text-sm text-white font-semibold">Frequently Asked Questions</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-medium tracking-tight text-gray-900 mb-4 md:mb-6 px-2">
-                Questions? Answers!
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-gray-900 via-slate-800 to-gray-900 bg-clip-text text-transparent mb-4 md:mb-6 px-2">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600">Everything</span> You Need to Know
               </h2>
-              <p className="text-base md:text-lg text-gray-600 px-2">
-                Find quick answers to the most common questions about our platform
+              <p className="text-base md:text-lg text-gray-600 mb-8 md:mb-12 px-2 max-w-xl mx-auto">
+                Get answers to common questions about our AI-powered platform
               </p>
             </div>
           </ScrollAnimationWrapper>
 
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 ">
             {faqs.map((faq, index) => (
               <ScrollAnimationWrapper key={index} delay={index * 0.1}>
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                  <button
-                    className="flex items-center justify-between w-full px-4 md:px-6 py-4 text-left hover:bg-gray-50 transition-colors"
-                    onClick={() => toggleFaq(index)}
-                  >
-                    <span className="text-sm md:text-base font-medium text-gray-900 pr-4">{faq.question}</span>
-                    <ChevronDown
-                      className={`h-5 w-5 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
-                        openFaqIndex === index ? 'rotate-180' : ''
-                      }`}
-                    />
-                  </button>
-                  {openFaqIndex === index && (
-                    <div className="px-4 md:px-6 pb-4 text-gray-600 text-sm leading-relaxed">
-                      {faq.answer}
-                    </div>
-                  )}
+                <div className="group relative ">
+                  {/* Subtle glow effect */}
+                  <div className="absolute -inset-0.5 bg-white/30 backdrop-blur-sm border border-white/50 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
+
+                  <div className="relative bg-white/30 backdrop-blur-sm border-gray-200 rounded-2xl  transition-all duration-500 overflow-hidden h-full cursor-pointer">
+                    <button
+                      className="flex items-center w-full px-6 md:px-8 py-6 text-left hover:bg-gradient-to-r  transition-all duration-300 cursor-pointer "
+                      onClick={() => toggleFaq(index)}
+                    >
+                      <div className="flex items-center flex-1">
+                        <div className={`flex items-center justify-center w-10 h-10 rounded-xl ${faq.bgColor} mr-4 transition-all duration-300 flex-shrink-0`}>
+                          {faq.icon}
+                        </div>
+                        <div className="flex-1">
+                          <span className="text-sm md:text-base font-semibold text-gray-900  transition-colors duration-200 leading-tight">{faq.question}</span>
+                        </div>
+                      </div>
+                      <ChevronDown
+                        className={`h-5 w-5 text-orange-500 transition-all duration-300 flex-shrink-0 ml-4 transform ${openFaqIndex === index ? 'rotate-180 text-red-600' : 'rotate-0'}`}
+                      />
+                    </button>
+                    {openFaqIndex === index && (
+                      <div className="px-6 md:px-8 pb-6 text-gray-600 text-sm md:text-base leading-relaxed border-t border-orange-100/50 bg-gradient-to-r from-orange-50/20 to-red-50/20">
+                        <div className="pt-4 flex items-start">
+                          <div className="w-1 h-full bg-gradient-to-b from-orange-400 to-red-400 rounded-full mr-4 flex-shrink-0 mt-1"></div>
+                          <p className="flex-1">{faq.answer}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </ScrollAnimationWrapper>
             ))}
           </div>
 
-          <div className="mt-12 text-center">
-            <div className="flex flex-col sm:flex-row items-center justify-center text-sm text-gray-600 gap-2">
-              <div className="flex items-center">
-                <Mail className="h-4 w-4 mr-2" />
-                <span>Feel free to mail us for any enquiries:</span>
+          <div className="mt-16 md:mt-20 text-center">
+            <div className="inline-flex items-center bg-white/30 backdrop-blur-sm rounded-2xl px-8 py-6 border border-gray-200">
+              <div className="flex items-center mr-4">
+                <MailCheck className="h-5 w-5 mr-3 text-orange-500 fill-orange-500" />
+                <span className="text-sm text-gray-600 font-medium">Still have questions?</span>
               </div>
-              <a 
-                href="mailto:RedditIdeaExtractor@support.com" 
-                className="text-gray-900 font-medium hover:underline"
+              <a
+                href="mailto:RedditIdeaExtractor@support.com"
+                className="text-orange-600 font-semibold hover:text-orange-700 transition-colors duration-200  decoration-2 underline-offset-2 hover:decoration-red-500"
               >
-                RedditIdeaExtractor@support.com
+                Contact our support team
               </a>
             </div>
           </div>
@@ -569,21 +581,30 @@ const HomePage = () => {
 
       {/* Testimonials Section */}
       <section id="contact" className="relative py-16 md:py-24 scroll-section bg-[#e6ebef] px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Enhanced Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-10 left-10 w-96 h-96 bg-gradient-to-br from-orange-200/15 to-red-200/15 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-10 right-10 w-80 h-80 bg-gradient-to-br from-red-200/10 to-pink-200/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-br from-orange-100/8 to-red-100/8 rounded-full blur-3xl animate-pulse delay-500"></div>
+        </div>
+
         {/* Testimonials Section Clouds */}
-        <CloudBackground className="top-[15%] -translate-y-1/2" left size="lg" opacity={30} delay={2} />
-        <CloudBackground className="top-[50%] -translate-y-1/2" right size="sm" opacity={25} delay={4} />
-        <CloudBackground className="top-[85%] -translate-y-1/2" left size="base" opacity={20} delay={1} />
-        <div className="relative mx-auto max-w-6xl z-10">
+        <CloudBackground className="top-[15%] -translate-y-1/2" left size="lg" opacity={25} delay={2} />
+        <CloudBackground className="top-[50%] -translate-y-1/2" right size="sm" opacity={20} delay={4} />
+        <CloudBackground className="top-[85%] -translate-y-1/2" left size="base" opacity={15} delay={1} />
+
+        <div className="relative mx-auto max-w-7xl z-10">
           <ScrollAnimationWrapper>
-            <div className="mx-auto max-w-2xl text-center mb-12 md:mb-16">
-              <div className="inline-flex items-center bg-gray-100 text-gray-700 rounded-full px-4 py-2 mb-4 md:mb-6">
-                <span className="text-sm font-medium">🚀 Trusted by Innovators Worldwide</span>
+            <div className="mx-auto max-w-3xl text-center mb-12 md:mb-20">
+              <div className="inline-flex items-center bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full px-6 py-3 mb-6 shadow-lg border border-white/20">
+                <Sparkles className="h-4 w-4 mr-2" />
+                <span className="text-sm font-semibold">Success Stories</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-medium tracking-tight text-gray-900 mb-4 md:mb-6 px-2">
-                What Our Users Say
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-r from-gray-900 via-slate-800 to-gray-900 bg-clip-text text-transparent mb-4 md:mb-6 px-2">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600">Trusted</span> by Innovators Worldwide
               </h2>
-              <p className="text-base md:text-lg text-gray-600 px-2">
-                Hear from businesses who've transformed their workflows with our solutions
+              <p className="text-base md:text-lg text-gray-600 px-2 max-w-2xl mx-auto leading-relaxed">
+                Join thousands of entrepreneurs and businesses who've transformed their workflows with our AI-powered platform
               </p>
             </div>
           </ScrollAnimationWrapper>
@@ -591,20 +612,46 @@ const HomePage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 text-left">
             {testimonials.map((testimonial, index) => (
               <ScrollAnimationWrapper key={index} delay={index * 0.1}>
-                <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-200 h-full flex flex-col">
-                  <p className="text-sm md:text-base text-gray-600 mb-6 leading-relaxed flex-1">
-                    {testimonial.text}
+                <div className="bg-white/30 backdrop-blur-sm border border-gray-200 rounded-3xl p-6 md:p-8 h-full flex flex-col">
+                  {/* Quote Icon */}
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-gradient-to-r from-orange-400 to-red-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-gradient-to-r from-orange-400 to-red-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-gradient-to-r from-orange-400 to-red-400 rounded-full"></div>
+                    </div>
+                    <div className="text-orange-500 opacity-60">
+                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h4v10h-10z"/>
+                      </svg>
+                    </div>
+                  </div>
+
+                  <p className="text-sm md:text-base text-gray-700 mb-8 leading-relaxed flex-1 font-medium italic">
+                    "{testimonial.text}"
                   </p>
-                  <div className="flex items-center">
-                    <img 
-                    src={testimonial.avatar} 
-                    alt={testimonial.name}
-                    className="w-10 h-10 rounded-lg object-cover mr-4"
-                  />
-                    <div className="h-12 w-px bg-gray-200 mx-4"></div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{testimonial.name}</p>
-                      <p className="text-xs text-gray-500">{testimonial.company}</p>
+
+                  <div className="flex items-center pt-4 border-t border-gray-100 mt-auto">
+                    <div className="relative">
+                      <img
+                        src={testimonial.avatar}
+                        alt={testimonial.name}
+                        className="w-12 h-12 rounded-full object-cover ring-2 ring-orange-100"
+                      />
+                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-r from-orange-400 to-red-400 rounded-full flex items-center justify-center">
+                        <CheckCircle className="w-2.5 h-2.5 text-white" />
+                      </div>
+                    </div>
+                    <div className="ml-4 flex-1">
+                      <p className="text-sm font-semibold text-gray-900">{testimonial.name}</p>
+                      <p className="text-xs text-gray-500 font-medium">{testimonial.company}</p>
+                    </div>
+                    <div className="flex text-orange-400">
+                      {[...Array(5)].map((_, i) => (
+                        <svg key={i} className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -612,11 +659,21 @@ const HomePage = () => {
             ))}
           </div>
 
-          <div className="mt-12 md:mt-16 text-center">
-            <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-4">
-              <span className="text-sm text-gray-600">
-                Trusted by <strong>5,000+</strong> innovators worldwide
-              </span>
+          <div className="mt-16 md:mt-20 text-center">
+            <div className="inline-flex items-center bg-white/30 backdrop-blur-sm border border-gray-200 rounded-2xl px-8 py-4">
+              <div className="flex items-center space-x-6">
+                <div className="flex -space-x-2">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-r from-orange-400 to-red-400 border-2 border-white flex items-center justify-center text-white text-xs font-bold">
+                      {String.fromCharCode(65 + i)}
+                    </div>
+                  ))}
+                </div>
+                <div className="text-left">
+                  <p className="text-sm font-semibold text-gray-900">Trusted by <span className="text-orange-600">5,000+</span> innovators</p>
+                  <p className="text-xs text-gray-500">Join the community today</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
