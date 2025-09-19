@@ -12,7 +12,38 @@ class LandingPageDeployer {
     this.githubToken = process.env.GITHUB_TOKEN;
     this.vercelToken = process.env.VERCEL_TOKEN;
     this.userId = process.env.USER_ID;
-    this.octokit = new Octokit({ auth: this.githubToken });
+    this.octokit = null;
+    
+    // Initialize GitHub client only if token is available
+    if (this.githubToken) {
+      this.octokit = new Octokit({ auth: this.githubToken });
+    }
+  }
+
+  /**
+   * Validate required environment variables for deployment
+   * @throws {Error} If required variables are missing
+   */
+  validateEnvironmentVariables() {
+    const requiredVars = {
+      'GITHUB_TOKEN': this.githubToken,
+      'VERCEL_TOKEN': this.vercelToken,
+      'USER_ID': this.userId
+    };
+
+    const missingVars = Object.entries(requiredVars)
+      .filter(([key, value]) => !value)
+      .map(([key]) => key);
+
+    if (missingVars.length > 0) {
+      throw new Error(
+        `Missing required environment variables for deployment: ${missingVars.join(', ')}. ` +
+        `Please configure these variables in your production environment. ` +
+        `GITHUB_TOKEN: Personal Access Token with repo permissions, ` +
+        `VERCEL_TOKEN: Vercel API Token, ` +
+        `USER_ID: Your Vercel User ID.`
+      );
+    }
   }
 
   /**
@@ -391,11 +422,12 @@ export default LandingPage;`;
   }
 
   async deployToVercel(landingPageId, repoName) {
-    // Check if GitHub token is available
-    if (!this.githubToken) {
-      throw new Error(
-        "GitHub authentication token (GITHUB_TOKEN) is not configured. Please set up a GitHub Personal Access Token with repo permissions."
-      );
+    // Validate environment variables first
+    this.validateEnvironmentVariables();
+
+    // Initialize GitHub client if not already done
+    if (!this.octokit) {
+      this.octokit = new Octokit({ auth: this.githubToken });
     }
 
     // Clean up the repo name and ensure it's unique
@@ -508,12 +540,6 @@ export default LandingPage;`;
     }
 
     // 7. Deploy to Vercel
-    if (!this.vercelToken) {
-      throw new Error(
-        "Vercel authentication token (VERCEL_TOKEN) is not configured. Please set up a Vercel Access Token."
-      );
-    }
-
     console.log("Starting Vercel deployment...");
     console.log("Using repo name:", uniqueRepoName);
 
@@ -553,10 +579,10 @@ export default LandingPage;`;
         );
         if (error.response?.status === 403) {
           throw new Error(
-            "Vercel authentication failed: Invalid or expired token. Please generate a new token from Vercel dashboard with the correct permissions."
+            "Vercel authentication failed: Invalid or expired token. Please generate a new token from Vercel dashboard with the correct permissions and set VERCEL_TOKEN environment variable."
           );
         }
-        throw new Error(`Vercel authentication failed: ${error.message}`);
+        throw new Error(`Vercel authentication failed: ${error.message}. Please check your VERCEL_TOKEN environment variable.`);
       }
 
       // Create a new Vercel project

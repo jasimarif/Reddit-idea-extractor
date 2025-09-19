@@ -10,6 +10,15 @@ services:
         value: production
       - key: PORT
         value: 10000
+      # Required for landing page deployment functionality
+      - key: GITHUB_TOKEN
+        sync: false  # Set this in Render dashboard with your GitHub Personal Access Token
+      - key: VERCEL_TOKEN
+        sync: false  # Set this in Render dashboard with your Vercel API Token
+      - key: USER_ID
+        sync: false  # Set this in Render dashboard with your Vercel User ID
+      - key: GITHUB_USERNAME
+        sync: false  # Set this in Render dashboard with your GitHub username
       # Add other environment variables from your .env file here
       # - key: VARIABLE_NAME
       #   value: your-value
