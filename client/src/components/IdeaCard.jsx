@@ -27,7 +27,7 @@ const IdeaCard = ({ idea, onToggleFavorite }) => {
   };
 
   return (
-    <Link to={`/idea/${idea.id}`} className="bg-gradient-to-br from-white to-gray-50 rounded-lg sm:rounded-xl border-l-4 border-l-red-500 border-t border-r border-b border-gray-200 overflow-hidden hover:from-red-50 hover:to-white transition-all duration-300 cursor-pointer block">
+    <Link to={`/idea/${idea.id}`} className="bg-white/40 backdrop-blur-sm rounded-lg sm:rounded-xl border-l-4 border-l-red-500 border-t border-r border-b border-gray-200 overflow-hidden hover:from-red-50 hover:to-white transition-all duration-300 cursor-pointer block">
       <div className="p-4 sm:p-6">
         <div className="flex items-start justify-between mb-3 sm:mb-4">
           <div className="flex items-center space-x-1.5 sm:space-x-2">

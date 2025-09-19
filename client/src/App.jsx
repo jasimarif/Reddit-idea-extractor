@@ -15,6 +15,7 @@ import DashboardPage from "./pages/dashboard.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import UserProfilePage from "./pages/UserProfilePage.jsx";
 import FavoritesPage from "./pages/FavoratesPage.jsx";
+import MyLandingPages from "./pages/MyLandingPages.jsx";
 import IdeaDetailPage from "./pages/IdeaDetailPage.jsx";
 import LandingPageViewer from "./pages/landingPage.jsx";
 import LandingPageView from "./pages/LandingPageView.jsx";
@@ -148,6 +149,16 @@ function AppContent() {
               <ProtectedRoute>
                 <AnimatedPage>
                   <UserProfilePage />
+                </AnimatedPage>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-landing-pages"
+            element={
+              <ProtectedRoute>
+                <AnimatedPage>
+                  <MyLandingPages />
                 </AnimatedPage>
               </ProtectedRoute>
             }

@@ -273,6 +273,26 @@ async function getLandingPageUsageHandler(req, res) {
   }
 }
 
+// Get all landing pages for the authenticated user
+async function getMyLandingPagesHandler(req, res) {
+  try {
+    const userId = req.user._id;
+    
+    // Fetch all landing pages for the user, populate business idea details
+    const landingPages = await LandingPage.find({ userId })
+      .populate('businessIdeaId', 'title description category')
+      .sort({ createdAt: -1 }); // Sort by newest first
+
+    res.status(200).json({
+      landingPages,
+      count: landingPages.length
+    });
+  } catch (error) {
+    console.error('Error fetching user landing pages:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
 // Check deployment status
 async function checkDeploymentStatusHandler(req, res) {
   try {
@@ -376,5 +396,6 @@ module.exports = {
   deployLandingPageHandler,
   generateAndDeployLandingPageHandler,
   getLandingPageUsageHandler,
+  getMyLandingPagesHandler,
   checkDeploymentStatusHandler,
 };

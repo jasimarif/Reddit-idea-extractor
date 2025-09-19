@@ -12,6 +12,7 @@ const {
   deployLandingPageHandler,
   generateAndDeployLandingPageHandler,
   getLandingPageUsageHandler,
+  getMyLandingPagesHandler,
   checkDeploymentStatusHandler
 } = require('../controllers/landingPage.controller');
 
@@ -23,6 +24,9 @@ router.get('/landing-page/:businessIdeaId', cacheRoute(3600, 'landingpage:'), pr
 
 // Get user's landing page usage (no premium required for reading usage)
 router.get('/usage', protect, getLandingPageUsageHandler);
+
+// Get all landing pages for the authenticated user
+router.get('/my-pages', protect, getMyLandingPagesHandler);
 
 // Check deployment status
 router.get('/deployment-status/:landingPageId', protect, checkDeploymentStatusHandler);

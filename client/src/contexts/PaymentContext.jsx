@@ -54,7 +54,7 @@ export const PaymentProvider = ({ children }) => {
 
   const fetchLandingPageUsage = async () => {
     try {
-      const response = await apiRequest.get('/landing-pages/usage');
+      const response = await apiRequest.get('/landingpages/usage');
       setLandingPageUsage(response.data);
     } catch (error) {
       console.error('Failed to fetch landing page usage:', error);

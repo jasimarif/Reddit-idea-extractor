@@ -262,7 +262,7 @@ const FavoritesPage = () => {
                         onClick={() => setSelectedCategory(categoryName === "All" ? "All" : categoryName)}
                         className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-md sm:rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                           selectedCategory === categoryName
-                            ? "bg-purple-100 text-purple-700 shadow-sm"
+                            ? "bg-white/70"
                             : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-sm"
                         }`}
                       >
@@ -282,7 +282,7 @@ const FavoritesPage = () => {
                     placeholder="Search favorites..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="block w-full pl-9 sm:pl-10 pr-3 py-1.5 sm:py-2 border border-gray-300 rounded-lg bg-white text-xs sm:text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 focus:shadow-md"
+                    className="block w-full pl-9 sm:pl-10 pr-3 py-1.5 sm:py-2 border-gray-200 rounded-lg bg-white/50 text-xs sm:text-sm placeholder-gray-500 focus:outline-none  transition-all duration-200 "
                   />
                 </div>
               </div>

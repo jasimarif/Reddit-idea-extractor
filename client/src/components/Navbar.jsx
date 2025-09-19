@@ -27,6 +27,7 @@ import {
   Award,
   HomeIcon,
   HeartIcon,
+  FileText,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
@@ -332,6 +333,16 @@ const EnhancedAnimatedNavbar = () => {
                       </Link>
                     </DropdownMenuItem>
 
+                    <DropdownMenuItem asChild>
+                      <Link
+                        to="/my-landing-pages"
+                        className="flex items-center space-x-3 cursor-pointer hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-200"
+                      >
+                        <FileText className="h-5 w-5 text-blue-500" />
+                        <span className="font-medium">View My Landing Pages</span>
+                      </Link>
+                    </DropdownMenuItem>
+
                     <DropdownMenuSeparator className="bg-gradient-to-r from-purple-200 to-pink-200" />
 
                     <DropdownMenuItem
@@ -467,6 +478,15 @@ const EnhancedAnimatedNavbar = () => {
                         >
                           <User className="h-5 w-5" />
                           <span>Profile</span>
+                        </Link>
+
+                        <Link
+                          to="/my-landing-pages"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center space-x-3 w-full text-left py-2.5 px-3 text-base !font-medium !text-gray-900 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors"
+                        >
+                          <FileText className="h-5 w-5" />
+                          <span>View My Landing Pages</span>
                         </Link>
 
                         <button

@@ -260,7 +260,7 @@ const IdeaDetailPage = () => {
           </div>
 
           {/* Main Pain Point Card */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 border border-white/20 transition-all duration-300">
+          <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 border border-white/20 transition-all duration-300">
             <div className="space-y-4">
               <div className="flex items-start justify-between">
                 <div className="flex-1">

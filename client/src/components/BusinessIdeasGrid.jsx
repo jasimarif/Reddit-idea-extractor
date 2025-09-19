@@ -54,7 +54,7 @@ const BusinessIdeasGrid = ({ businessIdeas, isGeneratingIdeas }) => {
               return (
                 <div
                   key={businessIdea.id}
-                  className="bg-white rounded-2xl  transition-all duration-300 group relative w-full overflow-hidden border border-gray-100/50"
+                  className="bg-white/60 backdrop-blur-sm rounded-2xl  transition-all duration-300 group relative w-full overflow-hidden border border-gray-100/50"
                 >
                   {/* Plus icon and text for creating landing page */}
                   {isPremium ? (
@@ -109,7 +109,7 @@ const BusinessIdeasGrid = ({ businessIdeas, isGeneratingIdeas }) => {
                         </h3>
 
                         {/* Description */}
-                        <div className="bg-gray-50/30 backdrop-blur-sm rounded-xl p-4 border border-gray-100 ">
+                        <div className="bg-white/40  rounded-xl p-4 border border-gray-100 ">
                           <p className="text-gray-700 text-base leading-relaxed text-left">
                             {businessIdea.description || businessIdea.solutionOverview}
                           </p>
