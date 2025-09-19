@@ -471,6 +471,10 @@ export default LandingPage;`;
     // Initialize git repo
     execSync("git init", { cwd: tempDir });
 
+    // Configure git user for this repository (required for commits)
+    execSync('git config user.name "Automated Deployment"', { cwd: tempDir });
+    execSync('git config user.email "deployment@automation.com"', { cwd: tempDir });
+
     // Add all files
     execSync("git add .", { cwd: tempDir });
 
@@ -516,11 +520,11 @@ export default LandingPage;`;
       const repoOwner = repo.owner.login || repo.owner.name;
       const repoUrl = `https://${this.githubToken}@github.com/${repoOwner}/${repo.name}.git`;
 
-      // Configure git to use the token for authentication
-      execSync('git config --global user.name "GitHub Action"', {
+      // Configure git to use a consistent identity for this deployment
+      execSync('git config user.name "Automated Deployment"', {
         cwd: tempDir,
       });
-      execSync('git config --global user.email "action@github.com"', {
+      execSync('git config user.email "deployment@automation.com"', {
         cwd: tempDir,
       });
 
