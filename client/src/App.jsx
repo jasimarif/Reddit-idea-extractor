@@ -1,6 +1,7 @@
 import "./App.css";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/sonner";
 import LoginPage from "./pages/login.jsx";
 import SignupPage from "./pages/signup.jsx";
 import ResetPasswordPage from "./pages/reset-password.jsx";
@@ -30,6 +31,7 @@ import { AnimatePresence } from "framer-motion";
 import AnimatedPage from "./components/AnimatedPage";
 import EnhancedAnimatedNavbar from "./components/Navbar.jsx";
 import PublicRoute from "./components/PublicRoute.jsx";
+import RedditDataPage from "./pages/RedditDataPage.jsx";
 
 const queryClient = new QueryClient();
 
@@ -37,7 +39,6 @@ function AppContent() {
   const location = useLocation();
   const { isModalOpen } = usePayment();
 
-  // Hide navbar on auth pages or when modal is open
   const isAuthPage = [
     "/login",
     "/signup",
@@ -163,6 +164,16 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/reddit-data"
+            element={
+              <ProtectedRoute>
+                <AnimatedPage>
+                  <RedditDataPage />
+                </AnimatedPage>
+              </ProtectedRoute>
+            }
+          />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </AnimatePresence>
@@ -184,6 +195,7 @@ function App() {
           </AuthProvider>
         </ThemeProvider>
       </TooltipProvider>
+      <Toaster />
     </QueryClientProvider>
   );
 }

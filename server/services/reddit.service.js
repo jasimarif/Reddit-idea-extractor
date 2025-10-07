@@ -37,6 +37,8 @@ const commentTriggerRegexes = [
   /why (is|can'?t)/i
 ];
 
+// TEMPORARY: Commenting out AI classification function
+/*
 async function filterPostsByKeywords(posts) {
   const filteredPosts = [];
   
@@ -86,23 +88,24 @@ async function filterPostsByKeywords(posts) {
   
   return filteredPosts;
 }
+*/
 
 async function fetchTopPosts(subreddit, limit = 1) {
   try {
-    const url = `https://www.reddit.com/r/${subreddit}/top.json?limit=${Math.min(limit * 1, 100)}&t=day`;
+    const url = `https://www.reddit.com/r/${subreddit}/top.json?limit=${Math.min(limit * 1, 100)}&t=week`;
     console.log(`Fetching top posts from r/${subreddit}...`);
     const res = await axios.get(url);
 
     const rawPosts = res.data.data.children.map((post) => post.data);
-    console.log(`Found ${rawPosts.length} posts, filtering for pain points...`);
-    
-    // Filter posts using both regex and LLM
-    const postsWithKeywords = await filterPostsByKeywords(rawPosts);
-    console.log(`After filtering, found ${postsWithKeywords.length} pain points`);
+    console.log(`Found ${rawPosts.length} posts`);
+
+    // TEMPORARY: Skip AI filtering and return raw posts
+    // const postsWithKeywords = await filterPostsByKeywords(rawPosts);
+    // console.log(`After filtering, found ${postsWithKeywords.length} pain points`);
 
     // Limit the number of returned posts to the requested limit
-    const limitedPosts = postsWithKeywords.slice(0, limit);
-    
+    const limitedPosts = rawPosts.slice(0, limit);
+
     return limitedPosts.map((data) => ({
       id: data.id,
       title: data.title,
@@ -112,8 +115,9 @@ async function fetchTopPosts(subreddit, limit = 1) {
       upvotes: data.ups,
       commentCount: data.num_comments,
       permalink: `https://www.reddit.com${data.permalink}`,
-      triggerKeywords: data.triggerKeywords || [],
-      llmClassification: data.llmClassification
+      // TEMPORARY: Remove AI classification data
+      // triggerKeywords: data.triggerKeywords || [],
+      // llmClassification: data.llmClassification
     }));
   } catch (error) {
     console.error(`Error fetching posts from r/${subreddit}:`, error.message);
@@ -126,7 +130,7 @@ function filterCommentByKeywords(commentText) {
   return commentTriggerRegexes.some((regex) => regex.test(text));
 }
 
-async function fetchComments(postId, limit = 1) {
+async function fetchComments(postId, limit = 10) {
   const url = `https://www.reddit.com/comments/${postId}.json?limit=${limit}`;
   const res = await axios.get(url);
 
@@ -137,7 +141,8 @@ async function fetchComments(postId, limit = 1) {
       text: c.data.body,
       createdAt: new Date(c.data.created_utc * 1000),
     }))
-    .filter((c) => filterCommentByKeywords(c.text));
+    // Remove keyword filtering to get ALL comments
+    // .filter((c) => filterCommentByKeywords(c.text));
 
   return comments;
 }

@@ -149,6 +149,7 @@ const EnhancedAnimatedNavbar = () => {
   const authenticatedNavItems = user
     ? [
         { label: "Ideas", path: "/dashboard", icon: Lightbulb },
+        { label: "Reddit Data", path: "/reddit-data", icon: Lightbulb },
         { label: "Favorites", path: "/favorites", icon: Heart },
       ]
     : [];
@@ -199,6 +200,7 @@ const EnhancedAnimatedNavbar = () => {
                     const getIconColor = (path) => {
                       switch (path) {
                         case '/dashboard': return 'text-blue-300';
+                        case '/reddit-data': return 'text-orange-300';
                         case '/favorites': return 'text-red-300';
                         default: return 'text-white';
                       }
