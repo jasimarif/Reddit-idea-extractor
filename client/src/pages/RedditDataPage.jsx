@@ -67,10 +67,7 @@ const RedditDataPage = () => {
     const [twitterTotalPages, setTwitterTotalPages] = useState(1);
     const [totalTwitterCount, setTotalTwitterCount] = useState(0);
     const [selectedHashtags, setSelectedHashtags] = useState([]);
-    const [availableHashtags, setAvailableHashtags] = useState([
-        "entrepreneur",
-        "startup", 
-    ]);
+    const [availableHashtags, setAvailableHashtags] = useState([]);
     const [hashtagCounts, setHashtagCounts] = useState({});
     const [isTwitterDialogOpen, setIsTwitterDialogOpen] = useState(false);
     const [hashtagInputs, setHashtagInputs] = useState(['', '', '', '', '']);
@@ -218,6 +215,7 @@ const RedditDataPage = () => {
             }
 
             fetchStoredTwitterPosts(1);
+            fetchHashtagCounts();
         } catch (error) {
             console.error("Failed to store Twitter posts:", error);
             toast.error("Failed to store Twitter posts. Please try again.");
@@ -258,7 +256,9 @@ const RedditDataPage = () => {
     const fetchHashtagCounts = async () => {
         try {
             const response = await apiRequest.get("/twitter/hashtag-counts");
-            setHashtagCounts(response.data.data || {});
+            const counts = response.data.data || {};
+            setHashtagCounts(counts);
+            setAvailableHashtags(prev => [...new Set([...prev, ...Object.keys(counts)])]);
         } catch (error) {
             console.error("Failed to fetch hashtag counts:", error);
         }
@@ -301,6 +301,7 @@ const RedditDataPage = () => {
     useEffect(() => {
         if (activeTab === 'twitter') {
             fetchStoredTwitterPosts();
+            fetchHashtagCounts();
         }
     }, [activeTab]);
 
